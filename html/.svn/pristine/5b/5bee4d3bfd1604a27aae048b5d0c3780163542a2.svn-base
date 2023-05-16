@@ -1,0 +1,910 @@
+<?php session_start();
+	include_once("conexionBD.php");
+	
+	$funcion=0;
+	
+	if(isset($_GET["funcion"]))
+		$funcion=$_GET["funcion"];
+	else
+		$funcion=$_POST["funcion"];
+	
+	switch($funcion)
+	{
+		case 1:
+			obtenerJuecesGuardias();
+		break;
+		case 2:
+			registrarEventosJuez();
+		break;
+		case 3:
+			removerAsignacioJuez();
+		break;
+		case 4:
+			obtenerJuecesTramite();
+		break;
+		case 5:
+			obtenerIncienciasJuez();
+		break;
+		case 6:
+			obtenerVacacionesJuez();
+		break;
+		case 7:
+			obtenerAgendaJuez();
+		break;
+		case 8:
+			obtenerRegistroDiasNOHabiles();
+		break;
+		case 9:
+			registrarDiasNOHabiles();
+		break;
+		case 10:
+			removerRegistroDiaNoHabil();
+		break;
+		case 11:
+			registrarEventoCarpeta();
+		break;
+		case 12:
+			obtenerEventosCarpeta();
+		break;
+		case 13:
+			removerEventoCarpeta();
+		break;
+		case 14:
+			obtenerAgendaJuzgadoSecretarias();
+		break;
+	}
+	
+	
+	function obtenerJuecesGuardias()
+	{
+		global $con;
+		$uG=$_GET["uG"];
+		$fechaInicial=$_GET["from"];
+		$fechaFinal=$_GET["to"];
+		
+		$arrEventos="";
+		
+		
+		
+		
+		if($uG==0)
+		{
+			$consulta="SELECT id__17_tablaDinamica FROM _17_tablaDinamica";
+			$uG=$con->obtenerListaValores($consulta,"'");
+		}
+		
+		$comp=generarConsultaIntervalos($fechaInicial,$fechaFinal,"fechaInicio","fechaFinalizacion",true);
+
+		$consulta="SELECT id__13_tablaDinamica,fechaInicio,fechaFinalizacion,'' as clave,u.nombre,ug. claveUnidad,'' as claveFolioCarpetas  FROM _13_tablaDinamica g,800_usuarios u,
+					_17_tablaDinamica ug, 801_adscripcion a WHERE g.idEstado=1  AND 
+					u.idUsuario=g.usuarioJuez and ".$comp." and ug.claveUnidad=a.Institucion order by fechaInicio";
+
+		$resJueces=$con->obtenerFilas($consulta);
+		
+		while($fila=mysql_fetch_row($resJueces))
+		{
+			$texto=$fila[4].' ['.date("H:i",strtotime($fila[1])).' - '.date("d/m/Y H:i",strtotime($fila[2])).']';
+			
+			$fila[1]=date("Y-m-d",strtotime($fila[1]));
+			$fila[2]=date("Y-m-d",strtotime($fila[2]));
+			
+			$fechaFin=$fila[2];
+			if($fila[1]!=$fila[2])
+				$fechaFin.=" 23:59:59";
+			else
+			{
+				$fechaFin=date("Y-m-d 00:00:00",strtotime("+1 days",strtotime($fila[1])));
+			}
+			$o='{"unidadGestion":"'.$fila[5].'","id":"'.$fila[0].'","details":"","start_date":"'.$fila[1].' 00:00:00","end_date":"'.$fechaFin.'","text":"<a href=\'javascript:removerAsignacion(\"'.bE($fila[0]).'\")\'><img src=\"../images/delete.png\" title=\"Remover asignaci&oacute;n\" alt=\"Remover asignaci&oacute;n\"></a> <span title=\"'.$texto.'\">'.$texto.'</span>"}';
+			if($arrEventos=="")
+				$arrEventos=$o;
+			else
+				$arrEventos.=",".$o;
+		}
+		
+		$res='{"data":['.$arrEventos.']}';
+		echo $res;
+	}
+		
+	function registrarEventosJuez()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		$arrValores=array();
+		$arrDocumentosReferencia=NULL;
+		$idRegistro=-1;
+		switch($obj->tipoEvento)
+		{
+			case 1:
+			
+				
+				
+				$arrValores["fechaInicio"]=$obj->fechaInicio;
+				$arrValores["fechaFinalizacion"]=$obj->fechaFin;
+				$arrValores["usuarioJuez"]=$obj->idJuez;
+				$arrValores["observaciones"]=$obj->comentarios;
+				$idRegistro=crearInstanciaRegistroFormulario(13,-1,1,$arrValores,$arrDocumentosReferencia,-1,0);
+				
+			break;
+			case 2:
+				$arrValores["fechaInicial"]=$obj->fechaInicio;
+				$arrValores["fechaFinal"]=$obj->fechaFin;
+				$arrValores["nombreJueces"]=$obj->idJuez;
+				$arrValores["comentarios"]=$obj->comentarios;
+				
+				$idRegistro=crearInstanciaRegistroFormulario(292,-1,1,$arrValores,$arrDocumentosReferencia,-1,0);
+				
+			break;
+			case 3:
+			case 4:
+				$arrValores["fechaInicial"]=$obj->fechaInicio;
+				$arrValores["fechaFinal"]=$obj->fechaFin;
+				$arrValores["usuarioJuez"]=$obj->idJuez;
+				$arrValores["tipoIncidencia"]=$obj->tipoIncidencia;
+				$arrValores["comentarios"]=$obj->comentarios;
+				$arrValores["hInicio"]=isset($obj->horaInicio)?$obj->horaInicio:"00:00";
+				$arrValores["hFin"]=isset($obj->horaFin)?$obj->horaFin:"23:59";
+				$arrValores["tipoIntervalo"]=isset($obj->tipoIntervalo)?$obj->tipoIntervalo:"1";
+				$idRegistro=crearInstanciaRegistroFormulario(20,-1,1,$arrValores,$arrDocumentosReferencia,-1,0);
+				
+			break;
+		}
+		
+		if($idRegistro!=-1)
+			echo "1|".$idRegistro;
+		
+		
+
+		
+		
+	}
+	
+	function removerAsignacioJuez()
+	{
+		global $con;
+		$tipo=$_POST["tipo"];
+		$idAsignacion=$_POST["idAsignacion"];
+		$motivo=$_POST["motivo"];
+		$consulta="";
+		switch($tipo)
+		{
+			case 1:
+				$consulta="UPDATE _13_tablaDinamica SET motivoBaja='".cv($motivo)."',idEstado=2,fechaBaja='".date("Y-m-d H:i:s")."',responsableBaja=".$_SESSION["idUsr"]." WHERE id__13_tablaDinamica=".$idAsignacion;
+				
+			break;
+			case 2:
+				$consulta="UPDATE _292_tablaDinamica SET motivoBaja='".cv($motivo)."',idEstado=2,fechaBaja='".date("Y-m-d H:i:s")."',responsableBaja=".$_SESSION["idUsr"]." WHERE id__292_tablaDinamica=".$idAsignacion;
+				
+			break;
+			case 3:
+			case 4:
+				$consulta="UPDATE _20_tablaDinamica SET motivoBaja='".cv($motivo)."',idEstado=2,fechaBaja='".date("Y-m-d H:i:s")."',responsableBaja=".$_SESSION["idUsr"]." WHERE id__20_tablaDinamica=".$idAsignacion;
+				
+			break;
+		}
+
+		eC($consulta);
+		
+	}
+	
+	function obtenerJuecesTramite()
+	{
+		global $con;
+		$uG=$_GET["uG"];
+		$fechaInicial=$_GET["from"];
+		$fechaFinal=$_GET["to"];
+		
+		$arrEventos="";
+		
+		
+		
+		
+		if($uG==0)
+		{
+			$consulta="SELECT id__17_tablaDinamica FROM _17_tablaDinamica";
+			$uG=$con->obtenerListaValores($consulta,"'");
+		}
+		
+		$comp=generarConsultaIntervalos($fechaInicial,$fechaFinal,"fechaInicial","fechaFinal",true);
+
+		$consulta="SELECT id__292_tablaDinamica,fechaInicial,fechaFinal,ju.clave,u.nombre,ug. claveUnidad,ug.claveFolioCarpetas  FROM _26_tablaDinamica ju,_292_tablaDinamica g,800_usuarios u,
+					_17_tablaDinamica ug WHERE g.idEstado=1 and g.nombreJueces=ju.usuarioJuez AND ju.idReferencia in(".$uG.") AND 
+					u.idUsuario=g.nombreJueces and ".$comp." and ug.id__17_tablaDinamica=ju.idReferencia order by fechaInicial,ju.clave";
+
+		$resJueces=$con->obtenerFilas($consulta);
+		
+		while($fila=mysql_fetch_row($resJueces))
+		{
+			$texto='('.$fila[6].') '.$fila[3].'.- '.$fila[4].'';
+			
+			
+			$fechaFin=$fila[2];
+			if($fila[1]!=$fila[2])
+				$fechaFin.=" 23:59:59";
+			else
+			{
+				$fechaFin=date("Y-m-d 00:00:00",strtotime("+1 days",strtotime($fila[1])));
+			}
+			$o='{"unidadGestion":"'.$fila[5].'","id":"'.$fila[0].'","details":"","start_date":"'.$fila[1].' 00:00:00","end_date":"'.$fechaFin.'","text":"<a href=\'javascript:removerAsignacion(\"'.bE($fila[0]).'\")\'><img src=\"../images/delete.png\" title=\"Remover asignaci&oacute;n\" alt=\"Remover asignaci&oacute;n\"></a> <span title=\"'.$texto.'\">'.$texto.'</span>"}';
+			if($arrEventos=="")
+				$arrEventos=$o;
+			else
+				$arrEventos.=",".$o;
+		}
+		
+		$res='{"data":['.$arrEventos.']}';
+		echo $res;
+	}
+	
+	function obtenerIncienciasJuez()
+	{
+		global $con;
+		$uG=$_GET["uG"];
+		$fechaInicial=$_GET["from"];
+		$fechaFinal=$_GET["to"];
+		
+		$arrEventos="";
+		
+		if($uG==0)
+		{
+			$consulta="SELECT id__17_tablaDinamica FROM _17_tablaDinamica";
+			$uG=$con->obtenerListaValores($consulta,"'");
+		}
+		
+		$comp=generarConsultaIntervalos($fechaInicial,$fechaFinal,"fechaInicial","fechaFinal",true);
+
+		$consulta="SELECT id__20_tablaDinamica,fechaInicial,fechaFinal,ju.clave,u.nombre,ug. claveUnidad,g.tipoIncidencia,comentarios,'' as claveFolioCarpetas,
+					g.hInicio,g.hFin,g.tipoIntervalo  FROM _26_tablaDinamica ju,_20_tablaDinamica g,800_usuarios u,
+					_17_tablaDinamica ug WHERE g.idEstado=1 and g.tipoIncidencia<>3 and g.usuarioJuez=ju.usuarioJuez AND ju.idReferencia in(".$uG.") AND 
+					u.idUsuario=g.usuarioJuez and ".$comp." and ug.id__17_tablaDinamica=ju.idReferencia order by fechaInicial,ju.clave";
+
+		$resJueces=$con->obtenerFilas($consulta);
+		
+		while($fila=mysql_fetch_row($resJueces))
+		{
+			$texto='('.$fila[8].') '.$fila[3].'.- '.$fila[4].'';
+			if($fila[9]!="")
+			{
+				$texto.=' [De las '.date("H:i",strtotime($fila[9])).' hrs a las '.date("H:i",strtotime($fila[10])).' hrs - '.
+						($fila[11]==1?"Bloqueo total del d&iacute;a":"Bloqueo parcial repetitivo").']';
+			}
+			
+			$fechaFin=$fila[2];
+			$fechaFin.=" 23:59:59";
+			if($fila[1]!=$fila[2])
+				$fechaFin.=" 23:59:59";
+			else
+			{
+				$fechaFin=date("Y-m-d 00:00:00",strtotime("+1 days",strtotime($fila[1])));
+			}
+			
+			
+			$o='{"unidadGestion":"'.$fila[5].'","id":"'.$fila[0].'","details":"","start_date":"'.$fila[1].' 00:00:00","end_date":"'.$fechaFin.
+				'","text":"<a href=\'javascript:removerAsignacion(\"'.bE($fila[0]).'\")\'><img src=\"../images/delete.png\" title=\"Remover asignaci&oacute;n\" alt=\"Remover asignaci&oacute;n\"></a> <span title=\"'.$texto.
+				'\">'.$texto.'</span>","comentarios":"'.cv($fila[7]).'","tipoIncidencia":"'.cv($fila[6]).'","horaInicio":"'.$fila[9].
+				'","horaFin":"'.$fila[10].'","intervalo":"'.$fila[11].'"}';
+			if($arrEventos=="")
+				$arrEventos=$o;
+			else
+				$arrEventos.=",".$o;
+		}
+		
+		$res='{"data":['.$arrEventos.']}';
+		echo $res;
+	}
+	
+	function obtenerVacacionesJuez()
+	{
+		global $con;
+		$uG=$_GET["uG"];
+		$fechaInicial=$_GET["from"];
+		$fechaFinal=$_GET["to"];
+		
+		$arrEventos="";
+		
+		if($uG==0)
+		{
+			$consulta="SELECT id__17_tablaDinamica FROM _17_tablaDinamica";
+			$uG=$con->obtenerListaValores($consulta,"'");
+		}
+		
+		$comp=generarConsultaIntervalos($fechaInicial,$fechaFinal,"fechaInicial","fechaFinal",true);
+
+		$consulta="SELECT id__20_tablaDinamica,fechaInicial,fechaFinal,ju.clave,u.nombre,ug. claveUnidad,g.tipoIncidencia,comentarios,'' as claveFolioCarpetas  FROM _26_tablaDinamica ju,_20_tablaDinamica g,800_usuarios u,
+					_17_tablaDinamica ug WHERE g.idEstado=1 and g.tipoIncidencia=3 and g.usuarioJuez=ju.usuarioJuez AND ju.idReferencia in(".$uG.") AND 
+					u.idUsuario=g.usuarioJuez and ".$comp." and ug.id__17_tablaDinamica=ju.idReferencia order by fechaInicial,ju.clave";
+
+		$resJueces=$con->obtenerFilas($consulta);
+		
+		while($fila=mysql_fetch_row($resJueces))
+		{
+			$texto='('.$fila[8].') '.$fila[3].'.- '.$fila[4].'';
+			
+			
+			$fechaFin=$fila[2];
+			if($fila[1]!=$fila[2])
+				$fechaFin.=" 23:59:59";
+			else
+			{
+				$fechaFin=date("Y-m-d 00:00:00",strtotime("+1 days",strtotime($fila[1])));
+			}
+			$o='{"unidadGestion":"'.$fila[5].'","id":"'.$fila[0].'","details":"","start_date":"'.$fila[1].' 00:00:00","end_date":"'.$fechaFin.
+				'","text":"<a href=\'javascript:removerAsignacion(\"'.bE($fila[0]).'\")\'><img src=\"../images/delete.png\" title=\"Remover asignaci&oacute;n\" alt=\"Remover asignaci&oacute;n\"></a> <span title=\"'.$texto.
+				'\">'.$texto.'</span>","comentarios":"'.cv($fila[7]).'","tipoIncidencia":"'.cv($fila[6]).'"}';
+			if($arrEventos=="")
+				$arrEventos=$o;
+			else
+				$arrEventos.=",".$o;
+		}
+		
+		$res='{"data":['.$arrEventos.']}';
+		echo $res;
+	}
+	
+	function obtenerAgendaJuez()
+	{
+		global $con;
+		global $tipoMateria;
+		$vVacaciones=$_GET["vVacaciones"];
+		$vIncidencias=$_GET["vIncidencias"];
+		$vGuardias=$_GET["vGuardias"];
+		$vTramite=$_GET["vTramite"];
+		$idJuez=$_GET["idJuez"];
+		$from=$_GET["from"];
+		$to=$_GET["to"];
+		$arrEventos="";
+		
+		$vJuzgado=0;
+		$idJuzgado=0;
+		if(isset($_GET["vJuzgado"]))
+		{
+			$vJuzgado=1;
+			$idJuzgado=$_GET["iJ"];
+		}
+		
+		
+		$situacionAudiencia="1,2,4,5";
+		if($tipoMateria=="SCC")
+		{
+			$situacionAudiencia="1,2,3,4,5,6,7";
+		}
+		
+		$arrSituaciones=array();
+		$consulta="SELECT idSituacion,descripcionSituacion,icono FROM 7011_situacionEventosAudiencia";
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_row($res))
+		{
+			$arrSituaciones[$fila[0]]["etiqueta"]=$fila[1];
+			$arrSituaciones[$fila[0]]["icono"]=$fila[2];
+		}
+		
+		$consulta="SELECT fechaEvento,horaInicioEvento,horaFinEvento,e.situacion,e.idRegistroEvento,ta.tipoAudiencia,otroTipoAudiencia FROM 7000_eventosAudiencia e,7001_eventoAudienciaJuez j,_4_tablaDinamica ta
+					WHERE j.idRegistroEvento=e.idRegistroEvento and ta.id__4_tablaDinamica=e.tipoAudiencia and e.situacion in (".$situacionAudiencia.")
+ 					AND fechaEvento>='".$from."' AND fechaEvento<='".$to."' AND j.idJuez=".$idJuez;
+		
+		
+		
+		if($vJuzgado==1)
+		{
+			$consulta="SELECT fechaEvento,horaInicioEvento,horaFinEvento,e.situacion,e.idRegistroEvento,ta.tipoAudiencia,otroTipoAudiencia FROM 7000_eventosAudiencia e,_4_tablaDinamica ta
+					WHERE  ta.id__4_tablaDinamica=e.tipoAudiencia and e.situacion in (".$situacionAudiencia.")
+ 					AND fechaEvento>='".$from."' AND fechaEvento<='".$to."' AND e.idCentroGestion=".$idJuzgado;
+			
+		}
+		$resJueces=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_row($resJueces))
+		{
+			
+			$texto="<img width='13' height='13' src='".$arrSituaciones[$fila[3]]["icono"]."' title='".cv($arrSituaciones[$fila[3]]["etiqueta"])."' alt='".cv($arrSituaciones[$fila[3]]["etiqueta"])."'>".$fila[5];
+			if($fila[6]!="")
+			{
+				$texto.=": ".$fila[6];
+			}
+			
+			$fechaFin=date("Y-m-d",strtotime($fila[2]));
+			if($fila[0]!=$fechaFin)
+				$fechaFin.=" 23:59:59";
+			else
+			{
+				$fechaFin=date("Y-m-d 00:00:00",strtotime("+1 days",strtotime($fila[2])));
+			}
+			$o='{"tipoEvento":"1","id":"e_'.$fila[4].'","details":"","start_date":"'.$fila[1].' 00:00:00","end_date":"'.$fechaFin.
+				'","text":" <span title=\"'.strip_tags($texto).
+				'\"><a href=\"javascript:mostrarDatosEventoAudiencia(\''.bE($fila[4]).'\')\">'.$texto.'</a></span>","comentarios":"","tipoIncidencia":""}';
+			if($arrEventos=="")
+				$arrEventos=$o;
+			else
+				$arrEventos.=",".$o;
+		}
+		
+		
+		if($vVacaciones==1)
+		{
+			$comp=generarConsultaIntervalos($from,$to,"fechaInicial","fechaFinal",true);
+
+			$consulta="SELECT id__20_tablaDinamica,fechaInicial,fechaFinal,g.tipoIncidencia,comentarios  FROM _20_tablaDinamica g
+						 WHERE g.idEstado=1 and g.tipoIncidencia=3 and g.usuarioJuez=".$idJuez." AND 
+						 ".$comp." order by fechaInicial";
+	
+			$resJueces=$con->obtenerFilas($consulta);
+			
+			while($fila=mysql_fetch_row($resJueces))
+			{
+				$texto='Periodo vacacional';
+				
+				
+				$fechaFin=$fila[2];
+				if($fila[1]!=$fila[2])
+					$fechaFin.=" 23:59:59";
+				else
+				{
+					$fechaFin=date("Y-m-d 00:00:00",strtotime("+1 days",strtotime($fila[1])));
+				}
+				$o='{"tipoEvento":"2","id":"v_'.$fila[0].'","details":"","start_date":"'.$fila[1].' 00:00:00","end_date":"'.$fechaFin.
+					'","text":"<span title=\"'.$texto.
+					'\">'.$texto.'</span>","comentarios":"'.cv($fila[4]).'","tipoIncidencia":"'.cv($fila[3]).'"}';
+				if($arrEventos=="")
+					$arrEventos=$o;
+				else
+					$arrEventos.=",".$o;
+			}
+			
+		}
+		
+		if($vIncidencias==1)
+		{
+			$comp=generarConsultaIntervalos($from,$to,"fechaInicial","fechaFinal",true);
+
+			$consulta="SELECT id__20_tablaDinamica,fechaInicial,fechaFinal,g.tipoIncidencia,comentarios  FROM _20_tablaDinamica g
+						 WHERE g.idEstado=1 and g.tipoIncidencia<>3 and g.usuarioJuez=".$idJuez." AND 
+						 ".$comp." order by fechaInicial";
+	
+			$resJueces=$con->obtenerFilas($consulta);
+			
+			while($fila=mysql_fetch_row($resJueces))
+			{
+				$texto='Incidencia/permiso';
+				
+				
+				$fechaFin=$fila[2];
+				if($fila[1]!=$fila[2])
+					$fechaFin.=" 23:59:59";
+				else
+				{
+					$fechaFin=date("Y-m-d 00:00:00",strtotime("+1 days",strtotime($fila[1])));
+				}
+				$o='{"tipoEvento":"3","id":"v_'.$fila[0].'","details":"","start_date":"'.$fila[1].' 00:00:00","end_date":"'.$fechaFin.
+					'","text":"<span title=\"'.$texto.
+					'\">'.$texto.'</span>","comentarios":"'.cv($fila[4]).'","tipoIncidencia":"'.cv($fila[3]).'"}';
+				if($arrEventos=="")
+					$arrEventos=$o;
+				else
+					$arrEventos.=",".$o;
+			}
+			
+		}
+		
+		if($vGuardias==1)
+		{
+			$comp=generarConsultaIntervalos($from,$to,"fechaInicio","fechaFinalizacion",true);
+
+			$consulta="SELECT id__13_tablaDinamica,fechaInicio,fechaFinalizacion  FROM _13_tablaDinamica g
+						 WHERE g.idEstado=1 and g.usuarioJuez=".$idJuez." AND ".$comp."  order by fechaInicio";
+	
+			$resJueces=$con->obtenerFilas($consulta);
+			
+			while($fila=mysql_fetch_row($resJueces))
+			{
+				$texto='Periodo de guardia ['.date("H:i",strtotime($fila[1])).' - '.date("H:i",strtotime($fila[2])).']';
+				
+				$fila[1]=date("Y-m-d",strtotime($fila[1]));
+				$fila[2]=date("Y-m-d",strtotime($fila[2]));
+				
+				$fechaFin=$fila[2];
+				if($fila[1]!=$fila[2])
+					$fechaFin.=" 23:59:59";
+				else
+				{
+					$fechaFin=date("Y-m-d 00:00:00",strtotime("+1 days",strtotime($fila[1])));
+				}
+				$o='{"tipoEvento":"4","id":"'.$fila[0].'","details":"","start_date":"'.$fila[1].' 00:00:00","end_date":"'.$fechaFin.'","text":"<span title=\"'.$texto.'\">'.$texto.'</span>"}';
+				if($arrEventos=="")
+					$arrEventos=$o;
+				else
+					$arrEventos.=",".$o;
+			}
+		}
+		
+		if($vTramite==1)
+		{
+			$comp=generarConsultaIntervalos($from,$to,"fechaInicial","fechaFinal",true);
+
+			$consulta="SELECT id__292_tablaDinamica,fechaInicial,fechaFinal  FROM _292_tablaDinamica g WHERE g.idEstado=1 and 
+					g.nombreJueces=".$idJuez."	and ".$comp."  order by fechaInicial";
+	
+			$resJueces=$con->obtenerFilas($consulta);
+			
+			while($fila=mysql_fetch_row($resJueces))
+			{
+				$texto='Periodo de Juez de tr&aacute;mite';
+				
+				
+				$fechaFin=$fila[2];
+				if($fila[1]!=$fila[2])
+					$fechaFin.=" 23:59:59";
+				else
+				{
+					$fechaFin=date("Y-m-d 00:00:00",strtotime("+1 days",strtotime($fila[1])));
+				}
+				$o='{"tipoEvento":"5","id":"'.$fila[0].'","details":"","start_date":"'.$fila[1].' 00:00:00","end_date":"'.$fechaFin.'","text":"<span title=\"'.$texto.'\">'.$texto.'</span>"}';
+				if($arrEventos=="")
+					$arrEventos=$o;
+				else
+					$arrEventos.=",".$o;
+			}
+			
+		}
+		$res='{"data":['.$arrEventos.']}';
+		echo $res;
+		
+	}
+	
+	function obtenerRegistroDiasNOHabiles()
+	{
+		global $con;
+		
+		$fechaInicial=$_GET["from"];
+		$fechaFinal=$_GET["to"];
+		
+		$arrEventos="";
+		
+		
+		
+		
+		
+		
+		$comp=generarConsultaIntervalos($fechaInicial,$fechaFinal,"fechaInicio","fechaTermino",true);
+
+		$consulta="SELECT idRegistro,fechaInicio,fechaTermino,motivoDiaNoHabil  FROM 7022_diasNOHabiles d
+					WHERE d.situacion=1 and ".$comp;
+
+		$resDiasInhabiles=$con->obtenerFilas($consulta);
+		
+		while($fila=mysql_fetch_row($resDiasInhabiles))
+		{
+			$texto='Motivo: '.cv($fila[3]);
+			
+			$fila[1]=date("Y-m-d",strtotime($fila[1]));
+			$fila[2]=date("Y-m-d",strtotime($fila[2]));
+			
+			$fechaFin=$fila[2];
+			if($fila[1]!=$fila[2])
+				$fechaFin.=" 23:59:59";
+			else
+			{
+				$fechaFin=date("Y-m-d 00:00:00",strtotime("+1 days",strtotime($fila[1])));
+			}
+			$o='{"id":"'.$fila[0].'","details":"","start_date":"'.$fila[1].' 00:00:00","end_date":"'.$fechaFin.'","text":"<a href=\'javascript:removerAsignacion(\"'.bE($fila[0]).'\")\'><img src=\"../images/delete.png\" title=\"Remover d&iacute;a NO h&aacute;bil\" alt=\"Remover d&iacute;a NO h&aacute;bil\"></a> <span title=\"'.cv($texto).'\">'.cv($texto).'</span>"}';
+			if($arrEventos=="")
+				$arrEventos=$o;
+			else
+				$arrEventos.=",".$o;
+		}
+		
+		$res='{"data":['.$arrEventos.']}';
+		echo $res;
+	}
+	
+	function registrarDiasNOHabiles()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		$consulta="INSERT INTO 7022_diasNOHabiles(fechaInicio,fechaTermino,motivoDiaNoHabil,situacion,fechaRegistro,idResponsableRegistro) 
+					VALUES('".$obj->fechaInicio."','".$obj->fechaFin."','".cv($obj->motivo)."',1,'".date("Y-m-d H:i:s")."',".$_SESSION["idUsr"].")";
+		eC($consulta);
+		
+	}
+	
+	function removerRegistroDiaNoHabil()
+	{
+		global $con;
+		$idRegistro=$_POST["idRegistro"];
+		$motivo=$_POST["motivo"];
+
+		
+		$consulta="UPDATE 7022_diasNOHabiles  SET fechaBaja='".date("Y-m-d H:i:s")."',idResponsableBaja=".$_SESSION["idUsr"].
+				",motivoBaja='".cv($motivo)."',situacion=0 WHERE idRegistro=".$idRegistro;
+		eC($consulta);
+	}
+	
+	function registrarEventoCarpeta()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		$consulta="";
+		
+		$fechaRecordatorio="NULL";
+		if($obj->diasRecordatorio!=0)
+		{
+			$fechaRecordatorio="'".date("Y-m-d",strtotime("-".$obj->diasRecordatorio." days",strtotime($obj->fechaLimite)))."'";
+		}
+		
+		if($obj->idEvento==-1)
+		{
+			$consulta="INSERT INTO 7027_eventosCarpetas(fecha,detalle,carpetaAdministrativa,idUsuario,fechaRegistro,situacion,fechaRecordatorio) 
+					VALUES('".$obj->fechaLimite."','".cv($obj->detallesEvento)."','".$obj->carpetaAdministrativa."',".$_SESSION["idUsr"]
+					.",'".date("Y-m-d H:i:s")."',1,".$fechaRecordatorio.")";
+		}
+		else
+		{
+			$consulta="update 7027_eventosCarpetas set fecha='".$obj->fechaLimite."',detalle='".cv($obj->detallesEvento).
+					"',idUsuarioCambio=".$_SESSION["idUsr"].",fechaCambio='".date("Y-m-d H:i:s")."',fechaRecordatorio=".$fechaRecordatorio."
+					where idRegistro=".$obj->idEvento;
+					
+		}
+		eC($consulta);
+		
+	}
+	
+	function obtenerEventosCarpeta()
+	{
+		global $con;
+		$c=$_GET["c"];
+		$uG=$_GET["uG"];
+		$from=$_GET["from"];
+		$to=$_GET["to"];
+		$arrEventos="";
+		
+		$consulta="SELECT e.* FROM 7027_eventosCarpetas e,7006_carpetasAdministrativas c WHERE fecha>='".$from."' AND fecha<='".$to."' 
+					AND c.carpetaAdministrativa=e.carpetaAdministrativa AND c.unidadGestion='".$uG."' and e.situacion=1";
+		if($c!="-1")
+		{
+			$consulta.=" and c.carpetaAdministrativa='".$c."'";
+		}
+		
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			$eliminable='<a href=\'javascript:removerEvento(\"'.bE($fila["idRegistro"]).'\")\'><img src=\"../images/delete.png\" title=\"Remover evento\" alt=\"Remover evento\"></a>&nbsp;';
+			$editable=1;
+			if($fila["idUsuario"]!=$_SESSION["idUsr"])
+			{
+				$eliminable="";	
+				$editable=0;	
+			}
+			
+			$texto='['.$fila["carpetaAdministrativa"].'] '.$fila["detalle"];
+			$texto2=$texto;
+			if(strlen($texto)>40)
+				$texto2=substr($texto,0,40)."...";
+			$diasRecordar=0;
+			if($fila["fechaRecordatorio"]!="")
+			{
+				$diasRecordar=obtenerDiferenciaDias($fila["fechaRecordatorio"],$fila["fecha"]);
+			}
+			
+			$o='{"id":"'.($fila["idRegistro"]).'","details":"","start_date":"'.$fila["fecha"].' 00:00:00","end_date":"'.date("Y-m-d ",strtotime("+1 days",strtotime($fila["fecha"]))).' 00:00:00","text":"'.$eliminable.'<span title=\"'.
+				cv(str_replace("<br />","\n",$texto)).'\">'.cv($texto2).'</span>","editable":"'.$editable.'","carpetaAdministrativa":"'.
+				$fila["carpetaAdministrativa"].'","detalle":"'.cv($fila["detalle"]).'","diasRecordar":"'.$diasRecordar.'"}';
+			if($arrEventos=="")
+				$arrEventos=$o;
+			else
+				$arrEventos.=",".$o;
+			
+		}
+		
+		$res='{"data":['.$arrEventos.']}';
+		echo $res;
+		
+	}
+	
+	function removerEventoCarpeta()
+	{
+		global $con;
+		$idEvento=$_POST["iE"];
+		$consulta="UPDATE 7027_eventosCarpetas SET situacion=0, fechaCambio='".date("Y-m-d H:i:s")."',idUsuarioCambio=".$_SESSION["idUsr"]." 
+				WHERE idRegistro=".$idEvento;
+		eC($consulta);
+	}
+	
+	
+	function obtenerAgendaJuzgadoSecretarias()
+	{
+		global $con;
+		global $arrColoresSecretarias;
+		
+		$vVacaciones=$_GET["vVacaciones"];
+		$vIncidencias=$_GET["vIncidencias"];
+		$vGuardias=$_GET["vGuardias"];
+		$vTramite=$_GET["vTramite"];
+		$tipoVista=$_GET["tipoVista"];
+		$idJuzgado=$_GET["idJuzgado"];
+		$from=$_GET["from"];
+		$to=$_GET["to"];
+		$arrEventos="";
+		
+		$vJuzgado=0;
+		
+		$arrSituaciones=array();
+		$consulta="SELECT idSituacion,descripcionSituacion,icono FROM 7011_situacionEventosAudiencia";
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_row($res))
+		{
+			$arrSituaciones[$fila[0]]["etiqueta"]=$fila[1];
+			$arrSituaciones[$fila[0]]["icono"]=$fila[2];
+		}
+		
+		$consulta="SELECT fechaEvento,horaInicioEvento,horaFinEvento,e.situacion,e.idRegistroEvento,ta.tipoAudiencia,otroTipoAudiencia,idSala 
+					FROM 7000_eventosAudiencia e,_4_tablaDinamica ta
+					WHERE ta.id__4_tablaDinamica=e.tipoAudiencia and e.situacion in (1,2,4,5)
+ 					AND fechaEvento>='".$from."' AND fechaEvento<='".$to."' AND e.idCentroGestion=".$idJuzgado;
+		
+		if($tipoVista!=0)
+			$consulta.=" and e.idSala=".$tipoVista;
+		
+		$resJueces=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_row($resJueces))
+		{
+			$consulta="SELECT claveSala FROM _15_tablaDinamica WHERE id__15_tablaDinamica='".$fila[7]."'";	
+			$claveSala=$con->obtenerValor($consulta);
+			$arrSala=explode("_",$claveSala);
+			$color=isset($arrColoresSecretarias[$arrSala[1]])?$arrColoresSecretarias[$arrSala[1]]:'000';
+			//<img width='13' height='13' src='".$arrSituaciones[$fila[3]]["icono"]."' title='".cv($arrSituaciones[$fila[3]]["etiqueta"])."' alt='".cv($arrSituaciones[$fila[3]]["etiqueta"])."'>
+			$texto="".$fila[5];
+			if($fila[6]!="")
+			{
+				$texto.=": ".$fila[6];
+			}
+			
+			$fechaFin=date("Y-m-d",strtotime($fila[2]));
+			if($fila[0]!=$fechaFin)
+				$fechaFin.=" 23:59:59";
+			else
+			{
+				$fechaFin=date("Y-m-d 00:00:00",strtotime("+1 days",strtotime($fila[2])));
+			}
+			$o='{"tipoEvento":"1","id":"e_'.$fila[4].'","details":"","start_date":"'.$fila[1].' 00:00:00","end_date":"'.$fechaFin.
+				'","text":" <span title=\"'.strip_tags($texto).
+				'\"><a href=\"javascript:mostrarDatosEventoAudiencia(\''.bE($fila[4]).'\')\"><span style=\"color:#'.$color.'\">'.$texto.'</a></span>","comentarios":"","tipoIncidencia":""}';
+			if($arrEventos=="")
+				$arrEventos=$o;
+			else
+				$arrEventos.=",".$o;
+		}
+		
+		
+		if($vVacaciones==1)
+		{
+			$comp=generarConsultaIntervalos($from,$to,"fechaInicial","fechaFinal",true);
+
+			$consulta="SELECT id__20_tablaDinamica,fechaInicial,fechaFinal,g.tipoIncidencia,comentarios  FROM _20_tablaDinamica g
+						 WHERE g.idEstado=1 and g.tipoIncidencia=3 and g.usuarioJuez=".$idJuez." AND 
+						 ".$comp." order by fechaInicial";
+	
+			$resJueces=$con->obtenerFilas($consulta);
+			
+			while($fila=mysql_fetch_row($resJueces))
+			{
+				$texto='Periodo vacacional';
+				
+				
+				$fechaFin=$fila[2];
+				if($fila[1]!=$fila[2])
+					$fechaFin.=" 23:59:59";
+				else
+				{
+					$fechaFin=date("Y-m-d 00:00:00",strtotime("+1 days",strtotime($fila[1])));
+				}
+				$o='{"tipoEvento":"2","id":"v_'.$fila[0].'","details":"","start_date":"'.$fila[1].' 00:00:00","end_date":"'.$fechaFin.
+					'","text":"<span title=\"'.$texto.
+					'\">'.$texto.'</span>","comentarios":"'.cv($fila[4]).'","tipoIncidencia":"'.cv($fila[3]).'"}';
+				if($arrEventos=="")
+					$arrEventos=$o;
+				else
+					$arrEventos.=",".$o;
+			}
+			
+		}
+		
+		if($vIncidencias==1)
+		{
+			$comp=generarConsultaIntervalos($from,$to,"fechaInicial","fechaFinal",true);
+
+			$consulta="SELECT id__20_tablaDinamica,fechaInicial,fechaFinal,g.tipoIncidencia,comentarios  FROM _20_tablaDinamica g
+						 WHERE g.idEstado=1 and g.tipoIncidencia<>3 and g.usuarioJuez=".$idJuez." AND 
+						 ".$comp." order by fechaInicial";
+	
+			$resJueces=$con->obtenerFilas($consulta);
+			
+			while($fila=mysql_fetch_row($resJueces))
+			{
+				$texto='Incidencia/permiso';
+				
+				
+				$fechaFin=$fila[2];
+				if($fila[1]!=$fila[2])
+					$fechaFin.=" 23:59:59";
+				else
+				{
+					$fechaFin=date("Y-m-d 00:00:00",strtotime("+1 days",strtotime($fila[1])));
+				}
+				$o='{"tipoEvento":"3","id":"v_'.$fila[0].'","details":"","start_date":"'.$fila[1].' 00:00:00","end_date":"'.$fechaFin.
+					'","text":"<span title=\"'.$texto.
+					'\">'.$texto.'</span>","comentarios":"'.cv($fila[4]).'","tipoIncidencia":"'.cv($fila[3]).'"}';
+				if($arrEventos=="")
+					$arrEventos=$o;
+				else
+					$arrEventos.=",".$o;
+			}
+			
+		}
+		
+		if($vGuardias==1)
+		{
+			$comp=generarConsultaIntervalos($from,$to,"fechaInicio","fechaFinalizacion",true);
+
+			$consulta="SELECT id__13_tablaDinamica,fechaInicio,fechaFinalizacion  FROM _13_tablaDinamica g
+						 WHERE g.idEstado=1 and g.usuarioJuez=".$idJuez." AND ".$comp."  order by fechaInicio";
+	
+			$resJueces=$con->obtenerFilas($consulta);
+			
+			while($fila=mysql_fetch_row($resJueces))
+			{
+				$texto='Periodo de guardia ['.date("H:i",strtotime($fila[1])).' - '.date("H:i",strtotime($fila[2])).']';
+				
+				$fila[1]=date("Y-m-d",strtotime($fila[1]));
+				$fila[2]=date("Y-m-d",strtotime($fila[2]));
+				
+				$fechaFin=$fila[2];
+				if($fila[1]!=$fila[2])
+					$fechaFin.=" 23:59:59";
+				else
+				{
+					$fechaFin=date("Y-m-d 00:00:00",strtotime("+1 days",strtotime($fila[1])));
+				}
+				$o='{"tipoEvento":"4","id":"'.$fila[0].'","details":"","start_date":"'.$fila[1].' 00:00:00","end_date":"'.$fechaFin.'","text":"<span title=\"'.$texto.'\">'.$texto.'</span>"}';
+				if($arrEventos=="")
+					$arrEventos=$o;
+				else
+					$arrEventos.=",".$o;
+			}
+		}
+		
+		if($vTramite==1)
+		{
+			$comp=generarConsultaIntervalos($from,$to,"fechaInicial","fechaFinal",true);
+
+			$consulta="SELECT id__292_tablaDinamica,fechaInicial,fechaFinal  FROM _292_tablaDinamica g WHERE g.idEstado=1 and 
+					g.nombreJueces=".$idJuez."	and ".$comp."  order by fechaInicial";
+	
+			$resJueces=$con->obtenerFilas($consulta);
+			
+			while($fila=mysql_fetch_row($resJueces))
+			{
+				$texto='Periodo de Juez de tr&aacute;mite';
+				
+				
+				$fechaFin=$fila[2];
+				if($fila[1]!=$fila[2])
+					$fechaFin.=" 23:59:59";
+				else
+				{
+					$fechaFin=date("Y-m-d 00:00:00",strtotime("+1 days",strtotime($fila[1])));
+				}
+				$o='{"tipoEvento":"5","id":"'.$fila[0].'","details":"","start_date":"'.$fila[1].' 00:00:00","end_date":"'.$fechaFin.'","text":"<span title=\"'.$texto.'\">'.$texto.'</span>"}';
+				if($arrEventos=="")
+					$arrEventos=$o;
+				else
+					$arrEventos.=",".$o;
+			}
+			
+		}
+		$res='{"data":['.$arrEventos.']}';
+		echo $res;
+		
+	}
+	
+?>

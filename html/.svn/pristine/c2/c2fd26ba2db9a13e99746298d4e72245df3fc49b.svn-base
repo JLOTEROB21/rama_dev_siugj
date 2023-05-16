@@ -1,0 +1,402 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+	
+	$consulta="SELECT idCategoria,nombreCategoria FROM 908_categoriasDocumentos";
+	$arrCategorias=$con->obtenerFilasArreglo($consulta);
+?>
+
+var primeraCargaFrame=true;
+var arrCategorias=<?php echo $arrCategorias?>;
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	var oDocumento=eval('['+bD(gE('datosDocumento').value)+']')[0];   
+
+   	var oComp=bD(gE('oComp').value);
+    if(oComp!='')
+    {
+    	oComp=eval('['+oComp+']')[0];
+    }
+    else
+    {
+    	oComp={};
+    }
+    
+  	var arrBar=null;
+    if(gE('ocultarBarraSuperior').value=='0')
+    {
+    	arrBar=		[
+                      {
+                          xtype:'label',
+                          html:'<div class="letraNombreTableroNegro">Documento: <div class="letraNombreTablero" id="lblNombreDoc" title="'+oDocumento.nombreArchivo+'" alt="'+oDocumento.nombreArchivo+'">'+
+                          		(oDocumento.nombreArchivo.length>40?oDocumento.nombreArchivo.substr(0,37)+'...':oDocumento.nombreArchivo)+'</label></div>'
+                      },
+                      {
+                      	xtype:'tbspacer',
+                        width:15
+                      },
+                      {
+                          xtype:'label',
+                          html:'<div class="letraNombreTableroNegro">Tama&ntilde;o: <div class="letraNombreTablero" id="lblTamano">'+(parseInt(oDocumento.tamano)==0?'Indeterminado':bytesToSize(parseInt(oDocumento.tamano),0))+'</div></div>'                      },
+                      
+                      {
+                      	xtype:'tbspacer',
+                        width:10
+                      },
+                      {
+                          xtype:'label',
+                          cls:'letraNombreTablero',
+                          html:'<div class="letraNombreTableroNegro">Formato: <div class="letraNombreTablero" id="lblFormato">'+oDocumento.extension.toUpperCase()+'</div></div>' 
+                      },
+                      {
+                      	xtype:'tbspacer',
+                        width:10
+                      },
+                      {
+                          xtype:'label',
+                          cls:'letraNombreTablero',
+                          html:'<div class="letraNombreTableroNegro">Fecha de registro: <div class="letraNombreTablero" id="lblFechaRegistro">'+Date.parseDate(oDocumento.fechaCreacion,'Y-m-d H:i:s').format('d/m/Y H:i')+' hrs.'+'</div></div>' 
+                      },
+                      {
+                      	xtype:'tbspacer',
+                        width:10
+                      },
+                      
+                      {
+                          icon:'../images/download.png',
+                          cls:'x-btn-text-icon',
+                          text:'Descargar',
+                          handler:function()
+                                  {
+                                      location.href=oDocumento.urlContenido+'?id='+bE('documento_'+gE('iDocumento').value)+'&eV2=0&nombreArchivo='+oDocumento.nombreArchivo;
+                                  }
+                          
+                      },
+                      {
+                      	xtype:'tbspacer',
+                        width:10
+                      },
+                      {
+                          icon:'../images/magnifier.png',
+                          cls:'x-btn-text-icon',
+                          hidden:((!oComp.idFormulario) || (parseInt(oComp.idFormulario)<0)) ,
+                          text:'Proceso asociado...',
+                          handler:function()
+                                  {
+                                      var oParam=[['idFormulario',oComp.idFormulario],['idRegistro',oComp.idRegistro],['dComp',bE('auto')],['actor',bE(oComp.actor)]];
+                                      enviarFormularioDatos('<?php echo $visorExpedienteProcesos?>',oParam);
+                                  }
+                          
+                      },
+                      {
+                      	xtype:'tbspacer',
+                        width:10
+                      },
+                      {
+                          icon:'../images/magnifier.png',
+                          cls:'x-btn-text-icon',
+                          hidden:((!oComp.idFormulario) || (parseInt(oComp.idFormulario)!=-5)) ,
+                          text:'Documento origen...',
+                          handler:function()
+                                  {
+                                  		var documentoRespuesta=eval(bD(gE('documentoRespuesta').value))[0];
+                                  		mostrarVisorDocumentoProceso(documentoRespuesta.extension,documentoRespuesta.idDocumento,'',documentoRespuesta.nombreArchivo)
+
+                                  }
+                      }
+                      
+                      
+                      
+                  ];
+    }
+    new Ext.Viewport(	{
+                                layout: 'border',
+                                items: [
+                                            {
+                                                xtype:'panel',
+                                                region:'center',
+                                                layout:'border',
+                                                cls:'panelSiugj',
+                                                tbar:	arrBar,
+                                                items:	[
+                                                			{
+                                                            	xtype:'panel',
+                                                                width:400,
+                                                                region:'west',
+                                                                cls:'panelSiugj',
+                                                                border:false,
+                                                                layout:'border',                                                               
+                                                                items:	[
+                                                                			crearArbolCarpetaAdministrativa()
+                                                                		]
+                                                                
+                                                            },
+                                                            new Ext.ux.IFrameComponent({ 
+  
+                                                                                              id: 'frameContenido', 
+                                                                                              anchor:'100% 100%',
+                                                                                              region:'center',
+                                                                                              loadFuncion:function(iFrame)
+                                                                                                          {
+                                                                                                              
+                                                                                                          },
+
+                                                                                              url: '../paginasFunciones/white.php',
+                                                                                              style: 'width:100%;height:100%' 
+                                                                                      })
+                                                        ]
+                                            }
+                                         ]
+                            }
+                        ) 
+	
+                           
+                          
+}
+
+function crearArbolCarpetaAdministrativa()
+{
+	var cmbTipoDocumento=crearComboExt('cmbTipoDocumento',arrCategorias);
+	var lector= new Ext.data.JsonReader({
+                                            
+                                            totalProperty:'numReg',
+                                            fields: [
+                                               			{name:'idDocumento'},
+		                                                {name: 'etapaProcesal'},
+		                                                {name:'nomArchivoOriginal'},
+		                                                {name: 'tamano'},
+                                                        {name: 'fechaRegistro', type:'date', dateFormat:'Y-m-d'},
+                                                        {name: 'fechaCreacion', type:'date', dateFormat:'Y-m-d H:i:s'},
+                                                        {name: 'descripcion'},
+                                                        {name:'idFormulario'},
+                                                        {name:'idRegistro'},
+                                                        {name:'idDocumento'},
+                                                        {name: 'categoriaDocumentos'},
+                                                        {name: 'subidorPor'}
+                                            		],
+                                            root:'registros'
+                                            
+                                        }
+                                      );
+	 
+                                                                                      
+	var alDatos=new Ext.data.GroupingStore({
+                                                            reader: lector,
+                                                            proxy : new Ext.data.HttpProxy	(
+
+                                                                                              {
+
+                                                                                                  url: '../paginasFunciones/funcionesModulosEspeciales_SGP.php'
+
+                                                                                              }
+
+                                                                                          ),
+                                                            sortInfo: {field: 'fechaRegistro', direction: 'ASC'},
+                                                            groupField: 'fechaRegistro',
+                                                            remoteGroup:false,
+				                                            remoteSort: false,
+                                                            autoLoad:true
+                                                            
+                                                        }) 
+	alDatos.on('beforeload',function(proxy)
+    								{
+                                    	proxy.baseParams.funcion='19';
+                                        proxy.baseParams.idCarpetaAdministrativa=(gE('idCarpeta').value);
+                                        proxy.baseParams.cA=gE('carpetaJudicial').value;
+                                    }
+                        )   
+   
+   alDatos.on('load',function(proxy)
+    								{
+                                    	var pos=obtenerPosFila(gEx('gridCarpetaAdministrativa').getStore(),'idDocumento',gE('iDocumento').value);
+										setTimeout(	function()
+                                        			{
+                                                    	fila=gEx('gridCarpetaAdministrativa').getStore().getAt(pos);
+                                                        gEx('gridCarpetaAdministrativa').getSelectionModel().selectRange(pos,pos);
+                                                        gEx('gridCarpetaAdministrativa').getView().refresh();
+
+                                                        cargarDocumentos(fila.data.idDocumento,fila.data.nomArchivoOriginal);
+                                                    },1000);
+                                       
+                                        
+                                        
+                                    }
+                        )    
+    
+	var chkRow=new Ext.grid.CheckboxSelectionModel({singleSelect:false});    
+    var cModelo= new Ext.grid.ColumnModel   	(
+                                                    [
+                                                    	new  Ext.grid.RowNumberer({width:40}),
+                                                        {
+                                                            header:'',
+                                                            width:30,
+                                                            sortable:true,
+                                                            dataIndex:'idDocumento',
+                                                            renderer:function(val,meta,registro)
+                                                            		{
+                                                                    	if(registro.data.etapaProcesal=='-1000')
+                                                                        	return '';
+                                                                    	var arrNombre=registro.data.nomArchivoOriginal.split('.');
+                                                                        return '<img src="../imagenesDocumentos/16/file_extension_'+arrNombre[1].toLowerCase()+'.png" />'
+                                                                    }
+                                                        },
+                                                       {
+                                                            header:'Documento',
+                                                            width:500,
+                                                            sortable:true,
+                                                            dataIndex:'nomArchivoOriginal',
+                                                            renderer:mostrarValorDescripcion
+                                                        },
+                                                        
+                                                        {
+                                                            header:'',
+                                                            width:500,
+                                                            sortable:true,
+                                                            dataIndex:'fechaRegistro',
+                                                            renderer:function(val)
+                                                            		{
+                                                                    	return val.format('d/m/Y')
+                                                                    }
+                                                        },
+                                                        {
+                                                            header:'Tipo documento',
+                                                            width:150,
+                                                            sortable:true,
+                                                            dataIndex:'categoriaDocumentos',
+                                                            editor:cmbTipoDocumento,
+                                                            renderer:function(val)
+                                                            		{
+                                                                    	return mostrarValorDescripcion(formatearValorRenderer(arrCategorias,val));
+                                                                    }
+                                                        }
+                                                        
+                                                    ]
+                                                );
+                                                
+    var tblGrid=	new Ext.grid.GridPanel	(
+                                                        {
+                                                            id:'gridCarpetaAdministrativa',
+                                                            store:alDatos,
+                                                            region:'center',
+                                                            frame:false,
+                                                            clicksToEdit:1,
+                                                            cm: cModelo,
+                                                            stripeRows :true,
+                                                            loadMask:true,
+                                                            columnLines : false,  
+                                                            cls:'gridSiugjPrincipal',
+                                                            
+                                                            view:new Ext.grid.GroupingView({
+                                                                                                forceFit:false,
+                                                                                                showGroupName: false,
+                                                                                                enableGrouping :<?php echo ($_SESSION["codigoInstitucion"]=="005")?"true":"false"; ?>,
+                                                                                                enableNoGroups:false,
+                                                                                                enableGroupingMenu:false,
+                                                                                                hideGroupedColumn: true,
+                                                                                                startCollapsed:false,
+                                                                                                groupTextTpl:'<span style="color:#900"><b>{text}</b> ({[values.rs.length]} {[values.rs.length > 1 ? "Documentos" : "Documento"]})</span>'
+                                                                                            })
+                                                        }
+                                                    );
+                                                    
+	
+    tblGrid.on('afteredit',function(e)
+    						{
+                            	function funcAjax()
+                                {
+                                    var resp=peticion_http.responseText;
+                                    arrResp=resp.split('|');
+                                    if(arrResp[0]=='1')
+                                    {
+                                        
+                                    }
+                                    else
+                                    {
+                                    	function respErr()
+                                        {
+                                        	e.record.set(e.field,e.originalValue);
+                                        }
+                                        msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0],respErr);
+                                    }
+                                }
+                                obtenerDatosWeb('../paginasFunciones/funcionesModulosEspeciales_SGP.php',funcAjax, 'POST','funcion=57&iD='+e.record.data.idDocumento+'&tD='+e.value,true);
+                                
+                            }
+    			)
+    
+    tblGrid.getSelectionModel().on('rowselect',function(grid,rowIndex,registro)
+                                                  {
+                                                       var arrExtension=registro.data.nomArchivoOriginal.split('.');
+                                                       var extension=arrExtension[arrExtension.length-1];
+                                                       gE('lblNombreDoc').innerHTML='<span class="x-btn-text" title="'+registro.data.nomArchivoOriginal+'" alt="'+registro.data.nomArchivoOriginal+'">'+
+                          															(registro.data.nomArchivoOriginal.length>40?registro.data.nomArchivoOriginal.substr(0,37)+'...':registro.data.nomArchivoOriginal)+'<span>';
+                                                       gE('lblTamano').innerHTML=bytesToSize(parseInt(registro.data.tamano),0);
+                                                       gE('lblFormato').innerHTML=extension.toUpperCase();
+                                                       gE('lblFechaRegistro').innerHTML=registro.data.fechaCreacion.format('d/m/Y H:i')+' hrs.';
+                                                       
+                                                       cargarDocumentos(registro.data.idDocumento,registro.data.nomArchivoOriginal);
+                                                       
+                                                      
+                                                  }
+                                      )                                                    
+                                                    
+    return 	tblGrid;	
+}
+
+function cargarDocumentos(idDocumento,nDocumento)
+{
+	var arrDocumentos=nDocumento.split('.');
+    var extension=arrDocumentos[arrDocumentos.length-1];
+	var parametros={};
+	var urlViewer='../visoresGaleriaDocumentos/';                        
+	var pos=existeValorMatriz(arrVisores,extension.toLowerCase());                        
+	if(pos==-1)                        
+    {
+    	urlViewer+='noViewer.php';
+    }
+    else
+    {
+
+	urlViewer+=arrVisores[pos][1];
+        parametros={urlDoc:bE('<?php echo $urlSitio?>paginasFunciones/obtenerDocumentoEditorArchivos.php?id='+bE('documento_'+idDocumento)+'&nombreArchivo='+nDocumento)}
+     }      
+     
+                
+	gEx('frameContenido').load	(
+    
+    								{
+    									url:urlViewer,
+                                        params:parametros	
+                                     }
+    							) 
+}
+
+function obtenerVersionCompletaDocumentos(iDocumento)
+{
+	
+	
+    var arrParametros=[['iDocumento',iDocumento]]
+    enviarFormularioDatos('../modulosEspeciales_SICORE/obtenerDocumentoCompletoImpresion.php',arrParametros,'POST','frameDTD');
+    primeraCargaFrame=false;
+    
+}
+
+function frameLoad(iFrame)
+{
+	if(!primeraCargaFrame)
+    {
+    	setTimeout(function()
+        			{
+                       
+                        iFrame.contentWindow.print();
+                    },2000
+                   );
+
+    }
+    else
+    	primeraCargaFrame=false;
+	
+}

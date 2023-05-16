@@ -1,0 +1,429 @@
+{
+  "ReportGuid": "7cbe0a63536781eba9dd8629a6f01eef",
+  "ReportName": "Report",
+  "ReportAlias": "Report",
+  "ReportFile": "ReporteUsuarios.mrt",
+  "ReportCreated": "/Date(1636926666000-0500)/",
+  "ReportChanged": "/Date(1636928508000-0500)/",
+  "EngineVersion": "EngineV2",
+  "CalculationMode": "Interpretation",
+  "ReportUnit": "Centimeters",
+  "PreviewSettings": 260039167,
+  "Dictionary": {
+    "Variables": {
+      "0": {
+        "Value": "11/14/2021 5:19:40 PM",
+        "Name": "FechaCreacion",
+        "DialogInfo": {
+          "SortDirection": "None",
+          "CheckedColumn": "null;"
+        },
+        "Alias": "FechaCreacion",
+        "Type": "System.DateTime",
+        "RequestFromUser": true,
+        "Description": "fecha creacion del login",
+        "SelectionMode": "Nothing"
+      }
+    },
+    "DataSources": {
+      "0": {
+        "Ident": "StiCustomSource",
+        "Name": "800_usuarios",
+        "Alias": "800_usuarios",
+        "Columns": {
+          "0": {
+            "Name": "FechaActualiza",
+            "Index": -1,
+            "NameInSource": "FechaActualiza",
+            "Alias": "FechaActualiza",
+            "Type": "System.DateTime"
+          },
+          "1": {
+            "Name": "FechaCambio",
+            "Index": -1,
+            "NameInSource": "FechaCambio",
+            "Alias": "FechaCambio",
+            "Type": "System.DateTime"
+          },
+          "2": {
+            "Name": "Login",
+            "Index": -1,
+            "NameInSource": "Login",
+            "Alias": "Login",
+            "Type": "System.String"
+          },
+          "3": {
+            "Name": "Nombre",
+            "Index": -1,
+            "NameInSource": "Nombre",
+            "Alias": "Nombre",
+            "Type": "System.String"
+          },
+          "4": {
+            "Name": "Password",
+            "Index": -1,
+            "NameInSource": "Password",
+            "Alias": "Password",
+            "Type": "System.String"
+          },
+          "5": {
+            "Name": "Status",
+            "Index": -1,
+            "NameInSource": "Status",
+            "Alias": "Status",
+            "Type": "System.String"
+          },
+          "6": {
+            "Name": "cambiarDatosUsr",
+            "Index": -1,
+            "NameInSource": "cambiarDatosUsr",
+            "Alias": "cambiarDatosUsr",
+            "Type": "System.String"
+          },
+          "7": {
+            "Name": "cuentaActiva",
+            "Index": -1,
+            "NameInSource": "cuentaActiva",
+            "Alias": "cuentaActiva",
+            "Type": "System.String"
+          },
+          "8": {
+            "Name": "fechaCreacion",
+            "Index": -1,
+            "NameInSource": "fechaCreacion",
+            "Alias": "fechaCreacion",
+            "Type": "System.DateTime"
+          },
+          "9": {
+            "Name": "idIdioma",
+            "Index": -1,
+            "NameInSource": "idIdioma",
+            "Alias": "idIdioma",
+            "Type": "System.String"
+          },
+          "10": {
+            "Name": "idUsuario",
+            "Index": -1,
+            "NameInSource": "idUsuario",
+            "Alias": "idUsuario",
+            "Type": "System.String"
+          },
+          "11": {
+            "Name": "paso",
+            "Index": -1,
+            "NameInSource": "paso",
+            "Alias": "paso",
+            "Type": "System.String"
+          },
+          "12": {
+            "Name": "registradoEnPlantel",
+            "Index": -1,
+            "NameInSource": "registradoEnPlantel",
+            "Alias": "registradoEnPlantel",
+            "Type": "System.String"
+          },
+          "13": {
+            "Name": "responsableCreacion",
+            "Index": -1,
+            "NameInSource": "responsableCreacion",
+            "Alias": "responsableCreacion",
+            "Type": "System.String"
+          }
+        },
+        "NameInSource": "NombreConexion",
+        "SqlCommand": "800_usuarios",
+        "ServiceName": "Latis"
+      }
+    },
+    "Databases": {
+      "0": {
+        "Ident": "StiCustomDatabase",
+        "Name": "NombreConexion",
+        "Alias": "AliasConexion",
+        "ConnectionStringEncrypted": "xW71C8hZo83iS6XEZ3CkP4vEzUhGWUu8b1z9vepwJRffcNEIxQ==",
+        "ServiceName": "Latis"
+      }
+    }
+  },
+  "Pages": {
+    "0": {
+      "Ident": "StiPage",
+      "Name": "Page1",
+      "Guid": "ee7b15d8fe15684ad99c4c1819b86be7",
+      "Interaction": {
+        "Ident": "StiInteraction"
+      },
+      "Border": ";;2;;;;;solid:Black",
+      "Brush": "solid:",
+      "Components": {
+        "0": {
+          "Ident": "StiReportTitleBand",
+          "Name": "ReportTitleBand1",
+          "ClientRectangle": "0,0.4,19.01,1.6",
+          "Interaction": {
+            "Ident": "StiInteraction"
+          },
+          "Border": ";;;;;;;solid:Black",
+          "Brush": "solid:",
+          "Components": {
+            "0": {
+              "Ident": "StiText",
+              "Name": "Text8",
+              "ClientRectangle": "1.4,0,15.2,0.8",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "TITULO DEL REPORTE"
+              },
+              "HorAlignment": "Center",
+              "Font": ";24;;",
+              "Border": ";;;;;;;solid:Black",
+              "Brush": "solid:",
+              "TextBrush": "solid:Black",
+              "Type": "Expression"
+            }
+          }
+        },
+        "1": {
+          "Ident": "StiHeaderBand",
+          "Name": "HeaderBand1",
+          "ClientRectangle": "0,2.8,19.01,0.4",
+          "Interaction": {
+            "Ident": "StiInteraction"
+          },
+          "Border": ";;;;;;;solid:Black",
+          "Brush": "solid:",
+          "Components": {
+            "0": {
+              "Ident": "StiText",
+              "Name": "Text5",
+              "ClientRectangle": "0.4,0,1.6,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "LOGIN"
+              },
+              "Font": ";;Bold;",
+              "Border": ";;;;;;;solid:Black",
+              "Brush": "solid:",
+              "TextBrush": "solid:Black",
+              "Type": "Expression"
+            },
+            "1": {
+              "Ident": "StiText",
+              "Name": "Text6",
+              "Guid": "11243e5f44a1dbf98c93d0396429dbaf",
+              "ClientRectangle": "6.2,0,1.6,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "NOMBRE"
+              },
+              "Font": ";;Bold;",
+              "Border": ";;;;;;;solid:Black",
+              "Brush": "solid:",
+              "TextBrush": "solid:Black",
+              "Type": "Expression"
+            },
+            "2": {
+              "Ident": "StiHorizontalLinePrimitive",
+              "Name": "HorizontalLinePrimitive1",
+              "ClientRectangle": "0.4,0.4,18.4,0.0254",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "StartCap": ";;;",
+              "EndCap": ";;;"
+            }
+          }
+        },
+        "2": {
+          "Ident": "StiGroupHeaderBand",
+          "Name": "GroupHeaderBand1",
+          "ClientRectangle": "0,4,19.01,0.8",
+          "Interaction": {
+            "Ident": "StiBandInteraction"
+          },
+          "Border": ";;;;;;;solid:Black",
+          "Brush": "solid:",
+          "Components": {
+            "0": {
+              "Ident": "StiText",
+              "Name": "Text3",
+              "ClientRectangle": "4.8,0.2,3,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{n800_usuarios.fechaCreacion}"
+              },
+              "Border": ";;;;;;;solid:Black",
+              "Brush": "solid:",
+              "TextBrush": "solid:Black"
+            },
+            "1": {
+              "Ident": "StiText",
+              "Name": "Text4",
+              "ClientRectangle": "0.6,0.2,4,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "FECHA DE CREACION:"
+              },
+              "Border": ";;;;;;;solid:Black",
+              "Brush": "solid:",
+              "TextBrush": "solid:Black",
+              "Type": "Expression"
+            },
+            "2": {
+              "Ident": "StiStartPointPrimitive",
+              "Name": "StartPointPrimitive1",
+              "ClientRectangle": "0.4,0,0,0",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "ReferenceToGuid": "e21febaed4ca3b2b9f1c6b418b32a90a"
+            },
+            "3": {
+              "Ident": "StiEndPointPrimitive",
+              "Name": "EndPointPrimitive1",
+              "ClientRectangle": "18.8,0.6,0,0",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "ReferenceToGuid": "e21febaed4ca3b2b9f1c6b418b32a90a"
+            }
+          },
+          "Condition": {
+            "Value": "{n800_usuarios.fechaCreacion}"
+          }
+        },
+        "3": {
+          "Ident": "StiDataBand",
+          "Name": "DataBand1",
+          "ClientRectangle": "0,5.6,19.01,0.6",
+          "Interaction": {
+            "Ident": "StiBandInteraction"
+          },
+          "Border": ";;;;;;;solid:Black",
+          "Brush": "solid:",
+          "Components": {
+            "0": {
+              "Ident": "StiText",
+              "Name": "Text1",
+              "ClientRectangle": "0.4,0,3,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{n800_usuarios.Login}"
+              },
+              "Border": ";;;;;;;solid:Black",
+              "Brush": "solid:",
+              "TextBrush": "solid:Black"
+            },
+            "1": {
+              "Ident": "StiText",
+              "Name": "Text2",
+              "ClientRectangle": "6.2,0,12.4,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{n800_usuarios.Nombre}"
+              },
+              "Border": ";;;;;;;solid:Black",
+              "Brush": "solid:",
+              "TextBrush": "solid:Black"
+            }
+          },
+          "DataSourceName": "800_usuarios"
+        },
+        "4": {
+          "Ident": "StiGroupFooterBand",
+          "Name": "GroupFooterBand1",
+          "ClientRectangle": "0,7,19.01,0.6",
+          "Interaction": {
+            "Ident": "StiInteraction"
+          },
+          "Border": ";;;;;;;solid:Black",
+          "Brush": "solid:",
+          "Components": {
+            "0": {
+              "Ident": "StiText",
+              "Name": "Text7",
+              "ClientRectangle": "13.2,0.2,5.6,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "TOTAL DE GRUPO: {Count(DataBand1)}"
+              },
+              "Font": ";;Bold;",
+              "Border": ";;;;;;;solid:Black",
+              "Brush": "solid:",
+              "TextBrush": "solid:Black",
+              "Type": "Expression"
+            }
+          }
+        },
+        "5": {
+          "Ident": "StiFooterBand",
+          "Name": "FooterBand1",
+          "ClientRectangle": "0,8.4,19.01,0.6",
+          "Interaction": {
+            "Ident": "StiInteraction"
+          },
+          "Border": ";;;;;;;solid:Black",
+          "Brush": "solid:",
+          "Components": {
+            "0": {
+              "Ident": "StiText",
+              "Name": "Text9",
+              "ClientRectangle": "8,0.2,3,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{PageNofM}"
+              },
+              "HorAlignment": "Center",
+              "Font": ";;Bold;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0"
+            }
+          },
+          "PrintAtBottom": true,
+          "CanBreak": true,
+          "KeepFooterTogether": false,
+          "PrintOnAllPages": true
+        },
+        "6": {
+          "Ident": "StiRectanglePrimitive",
+          "Name": "RectanglePrimitive1",
+          "Guid": "e21febaed4ca3b2b9f1c6b418b32a90a",
+          "ClientRectangle": "0.4,4,18.4,0.6",
+          "Interaction": {
+            "Ident": "StiInteraction"
+          }
+        }
+      },
+      "PageWidth": 21.01,
+      "PageHeight": 29.69,
+      "Watermark": {
+        "TextBrush": "solid:50,0,0,0"
+      },
+      "Margins": {
+        "Left": 1,
+        "Right": 1,
+        "Top": 1,
+        "Bottom": 1
+      }
+    }
+  }
+}

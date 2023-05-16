@@ -1,0 +1,508 @@
+<?php
+	function realizarRepartoAsignacionConJuez($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		$consulta="SELECT * FROM _977_tablaDinamica WHERE id__977_tablaDinamica=".$idRegistro;
+		$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+		if(($fRegistro["idConjuezAsignado"]!="N/E")&&($fRegistro["idConjuezAsignado"]!=""))
+		{
+			return true;
+		}
+		
+		
+		
+		$consulta="SELECT id__976_tablaDinamica FROM _976_tablaDinamica WHERE idEstado=2 ORDER BY id__976_tablaDinamica";
+		$universoDespachos=$con->obtenerListaValores($consulta);
+		$arrConfiguracion["tipoAsignacion"]="";
+		$arrConfiguracion["serieRonda"]="GrupoConJuez";
+		$arrConfiguracion["universoAsignacion"]=$universoDespachos;
+		$arrConfiguracion["idObjetoReferencia"]=-1;
+		$arrConfiguracion["pagarDeudasAsignacion"]=false;
+		$arrConfiguracion["considerarDeudasMismaRonda"]=false;
+		$arrConfiguracion["limitePagoRonda"]=0;
+		$arrConfiguracion["escribirAsignacion"]=true;
+		$arrConfiguracion["idFormulario"]=$idFormulario;
+		$arrConfiguracion["idRegistro"]=$idRegistro;
+		$resultado= obtenerSiguienteAsignacionObjeto($arrConfiguracion,true);
+		$idConjuezAsignado=$resultado["idUnidad"];
+		
+		if($idConjuezAsignado=="")
+			$idConjuezAsignado=-1;
+		
+		$consulta="UPDATE _977_tablaDinamica SET idConjuezAsignado=".$idConjuezAsignado.",fechaAsignacion='".date("Y-m-d H:i:s")."' WHERE  id__977_tablaDinamica=".$idRegistro;
+		if($con->ejecutarConsulta($consulta))
+		{
+			$consulta="SELECT * FROM _976_tablaDinamica WHERE id__976_tablaDinamica=".$idConjuezAsignado;
+			$fConjuez=$con->obtenerPrimeraFilaAsoc($consulta);
+			$arrParam=array();
+			$arrParam["emailDestinatario"]=$fConjuez["mailContacto"];
+			$arrParam["nombreDestinatario"]=$fConjuez["tituloConjuez"]." ".$fConjuez["nombre"]." ".$fConjuez["primerApellido"]." ".$fConjuez["segundoApellido"];
+			$arrParam["codigoUnicoProceso"]=$fRegistro["carpetaAdministrativa"];
+			
+			$consulta="SELECT tipoProceso,idActividad FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$fRegistro["carpetaAdministrativa"]."'";
+			$fDatosExpediente=$con->obtenerPrimeraFilaAsoc($consulta);
+			$tipoProceso=$fDatosExpediente["tipoProceso"];
+			$idActividad=$fDatosExpediente["idActividad"];
+			
+			$consulta="SELECT nombreUnidad FROM _17_tablaDinamica WHERE claveUnidad='".$fRegistro["codigoInstitucion"]."'";
+			$despacho=$con->obtenerValor($consulta);
+			
+			$demantante="";
+			$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+						FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+						AND r.idActividad=".$idActividad." AND r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='A') ORDER BY nombre,nombre,apellidoMaterno";
+			
+			$res=$con->obtenerFilas($consulta);
+			while($filaImputado=mysql_fetch_row($res))
+			{
+				$nombre=trim($filaImputado[0]);
+				if($demantante=="")
+					$demantante=$nombre;
+				else
+					$demantante.=", ".$nombre;
+			}
+		
+			$demandados="";
+			$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+						FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+						AND r.idActividad=".$idActividad." AND r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='D') ORDER BY nombre,nombre,apellidoMaterno";
+			
+			$res=$con->obtenerFilas($consulta);
+			while($filaImputado=mysql_fetch_row($res))
+			{
+				$nombre=trim($filaImputado[0]);
+				if($demandados=="")
+					$demandados=$nombre;
+				else
+					$demandados.=", ".$nombre;
+			}
+			
+			$arrParam["etDemandante"]=$tipoProceso==6?"ACCIONANTE":"ACTOR";
+			$arrParam["etDemandado"]=$tipoProceso==6?"ACCIONADO":"DEMANDADO";;
+			$arrParam["lblDemandante"]=$demantante;
+			$arrParam["fieldDemandado"]=$demandados;
+			$arrParam["despacho"]=$despacho;
+			if(enviarMensajeEnvio(26,$arrParam))
+				return true;
+	
+		}
+		return false;
+		
+	}
+	
+	
+	function realizarRepartoAsignacionSalaSeleccion($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		$consulta="SELECT * FROM _917_tablaDinamica WHERE id__917_tablaDinamica=".$idRegistro;
+		$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+		if(($fRegistro["salaRevision"]!="N/E")&&($fRegistro["salaRevision"]!=""))
+		{
+			return true;
+		}
+		
+		$carpetaAdministrativa=$fRegistro["carpetaAdministrativa"];
+		
+		$consulta="SELECT id__992_tablaDinamica FROM _992_tablaDinamica WHERE tipoSala=2";
+		$universoDespachos=$con->obtenerListaValores($consulta);
+		$arrConfiguracion["tipoAsignacion"]="";
+		$arrConfiguracion["serieRonda"]="Grupo_SalaSeleccion";
+		$arrConfiguracion["universoAsignacion"]=$universoDespachos;
+		$arrConfiguracion["idObjetoReferencia"]=-1;
+		$arrConfiguracion["pagarDeudasAsignacion"]=false;
+		$arrConfiguracion["considerarDeudasMismaRonda"]=false;
+		$arrConfiguracion["limitePagoRonda"]=0;
+		$arrConfiguracion["escribirAsignacion"]=true;
+		$arrConfiguracion["idFormulario"]=$idFormulario;
+		$arrConfiguracion["idRegistro"]=$idRegistro;
+		$resultado= obtenerSiguienteAsignacionObjeto($arrConfiguracion,true);
+		$idSalaRevision=$resultado["idUnidad"];
+
+		if($idSalaRevision=="")
+			$idSalaRevision=-1;
+		
+		
+		$query="SELECT * FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa."' AND tipoCarpetaAdministrativa=1";
+		$fDatosBase=$con->obtenerPrimeraFilaAsoc($query);
+		$consulta=array();
+		$x=0;
+		$consulta[$x]="begin";
+		$x++;
+		
+		$query="SELECT despachoAsigando FROM _993_tablaDinamica WHERE idReferencia=".$idSalaRevision;
+		$res=$con->obtenerFilas($query);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			$consulta[$x]="INSERT INTO 7006_carpetasAdministrativas(carpetaAdministrativa,fechaCreacion,responsableCreacion,idFormulario,
+							idRegistro,unidadGestion,etapaProcesalActual,idActividad,carpetaAdministrativaBase,
+							tipoCarpetaAdministrativa,unidadGestionOriginal,especialidad,tipoProceso,claseProceso,subclaseProceso,tema,subtema) 
+							VALUES('".$carpetaAdministrativa."','".date("Y-m-d H:i:s")."',".$_SESSION["idUsr"].",".$idFormulario.",'".$idRegistro."','".
+							$fila["despachoAsigando"]."',10,".$fDatosBase["idActividad"].",NULL,30,'".$fila["despachoAsigando"]."',".($fDatosBase["especialidad"]==""?"NULL":$fDatosBase["especialidad"]).",".
+							($fDatosBase["tipoProceso"]==""?"NULL":$fDatosBase["tipoProceso"]).",".($fDatosBase["claseProceso"]==""?"NULL":$fDatosBase["claseProceso"]).
+							",".($fDatosBase["subclaseProceso"]==""?"NULL":$fDatosBase["subclaseProceso"]).
+							",".($fDatosBase["tema"]==""?"NULL":$fDatosBase["tema"]).",".($fDatosBase["subtema"]==""?"NULL":$fDatosBase["subtema"]).")";
+			
+	
+			$x++;
+		}
+		$consulta[$x]="UPDATE _917_tablaDinamica SET salaRevision=".$idSalaRevision." WHERE  id__917_tablaDinamica=".$idRegistro;
+		$x++;
+		$consulta[$x]="commit";
+		$x++;
+		
+
+		if($con->ejecutarBloque($consulta))
+		{
+			/*$consulta="SELECT * FROM _976_tablaDinamica WHERE id__976_tablaDinamica=".$idConjuezAsignado;
+			$fConjuez=$con->obtenerPrimeraFilaAsoc($consulta);
+			$arrParam=array();
+			$arrParam["emailDestinatario"]=$fConjuez["mailContacto"];
+			$arrParam["nombreDestinatario"]=$fConjuez["tituloConjuez"]." ".$fConjuez["nombre"]." ".$fConjuez["primerApellido"]." ".$fConjuez["segundoApellido"];
+			$arrParam["codigoUnicoProceso"]=$fRegistro["carpetaAdministrativa"];
+			
+			$consulta="SELECT tipoProceso,idActividad FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$fRegistro["carpetaAdministrativa"]."'";
+			$fDatosExpediente=$con->obtenerPrimeraFilaAsoc($consulta);
+			$tipoProceso=$fDatosExpediente["tipoProceso"];
+			$idActividad=$fDatosExpediente["idActividad"];
+			
+			$consulta="SELECT nombreUnidad FROM _17_tablaDinamica WHERE claveUnidad='".$fRegistro["codigoInstitucion"]."'";
+			$despacho=$con->obtenerValor($consulta);
+			
+			$demantante="";
+			$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+						FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+						AND r.idActividad=".$idActividad." AND r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='A') ORDER BY nombre,nombre,apellidoMaterno";
+			
+			$res=$con->obtenerFilas($consulta);
+			while($filaImputado=mysql_fetch_row($res))
+			{
+				$nombre=trim($filaImputado[0]);
+				if($demantante=="")
+					$demantante=$nombre;
+				else
+					$demantante.=", ".$nombre;
+			}
+		
+			$demandados="";
+			$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+						FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+						AND r.idActividad=".$idActividad." AND r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='D') ORDER BY nombre,nombre,apellidoMaterno";
+			
+			$res=$con->obtenerFilas($consulta);
+			while($filaImputado=mysql_fetch_row($res))
+			{
+				$nombre=trim($filaImputado[0]);
+				if($demandados=="")
+					$demandados=$nombre;
+				else
+					$demandados.=", ".$nombre;
+			}
+			
+			$arrParam["etDemandante"]=$tipoProceso==6?"ACCIONANTE":"ACTOR";
+			$arrParam["etDemandado"]=$tipoProceso==6?"ACCIONADO":"DEMANDADO";;
+			$arrParam["lblDemandante"]=$demantante;
+			$arrParam["fieldDemandado"]=$demandados;
+			$arrParam["despacho"]=$despacho;
+			if(enviarMensajeEnvio(26,$arrParam))*/
+				return true;
+	
+		}
+		return false;
+		
+	}
+	
+	
+	function realizarRepartoProcesosVarios($idFormulario,$idRegistro)
+	{
+		global $con;
+		$idUsuarioRegistrante=$_SESSION["idUsr"];
+		$consulta="SELECT * FROM _".$idFormulario."_tablaDinamica WHERE id__".$idFormulario."_tablaDinamica=".$idRegistro;
+		$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+		if(($fRegistro["carpetaAdministrativa"]!="N/E")&&($fRegistro["carpetaAdministrativa"]!="")&&($idFormulario!=1204))
+		{
+			return true;
+		}
+		$tipoCarpetaAdministrativa=1;
+		$tipoProceso=0;
+		$esSalaVirtual=false;
+		$cveDespacho="";
+		$carpetaAdministrativaBase="";
+		switch($idFormulario)
+		{
+			case 1162:
+				$tipoProceso=21;
+				$consulta="SELECT claveUnidad FROM _17_tablaDinamica WHERE categoriaDespacho=4 ORDER BY id__17_tablaDinamica";
+				$fRegistro["especialidad"]=2;
+				$fRegistro["claseProceso"]=34;
+				$tipoCarpetaAdministrativa=50;
+
+			break;
+			case 1163:
+				$tipoProceso=22;
+				$consulta="SELECT claveUnidad FROM _17_tablaDinamica WHERE categoriaDespacho=4 ORDER BY id__17_tablaDinamica";
+				$fRegistro["especialidad"]=2;
+				$fRegistro["claseProceso"]=35;
+				$tipoCarpetaAdministrativa=60;
+			break;
+			case 1204:
+				$tipoProceso=23;
+				$consulta="SELECT unidadGestion FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$fRegistro["carpetaAdministrativa"]."'";
+				$fRegistro["especialidad"]=2;
+				$fRegistro["claseProceso"]=35;
+				$tipoCarpetaAdministrativa=61;
+				$consulta="SELECT idActividad FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$fRegistro["carpetaAdministrativa"]."'";
+				$iActividadBase=$con->obtenerValor($consulta);
+				
+				$consulta="UPDATE _1204_tablaDinamica SET idActividad=".$iActividadBase." WHERE id__1204_tablaDinamica=".$idRegistro;
+				$con->ejecutarConsulta($consulta);
+
+			break;			
+			case 1004:
+				$consulta="SELECT responsable FROM _1004_tablaDinamica WHERE id__1004_tablaDinamica=".$idRegistro;
+				$idUsuarioRegistrante=$con->obtenerValor($consulta);
+				
+				
+				$consulta="SELECT id__992_tablaDinamica FROM _992_tablaDinamica WHERE tipoSala=3 AND corporacion='100000010003'";
+				$esSalaVirtual=true;
+				
+			break;
+			case 1009:
+				$consulta="SELECT id__992_tablaDinamica FROM _992_tablaDinamica WHERE tipoSala=3 AND corporacion='100000010002'  AND id__992_tablaDinamica<24";
+				$esSalaVirtual=true;
+			break;
+			case 1010:
+			
+				switch($fRegistro["tipoSubProceso"])
+				{
+					case 1: //Medio de Control Y Nulidad de Asuntos de Propiedad Industrial
+						$consulta="SELECT id__992_tablaDinamica FROM _992_tablaDinamica WHERE tipoSala=3 AND corporacion='10000002' AND id__992_tablaDinamica>=14";
+						$esSalaVirtual=true;
+					break;
+					case 2: //Medio de Control Y Nulidad de Asuntos Tributarios
+						$consulta="SELECT id__992_tablaDinamica FROM _992_tablaDinamica WHERE tipoSala=3 AND corporacion='100000010004' AND id__992_tablaDinamica<>27";
+						$esSalaVirtual=true;
+						
+					break;
+				}
+			
+				//$consulta="SELECT claveUnidad FROM _17_tablaDinamica WHERE categoriaDespacho=6 and idEstado=2 and especialidad=".$fRegistro["especialidad"]." ORDER BY nombreUnidad";
+			break;
+			case 1013:
+			case 1116:
+				
+				
+				if($idFormulario==1116)
+				{
+					$consulta="SELECT procesoJudicial FROM _1116_tablaDinamica WHERE id__1116_tablaDinamica=".$idRegistro;
+					$carpetaAdministrativaBase=$con->obtenerValor($consulta);
+				}
+				$consulta="SELECT id__992_tablaDinamica FROM _992_tablaDinamica WHERE tipoSala=3 AND corporacion='10000002' and id__992_tablaDinamica in(11,12,13)";
+				$esSalaVirtual=true;
+				
+			break;
+			case 1021:///
+				$consulta="SELECT id__992_tablaDinamica FROM _992_tablaDinamica WHERE tipoSala=3 AND corporacion='100000010002' and id__992_tablaDinamica in(24,25,26)";
+				$esSalaVirtual=true;
+			break;
+		}
+		
+
+
+		$universoDespachos=$con->obtenerListaValores($consulta);
+		$arrConfiguracion["tipoAsignacion"]="";
+		$arrConfiguracion["serieRonda"]="GrupoReparto_".$idFormulario;
+		$arrConfiguracion["universoAsignacion"]=$universoDespachos;
+		$arrConfiguracion["idObjetoReferencia"]=-1;
+		$arrConfiguracion["pagarDeudasAsignacion"]=false;
+		$arrConfiguracion["considerarDeudasMismaRonda"]=false;
+		$arrConfiguracion["limitePagoRonda"]=0;
+		$arrConfiguracion["escribirAsignacion"]=true;
+		$arrConfiguracion["idFormulario"]=$idFormulario;
+		$arrConfiguracion["idRegistro"]=$idRegistro;
+		
+		$resultado= obtenerSiguienteAsignacionObjeto($arrConfiguracion,true);
+		
+		$idSalaVirtual=$resultado["idUnidad"];
+		$cveDespacho=$idSalaVirtual;
+		if($esSalaVirtual)
+		{
+			$consulta="SELECT despachoAsigando FROM _993_tablaDinamica WHERE idReferencia=".$cveDespacho." AND presideSala=1";
+			$cveDespacho=$con->obtenerValor($consulta);
+		}
+		$consulta="SELECT id__17_tablaDinamica FROM _17_tablaDinamica WHERE claveUnidad='".$cveDespacho."'";
+		$idUnidadGestion=$con->obtenerValor($consulta);
+		if($idUnidadGestion=="")
+			$idUnidadGestion=-1;
+			
+		$anio=date("Y");
+		
+		if($tipoProceso==0)
+		{
+			if($con->existeCampo("tipoProceso","_".$idFormulario."_tablaDinamica"))
+			{
+			
+				$consulta="SELECT carpetaAdministrativa,idActividad,tipoProceso FROM _".$idFormulario."_tablaDinamica WHERE id__".$idFormulario."_tablaDinamica=".$idRegistro;
+				
+			}
+			else
+			{
+				$query="SELECT idReferencia FROM _626_tablaDinamica WHERE id__626_tablaDinamica=".$fRegistro["claseProceso"];
+				$tipoProceso=$con->obtenerValor($query);
+				$consulta="SELECT carpetaAdministrativa,idActividad,'".$tipoProceso."' as tipoProceso FROM _".$idFormulario."_tablaDinamica WHERE id__".$idFormulario."_tablaDinamica=".$idRegistro;
+			}
+		}
+		else
+		{
+			$consulta="SELECT carpetaAdministrativa,idActividad,'".$tipoProceso."' as tipoProceso FROM _".$idFormulario."_tablaDinamica WHERE id__".$idFormulario."_tablaDinamica=".$idRegistro;
+		}
+		$fDatosCarpeta=$con->obtenerPrimeraFila($consulta);
+	
+		
+		if(($fDatosCarpeta[0]!="")&&($fDatosCarpeta[0]!="N/E")&&($idFormulario!=1204))
+			return true;
+		
+		$carpetaAdministrativa="";
+		if(($idFormulario==1162)||($idFormulario==1163)||($idFormulario==1204))
+		{
+			$carpetaAdministrativa=$fRegistro["codigo"];
+		}
+		else
+		{
+			$arrCodigoUnico=obtenerSiguienteCodigoUnicoProceso($cveDespacho,$anio,$fDatosCarpeta[2],$idFormulario,$idRegistro);	
+			$carpetaAdministrativa=$arrCodigoUnico[0];
+		}
+		$fechaCarpetaJudicial=date("Y-m-d H:i:s");
+		$idActividad=$fDatosCarpeta[1];
+		
+		
+
+		$consulta=array();
+		$x=0;
+		$consulta[$x]="begin";
+		$x++;
+		$consulta[$x]="INSERT INTO 7006_carpetasAdministrativas(carpetaAdministrativa,fechaCreacion,responsableCreacion,idFormulario,
+						idRegistro,unidadGestion,etapaProcesalActual,idActividad,carpetaAdministrativaBase,
+						tipoCarpetaAdministrativa,unidadGestionOriginal,especialidad,tipoProceso,claseProceso,subclaseProceso,tema,subtema) 
+						VALUES('".$carpetaAdministrativa."','".$fechaCarpetaJudicial."',".$_SESSION["idUsr"].",".$idFormulario.",'".$idRegistro."','".
+						$cveDespacho."',1,".$idActividad.",'".$carpetaAdministrativaBase."',".$tipoCarpetaAdministrativa.",'".$cveDespacho."',".$fRegistro["especialidad"].",".
+						$fDatosCarpeta[2].",".$fRegistro["claseProceso"].",NULL,NULL,NULL)";
+		
+		
+		$x++;
+		
+		$consulta[$x]="set @idCarpeta:=(select last_insert_id())";
+		$x++;
+		
+		
+		if($esSalaVirtual)
+		{
+			$orden=1;
+			$query="SELECT despachoAsigando FROM _993_tablaDinamica WHERE idReferencia=".$idSalaVirtual." AND presideSala=0";
+			$resSalas=$con->obtenerFilas($query);
+			while($filaSala=mysql_fetch_assoc($resSalas))
+			{
+				$consulta[$x]="INSERT INTO 7006_carpetasAdministrativasDespachosColegiados(carpetaAdministrativa,despachoAsignado,orden) 
+							VALUES('".$carpetaAdministrativa."','".$filaSala["despachoAsigando"]."',".$orden.")";
+				$x++;
+				$orden++;
+			}
+		}
+		
+		if($idFormulario!=1204)
+		{
+			$consulta[$x]="update _".$idFormulario."_tablaDinamica set carpetaAdministrativa='".$carpetaAdministrativa.
+						"',codigoInstitucion='".$cveDespacho."',despachoAsignado='".$cveDespacho.
+						"' where id__".$idFormulario."_tablaDinamica=".$idRegistro;
+			$x++;
+		}
+		if(!existeRol("'31_0'"))
+		{
+			if(isset($fRegistro["fechadeRecepcion"]))
+			{
+				$consulta[$x]="UPDATE _".$idFormulario."_tablaDinamica SET fechadeRecepcion='".date("Y-m-d")."',horaRecepcion='".date("H:i:s").
+							"' WHERE id__".$idFormulario."_tablaDinamica=".$idRegistro;
+				$x++;
+			}
+			$anioExpediente=date("Y",strtotime($fechaCarpetaJudicial));
+			$consulta[$x]="INSERT INTO 7006_usuariosVSCarpetasAdministrativas(idUsuario,idCarpetaAdministrativa,carpetaAdministrativa,
+					cveMateria,situacion,fechaInicio,unidadGestion,anioExpediente,idUsuarioExpediente) values
+					(".$idUsuarioRegistrante.",@idCarpeta,'".$carpetaAdministrativa."',".
+					$fRegistro["especialidad"].",1,'".$fechaCarpetaJudicial."','".$cveDespacho."',".$anioExpediente.
+					",-1)";
+			$x++;
+		}
+		
+		if($idFormulario==1004)
+		{
+			$consulta[$x]="UPDATE 04000_demandasProgramaTrabajo SET despachoAsignado='".$idSalaVirtual."',carpetaAdministrativa='".$carpetaAdministrativa."' WHERE iFormulario=".$idFormulario." AND iRegistro=".$idRegistro;
+			$x++;
+		}
+		
+		$consulta[$x]="commit";
+		$x++;
+	
+		if($con->ejecutarBloque($consulta))
+		{
+			if($idActividad!=-1)
+			{
+				$query="SELECT * FROM 9503_documentosRegistradosProceso WHERE idActividad=".$idActividad." and idDocumento IS NOT NULL";
+				$rDocumentos=$con->obtenerFilas($query);
+				while($fDocumento=mysql_fetch_assoc($rDocumentos))
+				{
+					registrarDocumentoCarpetaAdministrativa($carpetaAdministrativa,$fDocumento["idDocumento"],$idFormulario,$idRegistro);
+				}
+			}
+			
+			return true;
+	
+		}
+		return false;
+		
+		
+	}
+	
+	function obtenerSiguienteCodigoUnicoProcesoIncremental($idUnidadGestion,$anio,$tipoCarpeta,$idFormulario,$idRegistro)
+	{
+		global $con;
+		$tratarComoRadicacion=true;
+		
+		
+		$consulta="SELECT carpetaAdministrativa FROM _".$idFormulario."_tablaDinamica WHERE id__".$idFormulario."_tablaDinamica=".$idRegistro;
+		$fDatosRadicacion=$con->obtenerPrimeraFilaAsoc($consulta);
+
+		
+		$procesoJudicialOrigen=substr($fDatosRadicacion["carpetaAdministrativa"],0,strlen($fDatosRadicacion["carpetaAdministrativa"])-2);
+		$consulta="SELECT carpetaAdministrativa FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa LIKE 
+					'".$procesoJudicialOrigen."%' ORDER BY carpetaAdministrativa DESC";
+
+		$ultimoProceso=$con->obtenerValor($consulta);
+		$maxValor=substr($ultimoProceso,strlen($fDatosRadicacion["carpetaAdministrativa"])-2,2);
+		
+		$folioCorreccion=($maxValor*1)+1;
+		
+		$folioCorreccion=$folioCorreccion-5;
+		if($folioCorreccion<1)
+			$folioCorreccion=1;
+		
+		$carpetaAdministrativa=$procesoJudicialOrigen.str_pad($folioCorreccion,2,"0",STR_PAD_LEFT);
+		
+		while(existeCarpetaAdministrativa($carpetaAdministrativa,""))
+		{
+			$carpetaAdministrativa=$procesoJudicialOrigen.str_pad($folioCorreccion,2,"0",STR_PAD_LEFT);
+			$folioCorreccion++;	
+			
+		}
+		
+		$folioActual=$folioCorreccion;
+				
+		$arrResultado[0]=$carpetaAdministrativa;
+		$arrResultado[1]=$folioActual;
+		return $arrResultado;
+		
+		
+		
+		
+	}
+?>

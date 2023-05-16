@@ -1,0 +1,208 @@
+<?php
+	function obtenerNombreDespacho($codigoUnidad)
+	{
+		global $con;
+		$consulta="SELECT nombreUnidad FROM _17_tablaDinamica WHERE claveUnidad='".$codigoUnidad."'";
+		$nombreUnidad=$con->obtenerValor($consulta);
+		
+		return $nombreUnidad;
+	}
+		
+	function obtenerMunicipioDespacho($codigoUnidad)
+	{
+		global $con;
+		$consulta="SELECT unidadPadre FROM 817_organigrama WHERE codigoUnidad='".$codigoUnidad."'";
+		$unidadPadre=$con->obtenerValor($consulta);
+		$consulta="SELECT unidadPadre,institucion FROM 817_organigrama WHERE codigoUnidad='".$unidadPadre."'";
+		$fPadre=$con->obtenerPrimeraFilaAsoc($consulta);
+
+
+		if($fPadre["institucion"]==13)
+			return $fPadre["unidadPadre"];
+		return "";
+		
+	}
+		
+	function obtenerCircuitoDespacho($codigoUnidad)
+	{
+		global $con;
+		$municipio=obtenerMunicipioDespacho($codigoUnidad);
+		if($municipio!="")
+		{
+			$consulta="SELECT unidadPadre FROM 817_organigrama WHERE codigoUnidad='".$municipio."'";
+			$unidadPadre=$con->obtenerValor($consulta);
+			$consulta="SELECT unidadPadre,institucion FROM 817_organigrama WHERE codigoUnidad='".$unidadPadre."'";
+			$fPadre=$con->obtenerPrimeraFilaAsoc($consulta);
+	
+	
+			if($fPadre["institucion"]==12)
+				return $fPadre["unidadPadre"];
+		}
+		return "";
+	}
+	
+	function obtenerDistritoJuicialDespacho($codigoUnidad)
+	{
+		global $con;
+		$circuito=obtenerCircuitoDespacho($codigoUnidad);
+		if($circuito!="")
+		{
+			$consulta="SELECT unidadPadre FROM 817_organigrama WHERE codigoUnidad='".$circuito."'";
+			$unidadPadre=$con->obtenerValor($consulta);
+			$consulta="SELECT unidadPadre,institucion FROM 817_organigrama WHERE codigoUnidad='".$unidadPadre."'";
+			$fPadre=$con->obtenerPrimeraFilaAsoc($consulta);
+	
+	
+			if($fPadre["institucion"]==10)
+				return $fPadre["unidadPadre"];
+		}
+		return "";
+	}
+
+	function obtenerPerfilHorarioLaboralDespacho($cveDespacho)
+	{
+		global $con;
+		
+		$consulta="SELECT p.idRegistro FROM 7022_ambitoAplicacionPerfilHorario a,7022_perfilesHorario p WHERE tipoAmbito=4 AND  cveElemento='".$cveDespacho."'
+				and p.idRegistro=a.idReferencia and p.situacion=1";
+		$idPerfil=$con->obtenerValor($consulta);
+		
+		if($idPerfil!="")
+		{
+			return $idPerfil;
+		}
+		
+		
+		$municipio=obtenerMunicipioDespacho($cveDespacho);
+		if($municipio!="")
+		{
+
+			$consulta="SELECT p.idRegistro FROM 7022_ambitoAplicacionPerfilHorario a,7022_perfilesHorario p WHERE tipoAmbito=3 AND  cveElemento='".$municipio."'
+				and p.idRegistro=a.idReferencia and p.situacion=1";
+			$idPerfil=$con->obtenerValor($consulta);
+			
+			if($idPerfil!="")
+			{
+				return $idPerfil;
+			}
+		}
+		
+		
+		$circuito=obtenerCircuitoDespacho($cveDespacho);
+		if($circuito!="")
+		{
+			$consulta="SELECT p.idRegistro FROM 7022_ambitoAplicacionPerfilHorario a,7022_perfilesHorario p WHERE tipoAmbito=2 AND  cveElemento='".$circuito."'
+				and p.idRegistro=a.idReferencia and p.situacion=1";
+			$idPerfil=$con->obtenerValor($consulta);
+			
+			if($idPerfil!="")
+			{
+				return $idPerfil;
+			}
+		}
+		
+		
+		$distrito=obtenerDistritoJuicialDespacho($cveDespacho);
+		if($distrito!="")
+		{
+
+			$consulta="SELECT p.idRegistro FROM 7022_ambitoAplicacionPerfilHorario a,7022_perfilesHorario p WHERE tipoAmbito=1 AND  cveElemento='".$distrito."'
+				and p.idRegistro=a.idReferencia and p.situacion=1";
+			$idPerfil=$con->obtenerValor($consulta);
+			
+			if($idPerfil!="")
+			{
+				return $idPerfil;
+			}
+		}
+		
+		
+		$consulta="SELECT idRegistro FROM 7022_perfilesHorario WHERE ambitoGeneral=1 AND situacion=1";
+		$idPerfil=$con->obtenerValor($consulta);
+		return $idPerfil==""?-1:$idPerfil;
+		
+		
+	}
+
+	function obtenerPerfilConfiguracionServiciosNubeDespacho($cveDespacho,$tipoServicio)
+	{
+		global $con;
+		
+		$consulta="SELECT p.cuentaServicio FROM 7022_ambitoAplicacionPerfilServicioNube a,7022_perfilesServicioNubeSistema p,
+					20001_conexionesServiciosNube cN,20001_serviciosConexionNube sC WHERE tipoAmbito=4 AND  
+					cveElemento='".$cveDespacho."' AND p.idRegistro=a.idReferencia AND p.situacion=1 AND 
+					p.cuentaServicio=cN.idConexion AND sC.idConexionServicioNube=cN.idConexion
+					AND sC.tipoServicio=".$tipoServicio;
+		$idPerfil=$con->obtenerValor($consulta);
+		
+		if($idPerfil!="")
+		{
+			return $idPerfil;
+		}
+		
+		
+		$municipio=obtenerMunicipioDespacho($cveDespacho);
+		if($municipio!="")
+		{
+
+			$consulta="SELECT p.cuentaServicio FROM 7022_ambitoAplicacionPerfilServicioNube a,7022_perfilesServicioNubeSistema p,
+					20001_conexionesServiciosNube cN,20001_serviciosConexionNube sC WHERE tipoAmbito=3 AND  
+					cveElemento='".$cveDespacho."' AND p.idRegistro=a.idReferencia AND p.situacion=1 AND 
+					p.cuentaServicio=cN.idConexion AND sC.idConexionServicioNube=cN.idConexion
+					AND sC.tipoServicio=".$tipoServicio;	
+				
+			$idPerfil=$con->obtenerValor($consulta);
+			
+			if($idPerfil!="")
+			{
+				return $idPerfil;
+			}
+		}
+		
+		
+		$circuito=obtenerCircuitoDespacho($cveDespacho);
+		if($circuito!="")
+		{
+			$consulta="SELECT p.cuentaServicio FROM 7022_ambitoAplicacionPerfilServicioNube a,7022_perfilesServicioNubeSistema p,
+					20001_conexionesServiciosNube cN,20001_serviciosConexionNube sC WHERE tipoAmbito=2 AND  
+					cveElemento='".$cveDespacho."' AND p.idRegistro=a.idReferencia AND p.situacion=1 AND 
+					p.cuentaServicio=cN.idConexion AND sC.idConexionServicioNube=cN.idConexion
+					AND sC.tipoServicio=".$tipoServicio;
+			$idPerfil=$con->obtenerValor($consulta);
+			
+			if($idPerfil!="")
+			{
+				return $idPerfil;
+			}
+		}
+		
+		
+		$distrito=obtenerDistritoJuicialDespacho($cveDespacho);
+		if($distrito!="")
+		{
+			$consulta="SELECT p.cuentaServicio FROM 7022_ambitoAplicacionPerfilServicioNube a,7022_perfilesServicioNubeSistema p,
+					20001_conexionesServiciosNube cN,20001_serviciosConexionNube sC WHERE tipoAmbito=1 AND  
+					cveElemento='".$cveDespacho."' AND p.idRegistro=a.idReferencia AND p.situacion=1 AND 
+					p.cuentaServicio=cN.idConexion AND sC.idConexionServicioNube=cN.idConexion
+					AND sC.tipoServicio=".$tipoServicio;
+			
+			$idPerfil=$con->obtenerValor($consulta);
+			if($idPerfil!="")
+			{
+				return $idPerfil;
+			}
+		}
+		
+		$consulta="SELECT p.cuentaServicio FROM 7022_perfilesServicioNubeSistema p,
+					20001_conexionesServiciosNube cN,20001_serviciosConexionNube sC WHERE ambitoGeneral=1  and p.situacion=1 AND 
+					p.cuentaServicio=cN.idConexion AND sC.idConexionServicioNube=cN.idConexion
+					AND sC.tipoServicio=".$tipoServicio;
+		
+		$idPerfil=$con->obtenerValor($consulta);
+		return $idPerfil==""?-1:$idPerfil;
+		
+		
+	}
+
+
+?>

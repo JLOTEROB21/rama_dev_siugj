@@ -1,0 +1,525 @@
+<?php
+	function obtenerNombreDespacho($codigoUnidad)
+	{
+		global $con;
+		$consulta="SELECT nombreUnidad FROM _17_tablaDinamica WHERE claveUnidad='".$codigoUnidad."'";
+		$nombreUnidad=$con->obtenerValor($consulta);
+		
+		return $nombreUnidad;
+	}
+		
+	function obtenerMunicipioDespacho($codigoUnidad)
+	{
+		global $con;
+		$consulta="SELECT unidadPadre FROM 817_organigrama WHERE codigoUnidad='".$codigoUnidad."'";
+		$unidadPadre=$con->obtenerValor($consulta);
+		$consulta="SELECT unidadPadre,institucion FROM 817_organigrama WHERE codigoUnidad='".$unidadPadre."'";
+		$fPadre=$con->obtenerPrimeraFilaAsoc($consulta);
+
+
+		if($fPadre["institucion"]==13)
+			return $fPadre["unidadPadre"];
+		return "";
+		
+	}
+		
+	function obtenerCircuitoDespacho($codigoUnidad)
+	{
+		global $con;
+		$municipio=obtenerMunicipioDespacho($codigoUnidad);
+		if($municipio!="")
+		{
+			$consulta="SELECT unidadPadre FROM 817_organigrama WHERE codigoUnidad='".$municipio."'";
+			$unidadPadre=$con->obtenerValor($consulta);
+			$consulta="SELECT unidadPadre,institucion FROM 817_organigrama WHERE codigoUnidad='".$unidadPadre."'";
+			$fPadre=$con->obtenerPrimeraFilaAsoc($consulta);
+	
+	
+			if($fPadre["institucion"]==12)
+				return $fPadre["unidadPadre"];
+		}
+		return "";
+	}
+	
+	function obtenerDistritoJuicialDespacho($codigoUnidad)
+	{
+		global $con;
+		$circuito=obtenerCircuitoDespacho($codigoUnidad);
+		if($circuito!="")
+		{
+			$consulta="SELECT unidadPadre FROM 817_organigrama WHERE codigoUnidad='".$circuito."'";
+			$unidadPadre=$con->obtenerValor($consulta);
+			$consulta="SELECT unidadPadre,institucion FROM 817_organigrama WHERE codigoUnidad='".$unidadPadre."'";
+			$fPadre=$con->obtenerPrimeraFilaAsoc($consulta);
+	
+	
+			if($fPadre["institucion"]==10)
+				return $fPadre["unidadPadre"];
+		}
+		return "";
+	}
+
+	function obtenerPerfilHorarioLaboralDespacho($cveDespacho)
+	{
+		global $con;
+		
+		$consulta="SELECT p.idRegistro FROM 7022_ambitoAplicacionPerfilHorario a,7022_perfilesHorario p WHERE tipoAmbito=4 AND  cveElemento='".$cveDespacho."'
+				and p.idRegistro=a.idReferencia and p.situacion=1";
+		$idPerfil=$con->obtenerValor($consulta);
+		
+		if($idPerfil!="")
+		{
+			return $idPerfil;
+		}
+		
+		
+		$municipio=obtenerMunicipioDespacho($cveDespacho);
+		if($municipio!="")
+		{
+
+			$consulta="SELECT p.idRegistro FROM 7022_ambitoAplicacionPerfilHorario a,7022_perfilesHorario p WHERE tipoAmbito=3 AND  cveElemento='".$municipio."'
+				and p.idRegistro=a.idReferencia and p.situacion=1";
+			$idPerfil=$con->obtenerValor($consulta);
+			
+			if($idPerfil!="")
+			{
+				return $idPerfil;
+			}
+		}
+		
+		
+		$circuito=obtenerCircuitoDespacho($cveDespacho);
+		if($circuito!="")
+		{
+			$consulta="SELECT p.idRegistro FROM 7022_ambitoAplicacionPerfilHorario a,7022_perfilesHorario p WHERE tipoAmbito=2 AND  cveElemento='".$circuito."'
+				and p.idRegistro=a.idReferencia and p.situacion=1";
+			$idPerfil=$con->obtenerValor($consulta);
+			
+			if($idPerfil!="")
+			{
+				return $idPerfil;
+			}
+		}
+		
+		
+		$distrito=obtenerDistritoJuicialDespacho($cveDespacho);
+		if($distrito!="")
+		{
+
+			$consulta="SELECT p.idRegistro FROM 7022_ambitoAplicacionPerfilHorario a,7022_perfilesHorario p WHERE tipoAmbito=1 AND  cveElemento='".$distrito."'
+				and p.idRegistro=a.idReferencia and p.situacion=1";
+			$idPerfil=$con->obtenerValor($consulta);
+			
+			if($idPerfil!="")
+			{
+				return $idPerfil;
+			}
+		}
+		
+		
+		$consulta="SELECT idRegistro FROM 7022_perfilesHorario WHERE ambitoGeneral=1 AND situacion=1";
+		$idPerfil=$con->obtenerValor($consulta);
+		return $idPerfil==""?-1:$idPerfil;
+		
+		
+	}
+
+	function obtenerPerfilConfiguracionServiciosNubeDespacho($cveDespacho,$tipoServicio)
+	{
+		global $con;
+		
+		$consulta="SELECT p.cuentaServicio FROM 7022_ambitoAplicacionPerfilServicioNube a,7022_perfilesServicioNubeSistema p,
+					20001_conexionesServiciosNube cN,20001_serviciosConexionNube sC WHERE tipoAmbito=4 AND  
+					cveElemento='".$cveDespacho."' AND p.idRegistro=a.idReferencia AND p.situacion=1 AND 
+					p.cuentaServicio=cN.idConexion AND sC.idConexionServicioNube=cN.idConexion
+					AND sC.tipoServicio=".$tipoServicio;
+		$idPerfil=$con->obtenerValor($consulta);
+		
+		if($idPerfil!="")
+		{
+			return $idPerfil;
+		}
+		
+		
+		$municipio=obtenerMunicipioDespacho($cveDespacho);
+		if($municipio!="")
+		{
+
+			$consulta="SELECT p.cuentaServicio FROM 7022_ambitoAplicacionPerfilServicioNube a,7022_perfilesServicioNubeSistema p,
+					20001_conexionesServiciosNube cN,20001_serviciosConexionNube sC WHERE tipoAmbito=3 AND  
+					cveElemento='".$cveDespacho."' AND p.idRegistro=a.idReferencia AND p.situacion=1 AND 
+					p.cuentaServicio=cN.idConexion AND sC.idConexionServicioNube=cN.idConexion
+					AND sC.tipoServicio=".$tipoServicio;	
+				
+			$idPerfil=$con->obtenerValor($consulta);
+			
+			if($idPerfil!="")
+			{
+				return $idPerfil;
+			}
+		}
+		
+		
+		$circuito=obtenerCircuitoDespacho($cveDespacho);
+		if($circuito!="")
+		{
+			$consulta="SELECT p.cuentaServicio FROM 7022_ambitoAplicacionPerfilServicioNube a,7022_perfilesServicioNubeSistema p,
+					20001_conexionesServiciosNube cN,20001_serviciosConexionNube sC WHERE tipoAmbito=2 AND  
+					cveElemento='".$cveDespacho."' AND p.idRegistro=a.idReferencia AND p.situacion=1 AND 
+					p.cuentaServicio=cN.idConexion AND sC.idConexionServicioNube=cN.idConexion
+					AND sC.tipoServicio=".$tipoServicio;
+			$idPerfil=$con->obtenerValor($consulta);
+			
+			if($idPerfil!="")
+			{
+				return $idPerfil;
+			}
+		}
+		
+		
+		$distrito=obtenerDistritoJuicialDespacho($cveDespacho);
+		if($distrito!="")
+		{
+			$consulta="SELECT p.cuentaServicio FROM 7022_ambitoAplicacionPerfilServicioNube a,7022_perfilesServicioNubeSistema p,
+					20001_conexionesServiciosNube cN,20001_serviciosConexionNube sC WHERE tipoAmbito=1 AND  
+					cveElemento='".$cveDespacho."' AND p.idRegistro=a.idReferencia AND p.situacion=1 AND 
+					p.cuentaServicio=cN.idConexion AND sC.idConexionServicioNube=cN.idConexion
+					AND sC.tipoServicio=".$tipoServicio;
+			
+			$idPerfil=$con->obtenerValor($consulta);
+			if($idPerfil!="")
+			{
+				return $idPerfil;
+			}
+		}
+		
+		$consulta="SELECT p.cuentaServicio FROM 7022_perfilesServicioNubeSistema p,
+					20001_conexionesServiciosNube cN,20001_serviciosConexionNube sC WHERE ambitoGeneral=1  and p.situacion=1 AND 
+					p.cuentaServicio=cN.idConexion AND sC.idConexionServicioNube=cN.idConexion
+					AND sC.tipoServicio=".$tipoServicio;
+		
+		$idPerfil=$con->obtenerValor($consulta);
+		return $idPerfil==""?-1:$idPerfil;
+		
+		
+	}
+
+	function obtenerDespachosAsociadosGrupoReparto($idGrupoReparto,$zonaGeografica="",$unidadesExcluye="")
+	{
+		global $con;
+		
+		
+		$uExcluye='';
+		$arrUnidades=explode(",",$unidadesExcluye);
+		foreach($arrUnidades as $u )
+		{
+			if($uExcluye=='')
+				$uExcluye="'".$u."'";
+			else
+				$uExcluye.=",'".$u."'";
+		}
+		
+		$arrDespachoFinal=array();
+		$consulta="SELECT * FROM _1286_tablaDinamica WHERE idReferencia=".$idGrupoReparto;
+		$resReglas=$con->obtenerFilas($consulta);
+		while($fila=$con->fetchAssoc($resReglas))
+		{
+
+			$condWhere="";
+			if(($fila["jurisdiccion"]!="")&&($fila["jurisdiccion"]!="-1"))
+			{
+				if($condWhere!="")
+					$condWhere.=" and ";
+					
+				$condWhere.=" o.codigoUnidad like '".$fila["jurisdiccion"]."%'";	
+			}
+			
+			
+			if($uExcluye!="")
+			{
+				if($condWhere=='')
+					$condWhere=' o.codigoUnidad not in('.$uExcluye.')';
+				else
+					$condWhere.=' and o.codigoUnidad not in('.$uExcluye.')';
+			}
+			
+			
+			if(($fila["categoria"]!="")&&($fila["categoria"]!="-1"))
+			{
+				$consulta="SELECT codigoUnidad FROM 817_organigrama WHERE institucion=17 AND claveDepartamental='".$fila["categoria"]."'";
+				$resCategorias=$con->obtenerFilas($consulta);
+				$condCategoria="";
+				if($condWhere!="")
+					$condWhere.=" and ";	
+				while($filaCategorias=$con->fetchAssoc($resCategorias))
+				{
+					if($condCategoria=='')
+						$condCategoria=" o.codigoUnidad like '".$filaCategorias["codigoUnidad"]."%'";
+					else
+						$condCategoria.=" or o.codigoUnidad like '".$filaCategorias["codigoUnidad"]."%'";
+				}
+				
+				$condWhere.=" (".$condCategoria.")";
+					
+			}
+			
+			
+			if(($fila["considerarZonaGeografica"]!=0)&&($zonaGeografica!=""))
+			{
+				switch($fila["considerarZonaGeografica"])
+				{
+					case 1: //Distrito Judicial
+						$consulta="SELECT claveDepartamental FROM 817_organigrama WHERE codigoUnidad IN(
+								SELECT unidadPadre FROM 817_organigrama WHERE codigoUnidad IN(
+								SELECT unidadPadre FROM 817_organigrama WHERE institucion=13 AND claveDepartamental='".$zonaGeografica.
+								"') AND institucion=12) AND institucion=10";
+						$fila["distritoJudicial"]=$con->obtenerListaValores($consulta,"'");
+					break;
+					case 2: //Circuito Judicial
+						$consulta="SELECT claveDepartamental FROM 817_organigrama WHERE codigoUnidad IN(
+									SELECT unidadPadre FROM 817_organigrama WHERE institucion=13 AND claveDepartamental='".$zonaGeografica."') AND institucion=12";
+						$fila["circuitoJudicial"]=$con->obtenerListaValores($consulta,"'");
+					break;
+					case 3:  //Municipioi
+						$fila["municipio"]=$zonaGeografica;
+					break;
+				}
+			}
+
+			
+			if(($fila["distritoJudicial"]!="")&&($fila["distritoJudicial"]!="-1"))
+			{
+				
+				$consulta="SELECT codigoUnidad FROM 817_organigrama WHERE institucion=10 AND claveDepartamental in('".$fila["distritoJudicial"]."')";
+				$consulta=str_replace("''","'",$consulta);
+				$resCategorias=$con->obtenerFilas($consulta);
+				$condCategoria="";
+				if($condWhere!="")
+					$condWhere.=" and ";	
+				while($filaCategorias=$con->fetchAssoc($resCategorias))
+				{
+					if($condCategoria=='')
+						$condCategoria=" o.codigoUnidad like '".$filaCategorias["codigoUnidad"]."%'";
+					else
+						$condCategoria.=" or o.codigoUnidad like '".$filaCategorias["codigoUnidad"]."%'";
+				}
+				
+				$condWhere.=" (".$condCategoria.")";
+					
+			}
+			
+			if(($fila["circuitoJudicial"]!="")&&($fila["circuitoJudicial"]!="-1"))
+			{
+				
+				$consulta="SELECT codigoUnidad FROM 817_organigrama WHERE institucion=12 AND claveDepartamental in('".$fila["circuitoJudicial"]."')";
+				$consulta=str_replace("''","'",$consulta);
+				
+				$resCategorias=$con->obtenerFilas($consulta);
+				$condCategoria="";
+				if($condWhere!="")
+					$condWhere.=" and ";	
+				while($filaCategorias=$con->fetchAssoc($resCategorias))
+				{
+					if($condCategoria=='')
+						$condCategoria=" o.codigoUnidad like '".$filaCategorias["codigoUnidad"]."%'";
+					else
+						$condCategoria.=" or o.codigoUnidad like '".$filaCategorias["codigoUnidad"]."%'";
+				}
+				
+				$condWhere.=" (".$condCategoria.")";
+					
+			}
+			
+			if(($fila["municipio"]!="")&&($fila["municipio"]!="-1"))
+			{
+				$consulta="SELECT codigoUnidad FROM 817_organigrama WHERE institucion=13 AND claveDepartamental='".$fila["municipio"]."'";
+				$resMunicipios=$con->obtenerFilas($consulta);
+				$condMunicipio="";
+				if($condWhere!="")
+					$condWhere.=" and ";	
+				while($filaMunicipio=$con->fetchAssoc($resMunicipios))
+				{
+					if($condMunicipio=='')
+						$condMunicipio=" o.codigoUnidad like '".$filaMunicipio["codigoUnidad"]."%'";
+					else
+						$condMunicipio.=" or o.codigoUnidad like '".$filaMunicipio["codigoUnidad"]."%'";
+				}
+				
+				$condWhere.=" (".$condMunicipio.")";
+			
+			}
+			
+			if($fila["nombreDespacho"]!="")
+			{
+				if($condWhere=="")
+					$condWhere=" unidad like '%".$fila["nombreDespacho"]."%'";	
+				else
+					$condWhere.=" and unidad like '%".$fila["nombreDespacho"]."%'";	
+			}
+			
+			if($fila["claveDespacho"]!="")
+			{
+				if($condWhere=="")
+					$condWhere=" claveDepartamental like '%".$fila["claveDespacho"]."%'";	
+				else
+					$condWhere.=" and claveDepartamental like '%".$fila["claveDespacho"]."%'";	
+			}
+			
+			
+			if(($fila["funcionSeleccionDespacho"]!="")&&($fila["funcionSeleccionDespacho"]!="-1"))
+			{
+
+				$objParametros="";
+				foreach($fila as $llave=>$valor)
+				{
+					if($objParametros=="")
+						$objParametros='"'.$llave.'":"'.$valor.'"';
+					else
+						$objParametros.=',"'.$llave.'":"'.$valor.'"';
+				}
+				$objParametros=json_decode('{'.$objParametros.'}');
+				
+				$listadoUnidadesDespacho="";
+				
+				$cache=NULL;
+				$resultadoFuncionSeleccion=resolverExpresionCalculoPHP($fila["funcionSeleccionDespacho"],$objParametros,$cache);
+				
+				if($resultadoFuncionSeleccion)
+				{
+					
+					foreach($resultadoFuncionSeleccion as $r)
+					{
+						if($listadoUnidadesDespacho=="")
+							$listadoUnidadesDespacho="'".$r["codigoUnidad"]."'";
+						else
+							$listadoUnidadesDespacho.=",'".$r["codigoUnidad"]."'";
+					}
+				}
+				
+				if($listadoUnidadesDespacho=="")	
+					$listadoUnidadesDespacho=-1;
+							
+				if($condWhere=="")
+					$condWhere=" o.codigoUnidad in(".$listadoUnidadesDespacho.")";	
+				else
+					$condWhere.=" and o.codigoUnidad in(".$listadoUnidadesDespacho.")";
+				
+				
+			}
+				
+			if(		
+					($condWhere=="")&&
+					(( $fila["especialidad"]=="")||( $fila["especialidad"]=="-1"))&&
+					(( $fila["atributosDespacho"]=="")||( $fila["atributosDespacho"]=="-1"))&&
+					(( $_POST["tipoProceso"]=="")||( $_POST["tipoProceso"]=="-1"))
+				)
+			{
+				echo '{"numReg":"0","registros":[]}';
+				return;
+			}
+			
+			$consulta="SELECT idCategoriaUnidadOrganigrama FROM 817_categoriasUnidades WHERE esJuzgado=1";
+			$listaTiposDespacho=$con->obtenerListaValores($consulta);
+			if($listaTiposDespacho=="")
+				$listaTiposDespacho=-1;
+			
+			$arrEstructuraOrganizacional=array();
+			$consulta="select unidad,codigoUnidad,idOrganigrama,codigoFuncional,descripcion,institucion,codCentroCosto,unidadPadre,codigoIndividual,claveDepartamental,status,
+						(case status when '1'  then 'Activo' when '0' then 'Inactivo' when '2' then 'Concentrador' end) as activo,
+						(SELECT nombreCategoria FROM 817_categoriasUnidades WHERE idCategoriaUnidadOrganigrama=o.institucion) as tipoUnidad,
+						
+						(SELECT objConfiguracion FROM 817_categoriasUnidades WHERE idCategoriaUnidadOrganigrama=o.institucion) as objConfiguracion,
+						o.institucion as idTipoUnidad
+						from 817_organigrama o where  ".($condWhere!=""?($condWhere." and "):"")." institucion in (".$listaTiposDespacho.") and status=1 order by  codigoFuncional";
+			
+			$listaDespachosAtributos="";
+			$arrListaDespacho=array();
+			if(($fila["atributosDespacho"]!="")&&($fila["atributosDespacho"]!="-1"))
+			{
+				$consulta="SELECT DISTINCT idReferencia FROM _17_gridAtributosDespacho WHERE idAtributoDespacho IN(".$fila["atributosDespacho"].")";
+
+				$resAtributosDespacho=$con->obtenerFilas($consulta);
+				while($fAtributo=$con->fetchAssoc($resAtributosDespacho))
+				{
+					$arrListaDespacho[$fAtributo["idReferencia"]]=1;
+				}
+					
+				
+			}
+			
+			if(($fila["tipoProceso"]!="")&&($fila["tipoProceso"]!="-1"))
+			{
+				$consulta="SELECT DISTINCT idReferencia FROM _17_gridTiposProceso WHERE tipoProceso IN(".$fila["tipoProceso"].")";
+				$resAtributosDespacho=$con->obtenerFilas($consulta);
+				while($fAtributo=$con->fetchAssoc($resAtributosDespacho))
+				{
+					$arrListaDespacho[$fAtributo["idReferencia"]]=1;
+				}
+					
+				
+			}
+			
+			if(count($arrListaDespacho)>0)
+			{
+				foreach($arrListaDespacho as $idDespacho=>$resto)
+				{
+					if($listaDespachosAtributos=="")
+						$listaDespachosAtributos=$idDespacho;
+					else
+						$listaDespachosAtributos.=",".$idDespacho;
+				}
+			}
+			
+			if((($fila["especialidad"]!="")&&($fila["especialidad"]!="-1"))||($listaDespachosAtributos!=""))
+			{
+				if(($fila["especialidad"]!="")&&($fila["especialidad"]!="-1"))
+				{
+					if($condWhere=="")
+						$condWhere="e.especialidad=".$fila["especialidad"];	
+					else
+						$condWhere.=" and e.especialidad=".$fila["especialidad"];	
+				}
+				
+				if(($fila["detalleAdicional"]!="")&&($fila["detalleAdicional"]!="-1"))
+				{
+					if($condWhere=="")
+						$condWhere="e.detalleEspecialidad='".$fila["detalleAdicional"]."'";	
+					else
+						$condWhere.=" and e.detalleEspecialidad='".$fila["detalleAdicional"]."'";	
+				}
+	
+	
+				if($listaDespachosAtributos!="")
+				{
+					if($condWhere=="")
+						$condWhere="d.id__17_tablaDinamica in(".$listaDespachosAtributos.")";	
+					else
+						$condWhere.=" and d.id__17_tablaDinamica in(".$listaDespachosAtributos.")";	
+				}
+	
+				$consulta="select unidad,o.codigoUnidad,idOrganigrama,codigoFuncional,o.descripcion,institucion,codCentroCosto,o.unidadPadre,codigoIndividual,claveDepartamental,status,
+						(case status when '1'  then 'Activo' when '0' then 'Inactivo' when '2' then 'Concentrador' end) as activo,
+						(SELECT nombreCategoria FROM 817_categoriasUnidades WHERE idCategoriaUnidadOrganigrama=o.institucion) as tipoUnidad,
+						
+						(SELECT objConfiguracion FROM 817_categoriasUnidades WHERE idCategoriaUnidadOrganigrama=o.institucion) as objConfiguracion,
+						o.institucion as idTipoUnidad
+						from 817_organigrama o, _17_tablaDinamica d,_1284_tablaDinamica e where d.claveRegistro=o.codigoDepto and 
+						e.idReferencia=d.id__17_tablaDinamica and ".($condWhere!=""?($condWhere." and "):"").
+						" institucion in (".$listaTiposDespacho.") order by  codigoFuncional";
+			}
+
+			$resOrg=$con->obtenerFilas($consulta);	
+			while($filaOrg=$con->fetchAssoc($resOrg))
+			{
+				$arrDespachoFinal[$filaOrg["claveDepartamental"]]=$filaOrg;
+			}
+	
+			
+			
+		
+		}
+		
+		return $arrDespachoFinal;
+		
+	}
+?>

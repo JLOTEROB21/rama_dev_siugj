@@ -1,0 +1,34 @@
+<?php session_start();
+
+	include("conexionBD.php");
+
+if (!empty($_FILES['archivoEnvio']['name']))
+{
+	echo "1|";
+	return;
+	$arrMeses["Enero"]="1";
+	$arrMeses["Febrero"]="2";
+	$arrMeses["Marzo"]="3";
+	$arrMeses["Abril"]="4";
+	$arrMeses["Mayo"]="5";
+	$arrMeses["Junio"]="6";
+	$arrMeses["Julio"]="7";
+	$arrMeses["Agosto"]="8";
+	$arrMeses["Septiembre"]="9";
+	$arrMeses["Octubre"]="10";
+	$arrMeses["Noviembre"]="11";
+	$arrMeses["Diciembre"]="12";
+	
+	
+	$binario_nombre_temporal=$_FILES['archivoEnvio']['tmp_name'] ;
+	$nombreArchivo=rand ( 1000 , 9999)."_". rand ( 1000 , 9999);
+	$pathRuta=$baseDir."/archivosTemporales/".$nombreArchivo;
+	copy($binario_nombre_temporal,$pathRuta);
+	
+	//importacionArchivoDeposito($pathRuta);
+	//unlink($pathRuta);
+	echo "1|".$nombreArchivo."|".$_FILES["archivoEnvio"]["name"]."|".filesize($pathRuta)."|".$pathRuta;
+}
+
+
+?>

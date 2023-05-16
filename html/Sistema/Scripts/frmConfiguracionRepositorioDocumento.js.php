@@ -1,0 +1,117 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+?>
+
+
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	new Ext.Button (
+                                {
+                                    cls:'btnSIUGJ',
+                                    text:'Guardar',
+                                    width:150,
+                                    height:50,
+                                    id:'btnGuardarForm',
+                                    renderTo:'contenedor1',
+                                    handler:function()
+                                            {
+                                                validarFrm('frmEnvio')
+                                            }
+                                    
+                                }
+                            )
+	
+    
+    new Ext.Button (
+                                {
+                                    cls:'btnSIUGJCancel',
+                                    text:'Cancelar',
+                                    width:150,
+                                    height:50,
+                                    id:'btnCancelarForm',
+                                    renderTo:'contenedor2',
+                                    handler:function()
+                                            {
+                                            	function  resp(btn)
+                                                {
+                                                	if(btn=='yes')
+                                                    {
+                                                    	location.href='../Sistema/tblConexionesGestorDocumental.php';
+                                                    }
+                                                }
+                                                msgConfirm('Est&aacute; seguro de querer cancelar la operaci&oacute;n?',resp)
+                                                
+                                            }
+                                    
+                                }
+                            )
+}
+
+
+function validarFrm()
+{
+	if(validarFormularios('frmEnvio'))
+    {
+        var _urlServidorCMISvch=gE('_urlServidorvch');
+        var _usuarioServidorCMISvch=gE('_usuarioServidorvch');
+        var _passwordServidorCMISvch=gE('_passwordServidorvch');
+        var _raizServidorCMISvch=gE('_raizServidorvch');
+        var _tipoConectorint=gE('_tipoConectorint');
+        var valSel=_tipoConectorint.options[_tipoConectorint.selectedIndex].value;
+        var cadObj='{"urlServidor":"'+cv(_urlServidorCMISvch.value)+'","usuario":"'+cv(_usuarioServidorCMISvch.value.replace(/\\/gi,'\\'))+'","password":"'+cv(_passwordServidorCMISvch.value)+
+                    '","raiz":"'+cv(_raizServidorCMISvch.value)+'","tipoConector":"'+_tipoConectorint.value+'"}';
+        
+        function funcAjax()
+        {
+            var resp=peticion_http.responseText;
+            arrResp=resp.split('|');
+            if(arrResp[0]=='1')
+            {
+                switch(arrResp[1])
+                {
+                    case '1':
+                        gE('frmEnvio').submit();
+                    break;
+                    case '0':
+                        function resp1()
+                        {
+                            gE('_urlServidorCMISvch').focus();
+                        }
+                        msgBox('No se pudo establecer la conexi&oacute;n con el servidor',resp1);
+                    break;
+                    case '2':
+                        function resp2()
+                        {
+                            gE('_usuarioServidorCMISvch').focus();
+                        }
+                        msgBox('El Usuario o la Contrase&ntilde;a es incorrecta',resp2);
+                    break;
+                    case '3':
+                        function resp3()
+                        {
+                            gE('_usuarioServidorCMISvch').focus();
+                        }
+                        msgBox('La URL de conexi&oacute;n al servidor es incorrecta',resp3);
+                    break;
+                    default:
+                    	function resp4()
+                        {
+                            gE('_urlServidorCMISvch').focus();
+                        }
+                        msgBox('Error de conexi&oacute;n',resp4);
+                    break;
+                }
+            }	
+            else
+            {
+                msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+            }
+        }
+        obtenerDatosWeb('../paginasFunciones/funciones.php',funcAjax, 'POST','funcion=11&cadObj='+cadObj,true);
+	}
+    
+}

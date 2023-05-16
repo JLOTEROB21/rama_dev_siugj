@@ -1,0 +1,7 @@
+{
+	"id":"btnAddHipervinculo",
+	"funcion":"mostrarVentanaHipervinculo()",
+	"titulo":"Administrar hiperv&iacute;nculos",
+	"icono":"link.png",
+	"script":"hipervinculo.js.php?idFormulario=@idFormulario"
+}

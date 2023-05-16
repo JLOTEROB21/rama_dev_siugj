@@ -1,0 +1,7 @@
+{
+	"id":"btnAddCombo",
+	"funcion":"mostrarVentanaPreguntasCerradas()",
+	"titulo":"Insertar Combo",
+	"icono":"combo.png",
+	"script":"combo.js.php"
+}

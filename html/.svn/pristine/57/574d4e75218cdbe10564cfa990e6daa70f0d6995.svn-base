@@ -1,0 +1,216 @@
+<?php
+include_once("conexionBD.php");
+include_once("cExcel.php");
+include_once('tcpdf/tcpdf.inc.php');
+
+$fechaReporte=date("Y-m-d");
+$arreglo="";
+$tituloReporte="reporteCalculo";
+$texto1="Valores de entrada";
+$texto2="Resultados de la operación";
+
+	if(isset($_POST["cadObj"]))
+		$arreglo=bD($_POST["cadObj"]);
+		
+	
+	$obj=json_decode($arreglo);
+		
+	$nombreConcepto=$obj->nombreConcepto;
+
+	$tipoReporte=$obj->tipoReporte;
+	$arrParametro=$obj->arrParametros;
+	$arrCalculos=$obj->arrCalculos;
+	
+
+//varDump($obj);
+
+	
+		$periodo=cambiarFormatoFecha($fechaReporte);
+	
+		$libro=new cExcel("reporteCalculo.xls",true);
+	
+		$libro->setAnchoColumna("A",'35');
+		$libro->setAnchoColumna("B",'13');
+	
+		$libro->setValor("B9",$periodo);
+		$libro->setValor("A11",$texto1);
+		
+		$libro->setValor("A7",$nombreConcepto);
+		
+		$linea=13;
+		
+		foreach($arrParametro as $datos =>$valor)
+		{
+			//varDump($valor);
+			
+			$parametro=$valor->parametro;
+			$valorF=$valor->valor;
+			
+			$libro->setValor("A".$linea,$parametro);
+			$libro->setValor("B".$linea,$valorF);
+			$linea++;
+			
+		}
+		
+		$linea++;
+	
+		$libro->setValor("A".$linea,$texto2);
+		$linea++;
+		$linea++;
+		
+		foreach($arrCalculos as $datos =>$valor)
+		{
+			$calculo=$valor->calculo;
+			$valorF=$valor->valor;
+			
+			$libro->setValor("A".$linea,$calculo);
+			$libro->setValor("B".$linea,$valorF);
+			$linea++;
+		}
+	
+	
+		//$libro->generarArchivo("HTML");
+		if($tipoReporte==1)
+			$libro->generarArchivo("Excel5",$tituloReporte.".xls");
+		else	
+			$libro->generarArchivo("PDF",$tituloReporte.".pdf");
+			
+	{
+		/*class myPdf extends TCPDF
+		{
+			function Header()
+			{
+			}
+		}
+		
+		$pdf = new myPdf('P','mm','Letter', true, 'UTF-8', false); //array(ancho,largo)
+		
+		//Establecer los datos de Cabecera
+		$pdf->SetHeaderData('','', PDF_HEADER_TITLE, PDF_HEADER_STRING);
+		
+		$pdf->SetMargins(PDF_MARGIN_LEFT, '10', PDF_MARGIN_RIGHT);  // se define margen del texto centra
+		$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);  //distancia de donde empieza la hoja a la cabecera
+		$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);  
+		
+		
+		$pdf->SetFont('times', '', 10);
+		$pdf->AddPage();
+		
+		// print a some of text
+		
+		$text='
+				<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+				<html xmlns="http://www.w3.org/1999/xhtml">
+				<head>
+				<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+				<title>Documento sin título</title>
+				</head>
+				
+				<body>
+				<table width="90%" border="0">
+				  <tr>
+					<td width="45%" rowspan="2"><img src="imagen/logoRamaJudicial2.png" width="306" height="95" /></td>
+					<td width="55%">&nbsp;</td>
+				  </tr>
+				  <tr>
+					<td align="center">'.$nombreConcepto.'</td>
+				  </tr>
+				</table>
+				<table width="90%" border="0">
+				  <tr>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+				  </tr>
+				  <tr>
+					<td width="33%">Fecha del reporte:</td>
+					<td width="67%">'.formatearFecha($fechaReporte).'</td>
+				  </tr>
+				  <tr>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+				  </tr>
+				</table>
+				<table width="90%" border="0">
+				  <tr>
+					<td width="33%"><b>'.$texto1.'</b></td>
+					<td width="67%">&nbsp;</td>
+				  </tr>
+				  <tr>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+				  </tr>
+				  ';
+					foreach($arrParametro as $datos =>$valor)
+					{
+						//varDump($valor);
+						
+						$parametro=$valor->parametro;
+						$valorF=$valor->valor;
+						
+						$text.='
+								  <tr>
+									<td>'.$parametro.'</td>
+									<td>'.$valorF.'</td>
+								  </tr>';
+					}
+				  
+		$text.='				  
+				</table>
+				<table width="90%" border="0">
+				  <tr>
+					<td width="33%">&nbsp;</td>
+					<td width="67%">&nbsp;</td>
+				  </tr>
+				  <tr>
+					<td><b>'.$texto2.'</b></td>
+					<td>&nbsp;</td>
+				  </tr>
+				  <tr>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+				  </tr>
+				  ';
+				foreach($arrCalculos as $datos =>$valor)
+				{
+					$calculo=$valor->calculo;
+					$valorF=$valor->valor;
+					
+					$text.='
+							  <tr>
+								<td>'.$calculo.'</td>
+								<td>'.$valorF.'</td>
+							  </tr>
+							  ';
+				}
+				  
+		$text.='
+				</table>
+				</body>
+				</html>							
+			';
+			
+			
+			
+		$js="";
+		$pdf->writeHTML($text,false,0,false,0);
+		$js .= 'print(true);';
+		
+		// set javascript
+		$pdf->IncludeJS($js);
+		
+		//Close and output PDF document
+		$pdf->Output('impresionNota_.pdf','I');		*/
+	}
+
+	function formatearFecha($fecha)
+	{
+		return date("d/m/Y",strtotime($fecha))	;
+	}
+	
+	function formatearMoneda($monto)
+	{
+		return '$ '.number_format($monto,2);
+	}
+
+
+?>

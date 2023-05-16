@@ -1,0 +1,97 @@
+<?php
+	session_start();
+
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+
+	$idFormulario=bD($_GET["iF"]);
+
+	$idRegistro=bD($_GET["iR"]);
+
+
+	$fechaActual=date("Y-m-d")	;
+
+	$horaActual=date("H:i");
+
+?>
+
+var cadenaFuncionValidacion='validarFormulario';
+
+function inyeccionCodigo()
+{
+	
+    if(esRegistroFormulario())
+    {
+    	asignarEvento(gE('_rfcAfiliacionvch'),'change',function(chk)
+                                                      {
+                                                          gE('_curpAfiliacionvch').value=gE('_rfcAfiliacionvch').value.substr(0,10);
+                                                      }
+                                      );   
+    	
+    }
+    else
+    {
+    	
+    }
+    
+    gEx('grid_15938').getColumnModel().setRenderer(1,function(val)
+        												{
+                                                        	return val;
+                                                        }
+        												);
+	
+    gEx('grid_15938').getColumnModel().setRenderer(2,function(val)
+        												{
+                                                        	return val;
+                                                        }
+        												);    
+                                                        
+                                                        
+	gEx('grid_15941').getColumnModel().setRenderer(5,function(val)
+        												{
+                                                        	return val;
+                                                        }
+        												);
+	
+    gEx('grid_15941').getColumnModel().setRenderer(6,function(val)
+        												{
+                                                        	return val;
+                                                        }
+        												);                                                            
+                                                                                                            
+
+
+}
+
+function validarFormulario()
+{
+	if(gE('_rfcAfiliacionvch').value.length!=13)
+    {
+    	msgBox('La longitud del RFC debe ser de 13 caracteres');
+    	return false;
+    }
+    
+    if(gE('_curpAfiliacionvch').value.length!=18)
+    {
+    	msgBox('La longitud de la CURP  debe ser de 18 caracteres');
+    	return false;
+    }
+    
+    
+    
+    var _correoElectronicovch=gE('_correoElectronicovch');
+    var _confirmacionCorreoElectronicovch=gE('_confirmacionCorreoElectronicovch');
+    
+    
+    if(_correoElectronicovch.value!=_confirmacionCorreoElectronicovch.value)
+    {
+    	function resp()
+        {
+        	_correoElectronicovch.focus();
+        }
+    	msgBox('Los correos electr&oacute;nicos ingresados NO existen',resp);
+    	return false;
+    }
+    
+	return true;
+}

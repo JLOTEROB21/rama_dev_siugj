@@ -1,0 +1,70 @@
+<?php
+	session_start();
+	include("conexionBD.php");
+?>
+
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	$('#calendar').fullCalendar(
+    								{
+										defaultView:'agendaDay',
+                                     	header: 
+                                        		{
+                            		            	left: '',
+                                                    center: 'title',
+                                                    right:''
+                                    	            
+                                    	        },
+										
+                                        defaultDate: gE('fechaBase').value,
+                                        businessHours: true, // display business hours
+                                        editable: true,
+                                        loading:function(isLoading,view)
+                                        		{
+                                                	if(!isLoading)
+                                                    {
+                                                    	
+                                                       	
+                                                        
+                                                    }
+                                                },
+                                        dayClick: function(date, jsEvent, view) 
+                                        			{
+                                                    	
+                                                        
+                                                        
+                                                    },
+
+                                        eventDrop: function(event, delta, revertFunc) 
+                                        			{
+                                                    	
+                                                    	
+                                                
+                                                
+                                                    },
+										eventResize: function(event, delta, revertFunc) 
+                                        			{
+                                                    	
+                                                    	
+                                                        
+                                                        
+                                                         
+                                                    
+                                                    },
+                                        eventSources: 	[
+                                                    		{
+                                                            	url:'../modulosEspeciales_SIUGJ/paginasFunciones/funcionesSIUGJSinSession.php',
+                                                                type:'POST',
+                                                                data:	{
+                                                                			idSala:gE('idSala').value,
+                                                                            asignacionJuez:-1,
+                                                                            funcion:1
+                                                                		}
+                                                            }
+                                                		]
+                                                
+             						 }
+                               );
+}

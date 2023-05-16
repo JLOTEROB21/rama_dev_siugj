@@ -1,0 +1,63 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+	
+	$idFormulario=bD($_GET["iF"]);
+	$idRegistro=bD($_GET["iR"]);
+	
+	$fechaActual=date("Y-m-d")	;
+	
+	$horaActual=date("H:i");
+?>
+
+
+
+function inyeccionCodigo()
+{
+
+	if(esRegistroFormulario())
+    {
+    	
+      gE('sp_10560').innerHTML='';
+      gEx('ext__carpetaAdministrativavch').on('select',function(cmb,registro)
+      												{
+                                                    	obtenerInfoProcesoJudicial(registro.data.id);
+                                                    }
+      										) 
+    
+        
+	}
+    else
+    {
+    	obtenerInfoProcesoJudicial(gE('sp_10503').innerHTML);
+       
+    }
+    	
+    
+  
+	
+
+
+}
+
+
+function obtenerInfoProcesoJudicial(cupj)
+{
+	function funcAjax(peticion_http)
+    {
+        var resp=peticion_http.responseText;
+        arrResp=resp.split('|');
+        if(arrResp[0]=='1')
+        {
+         	var obj=eval('['+arrResp[1]+']')[0];  
+            gE('sp_10560').innerHTML= obj.leyenda ;
+        }
+        else
+        {
+            msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+        }
+    }
+    obtenerDatosWebV2('../modulosEspeciales_SGJ/paginasFunciones/funcionesModulosEspeciales_SGJ.php',funcAjax, 'POST','funcion=2&cupj='+cupj,true);
+    
+}

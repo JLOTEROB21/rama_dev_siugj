@@ -1,0 +1,7 @@
+{
+	"id":"btnAddCheckBox",
+	"funcion":"mostrarVentanaPreguntasOpcionesMultiples()",
+	"titulo":"Insertar campo de m&uacute;ltiple selecci&oacute;n",
+	"icono":"check.png",
+	"script":"combo.js.php"
+}

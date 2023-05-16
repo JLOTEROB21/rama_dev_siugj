@@ -1,0 +1,257 @@
+/* CSS Document */
+
+.eventoCarpeta
+{
+	border-style:none !important;
+	border-radius: 10px !important;	
+	border-color:#FFFF4A;
+	
+}
+
+.promocion
+{
+	border-style:none !important;
+	border-radius: 10px !important;		
+	border-color:#46A3FF;
+	
+}
+
+
+	
+.etapaInicial
+{
+	border-style:none !important;
+	border-radius: 10px !important;	
+	border-color:#060;
+	
+}
+.etapaApelacion
+{
+	
+	border-style:none !important;
+	border-radius: 10px !important;	
+	border-color:#F93;
+}
+.etapaCasacion
+{
+	border-style:none !important;
+	border-radius: 10px !important;	
+	border-color:#900;
+	
+}
+
+
+.tblMarco
+{
+	border-color:#CCC;
+	padding:10px;
+	border-style:solid;
+	border-width:1px;
+}
+
+.vi s-item.vis-selected 
+{
+	border-color: #F00;
+	border-style:solid;
+	border-width:4px;
+	z-index: 2;
+}
+
+.puntoAlerta
+{
+	border-style:none !important;
+	border-radius: 10px !important;
+	color:#FFF;
+	background-color:#900;
+	border-color:#030;
+	font-weight:bold;
+	
+	
+	
+	
+}
+
+.puntoAlerta_7
+{
+	border-style:none !important;
+	border-radius: 10px !important;
+	color:#000;
+	background-color:#900;
+	border-color:#030;
+	font-weight:bold;
+	
+	
+	
+	
+}
+
+.puntoAlerta_6
+{
+	border-style:none !important;
+	border-radius: 10px !important;
+	color:#000;
+	background-color:#DFF046;
+	border-color:#030;
+	font-weight:bold;
+	
+	
+	
+	
+}
+
+.puntoEventoCarpeta
+{
+	border-style:none !important;
+	border-radius: 10px !important;
+	color:#000;
+	background-color:#FFD9D9;
+	border-color:#003;
+	font-weight:bold;
+}
+
+.puntoEventoNotificacion
+{
+	border-style:none !important;
+	border-radius: 10px !important;
+	color:#000;
+	background-color:#B9DAFF;
+	border-color:#003;
+	font-weight:bold;
+}
+
+
+.puntoEventoCierreProceso
+{
+	border-style:none !important;
+	border-radius: 10px !important;
+	color:#000;
+	background-color:#C7C7C7;
+	border-color:#003;
+	font-weight:bold;
+}
+	
+.puntoEventoApelacion
+{
+	border-style:none !important;
+	border-radius: 10px !important;
+	color:#000;
+	background-color:#FCC;
+	border-color:#003;
+	font-weight:bold;
+}
+
+.puntoEventoCasacion
+{
+	border-style:none !important;
+	border-radius: 10px !important;
+	color:#000;
+	background-color:#FCF;
+	border-color:#003;
+	font-weight:bold;
+}
+
+.puntoEventoPromocion
+{
+	border-style:none !important;
+	border-radius: 10px !important;
+	color:#000;
+	background-color:#F0E1FF;
+	border-color:#003;
+	font-weight:bold;
+}
+
+.puntoEventoRadicacionInicial
+{
+	border-style:none !important;
+	border-radius: 10px !important;
+	color:#000;
+	background-color:#B4FEC2;
+	border-color:#003;
+	font-weight:bold;
+}
+
+.container
+{
+	width: 550px;
+	margin: 0 auto;
+}
+
+
+
+ul.tabs
+{
+	margin: 0px;
+	padding: 0px;
+	list-style: none;
+}
+ul.tabs li
+{
+	background: none;
+	color: #222;
+	display: inline-block;
+	padding: 10px 15px;
+	cursor: pointer;
+}
+
+ul.tabs li.current
+{
+	background: #ededed;
+	color: #222;
+}
+
+.tab-content
+{
+	display: none;
+	background: #ededed;
+	padding: 15px;
+}
+
+.tab-content.current
+{
+	display: inherit;
+}
+	
+.lblTituloCarpeta
+{
+	font-family: Montserrat !important;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px !important;
+    line-height: 17px !important;
+    color: #2B2B2B !important;
+	display: inline;
+}
+
+.lblCampoEtiqueta
+{
+	font-family: Montserrat !important;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px !important;
+    line-height: 17px !important;
+    color: #2B2B2B !important;
+	display: inline;
+}
+
+.lblCampoValor
+{
+	font-family: Montserrat !important;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px !important;
+    line-height: 17px !important;
+    color: #2B2B2B !important;
+	display: inline;
+}
+
+.lblVerDetalles
+{
+	font-family: Montserrat !important;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px !important;
+    line-height: 20px !important;
+    color: #1A3E9A !important;
+	display: inline;
+	text-decoration-line: underline;
+}

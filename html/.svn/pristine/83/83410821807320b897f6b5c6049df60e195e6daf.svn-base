@@ -1,0 +1,93 @@
+<?php
+	include_once("conexionBD.php");
+	include_once("cExcel.php");
+
+	
+	ini_set("memory_limit","256M");
+
+	$cadObj=NULL;
+	$objConf=NULL;
+	$arrArchivos=array();
+	$procesosJudiciales='';
+	if(isset($_POST["cadObj"]))
+	{
+		$objConf=json_decode(bD($_POST["cadObj"]));
+		
+	}
+	
+	
+
+	
+	
+	$arrColumnasReporte["A"]=1;
+	$arrColumnasReporte["B"]=1;
+	$arrColumnasReporte["C"]=1;
+	$arrColumnasReporte["D"]=1;
+	$arrColumnasReporte["E"]=1;
+	$arrColumnasReporte["F"]=1;
+	$arrColumnasReporte["G"]=1;
+	$arrColumnasReporte["H"]=1;
+	$arrColumnasReporte["I"]=1;
+	$arrColumnasReporte["J"]=1;
+	$arrColumnasReporte["K"]=1;
+	$arrColumnasReporte["L"]=1;
+	$arrColumnasReporte["M"]=1;
+	$arrColumnasReporte["N"]=1;
+	$arrColumnasReporte["O"]=1;
+	
+	foreach($arrColumnasReporte as $columna=>$resto)
+	{
+		$enc=false;
+		foreach($objConf->arrColumas as $oColumna)
+		{
+			if($columna==$oColumna->columna)
+				$enc=true;	
+		}
+		
+		
+		if(!$enc)
+		{
+			$arrColumnasReporte[$columna]=0;	
+		}
+	}
+	
+
+	
+	$arrTipoMovimiento=array();
+	$arrTipoMovimiento[1]="Depósito";
+	$arrTipoMovimiento[2]="Pagado a beneficiario";
+	$arrTipoMovimiento[3]="Prescrito";
+	$arrTipoMovimiento[4]="Traspasado";
+	
+	
+	
+	
+	
+	$libro=new cExcel("./plantillas/reporteConciliacionBancaria.xls",true);	
+	
+
+	
+	
+	$numFila=24;
+	$ct=1;
+	
+	$periodo="Del ".date("d/m/Y",strtotime($objConf->fechaInicio))." al ".date("d/m/Y",strtotime($objConf->fechaFin));
+	
+	$libro->setValor("B9",date("d/m/Y H:i"));
+	$libro->setValor("B10",$periodo);
+	
+	$eliminados=0;
+	foreach($arrColumnasReporte as $columna=>$resto)
+	{
+		if($resto==0)
+		{
+			$columna=$libro->obtenerDesplazamientoColumna($columna,$eliminados*-1);
+			$libro->obtenerHojaActiva()->removeColumn($columna,1);
+			$eliminados++;
+		}
+	}
+	
+
+	$libro->generarArchivo("Excel2007","informeConciliacion.xlsx");
+	
+?>

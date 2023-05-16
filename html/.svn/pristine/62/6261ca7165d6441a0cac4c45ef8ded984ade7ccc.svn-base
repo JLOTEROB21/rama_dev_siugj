@@ -1,0 +1,43 @@
+/* CSS Document */
+
+.plupload_container
+{
+	height:30px !important ;
+}
+
+.plupload_droptext 
+{
+	line-height: 30px !important;
+	background-color: #FFF !important;
+	font-family: Montserrat-Regular !important;
+	font-style: normal !important;
+	font-weight: 300 !important;
+	font-size: 16px !important;
+	color: #656572 !important;
+}
+
+.plupload_scroll .plupload_filelist 
+{
+	line-height: 25px !important;
+	background: #FFF !important;
+	padding-top: 7px !important;
+}
+
+
+.plupload_filelist li 
+{
+	
+	background: #FFF !important;
+	border-bottom: 1px solid #FFF;
+	font-family: Montserrat-Regular !important;
+	font-style: normal !important;
+	font-weight: 300 !important;
+	font-size: 16px !important;
+	color: #656572 !important;
+	line-height: 25px !important;
+}
+
+.plupload_file_name
+{
+	background: #FFF !important;
+}

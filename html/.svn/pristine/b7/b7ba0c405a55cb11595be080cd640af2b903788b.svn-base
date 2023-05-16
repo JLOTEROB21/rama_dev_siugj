@@ -1,0 +1,386 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+?>
+
+var dragged_event;
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	scheduler.config.show_loading = true;
+	scheduler.setLoadMode("month");
+    scheduler.config.xml_date="%Y-%m-%d %H:%i";  
+	scheduler.config.drag_move=false;
+	scheduler.templates.event_class=function(start, end, event)
+    								{
+                                        var css = "";
+                                        if(event.unidadGestion) // if event has subject property then special class should be assigned
+                                            css += "event_"+event.unidadGestion;
+                        
+                                        if(event.id == scheduler.getState().select_id)
+                                        {
+                                            css += " selected";
+                                        }
+                                        return css;
+                                    };
+
+
+    
+    scheduler.attachEvent("onBeforeDrag", function (id, mode, e)
+    										{
+                                            	
+                                                
+                                                return true;
+                                            });
+    
+    scheduler.attachEvent("onBeforeLightbox", function (id)
+    											{
+                                                   
+                                                    return false;
+                                                });
+                                                
+                                                
+	scheduler.attachEvent("onDragEnd", function (id, e){
+                                                          
+                                                          mostrarVentanaAsignarJuez(id);
+                                                                   
+                                                          return true;
+                                                      });	                                                
+                                                
+	scheduler.init('scheduler_here', new Date(),"month");
+    scheduler.load("../paginasFunciones/funcionesPanelCalendario.php?funcion=1&uG="+gE('idUnidadGestion').value,"json");
+
+}
+
+function mostrarVentanaAsignarJuez(id)
+{
+	var arrJueces=eval(''+bD(gE('arrJueces').value)+'');
+	var cmbJuez=crearComboExt('cmbJuez',arrJueces,110,35,300);
+	var evento=scheduler.getEvent(id);
+    var cmbHoraInicial=crearCampoHoraExt('cmbHoraInicial','00:00','23:50',1,false);
+    
+    cmbHoraInicial.setPosition(220,5);
+    cmbHoraInicial.setWidth(110);
+    cmbHoraInicial.setValue(gE('hInicioGuardia').value);
+    
+    var cmbHoraFinal=crearCampoHoraExt('cmbHoraFinal','00:00','23:50',1,false);
+    
+    cmbHoraFinal.setPosition(480,5);
+    cmbHoraFinal.setWidth(110);
+    cmbHoraFinal.setValue(gE('hFinGuardia').value);
+	var form = new Ext.form.FormPanel(	
+										{
+											baseCls: 'x-plain',
+											layout:'absolute',
+											defaultType: 'label',
+											items: 	[
+														{
+                                                        	x:10,
+                                                            y:10,
+                                                            html:'Periodo del :'
+                                                            
+                                                        },
+                                                        {
+                                                        	x:110,
+                                                            y:5,
+                                                            id:'fechaInicial',
+                                                            xtype:'datefield',
+                                                            value:evento.start_date.format('Y-m-d')
+                                                        },
+                                                        cmbHoraInicial,
+                                                        
+                                                        
+                                                        {
+                                                        	x:345,
+                                                            y:10,
+                                                            html:' al '
+                                                            
+                                                        },
+                                                        {
+                                                        	x:370,
+                                                            y:5,
+                                                            id:'fechaFinal',
+                                                            xtype:'datefield',
+                                                            value:evento.end_date.add(Date.DAY,-1).format('Y-m-d')
+                                                        },
+                                                        cmbHoraFinal,
+                                                        {
+                                                        	x:10,
+                                                            y:40,
+                                                            html:'Juez a asignar:'
+                                                        },
+                                                        cmbJuez,
+                                                        {
+                                                        	x:10,
+                                                            y:70,
+                                                            html:'Comentarios adicionales:'
+                                                        },
+                                                        {
+                                                        	x:10,
+                                                            y:100,
+                                                            width:600,
+                                                            height:80,
+                                                            xtype:'textarea',
+                                                            id:'txtComentariosAdicionales'
+                                                        }
+
+													]
+										}
+									);
+	
+	var ventanaAM = new Ext.Window(
+									{
+										title: 'Registro de periodo de guardia de juez',
+										width: 650,
+										height:280,
+										layout: 'fit',
+										plain:true,
+										modal:true,
+										bodyStyle:'padding:5px;',
+										buttonAlign:'center',
+										items: form,
+										listeners : {
+													show : {
+																buffer : 10,
+																fn : function() 
+																{
+                                                                	scheduler.deleteEvent(id);
+																}
+															}
+												},
+										buttons:	[
+														{
+															
+															text: '<?php echo $etj["lblBtnAceptar"]?>',
+                                                            
+															handler: function()
+																	{
+																		var fechaInicial=gEx('fechaInicial');
+                                                                        var fechaFinal=gEx('fechaFinal');
+                                                                        
+                                                                        
+                                                                        if(fechaInicial.getValue()=='')
+                                                                        {
+                                                                        	function resp1()
+                                                                            {
+                                                                            	fechaInicial.focus();
+                                                                            }
+                                                                        	msgBox('Debe indicar la fecha inicial del periodo',resp1);
+                                                                        	return;
+                                                                        }
+                                                                        
+                                                                        if(fechaFinal.getValue()=='')
+                                                                        {
+                                                                        	function resp2()
+                                                                            {
+                                                                            	fechaFinal.focus();
+                                                                            }
+                                                                        	msgBox('Debe indicar la fecha final del periodo',resp2);
+                                                                        	return;
+                                                                        }
+                                                                        
+                                                                        if(cmbHoraInicial.getValue()=='')
+                                                                        {
+                                                                        	function resp20()
+                                                                            {
+                                                                            	cmbHoraInicial.focus();
+                                                                            }
+                                                                        	msgBox('Debe indicar la hora inicial del periodo',resp20);
+                                                                        	return;
+                                                                        }
+                                                                        
+                                                                        if(cmbHoraFinal.getValue()=='')
+                                                                        {
+                                                                        	function resp21()
+                                                                            {
+                                                                            	cmbHoraFinal.focus();
+                                                                            }
+                                                                        	msgBox('Debe indicar la hora final del periodo',resp21);
+                                                                        	return;
+                                                                        }
+                                                                        
+                                                                        if(fechaInicial.getValue()>fechaFinal.getValue())
+                                                                        {
+                                                                        	function resp3()
+                                                                            {
+                                                                            	fechaFinal.focus();
+                                                                            }
+                                                                        	msgBox('La fecha inicial del periodo no puede ser mayor que la fecha final',resp3);
+                                                                        	return;
+                                                                        }
+                                                                        
+                                                                        if(cmbJuez.getValue()=='')
+                                                                        {
+                                                                        	function resp4()
+                                                                            {
+                                                                            	cmbJuez.focus();
+                                                                            }
+                                                                        	msgBox('Debe indicar el juez a asignar',resp4);
+                                                                        	return;
+                                                                        }
+                                                                        
+                                                                        var fechaInicio=Date.parseDate(fechaInicial.getValue().format('Y-m-d')+' '+cmbHoraInicial.getValue(),'Y-m-d H:i');
+                                                                        var fechaFin=Date.parseDate(fechaFinal.getValue().format('Y-m-d')+' '+cmbHoraFinal.getValue(),'Y-m-d H:i');
+                                                                        
+                                                                        if(fechaInicio>fechaFin)
+                                                                        {
+                                                                        	function resp30()
+                                                                            {
+                                                                            	cmbHoraFinal.focus();
+                                                                            }
+                                                                        	msgBox('La fecha inicial del periodo no puede ser mayor que la fecha final',resp30);
+                                                                        	return;
+                                                                        }
+                                                                        
+                                                                        var cadObj='{"tipoEvento":"1","fechaInicio":"'+fechaInicio.format('Y-m-d H:i:s')+'","fechaFin":"'+fechaFin.format('Y-m-d H:i:s')+
+                                                                        			'","idJuez":"'+cmbJuez.getValue()+'","comentarios":"'+cv(gEx('txtComentariosAdicionales').getValue())+'"}';
+                                                                        
+                                                                       
+                                                                        
+                                                                        
+                                                                        function funcAjax()
+                                                                        {
+                                                                            var resp=peticion_http.responseText;
+                                                                            arrResp=resp.split('|');
+                                                                            if(arrResp[0]=='1')
+                                                                            {
+                                                                            	recargarPagina();
+                                                                                ventanaAM.close();
+                                                                                
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                            	scheduler.deleteEvent(id);
+                                                                                msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+                                                                            }
+                                                                        }
+                                                                        obtenerDatosWeb('../paginasFunciones/funcionesPanelCalendario.php',funcAjax, 'POST','funcion=2&cadObj='+cadObj,true);
+                                                                        
+                                                                        
+
+                                                                        
+                                                                        
+																	}
+														},
+														{
+															text: '<?php echo $etj["lblBtnCancelar"]?>',
+															handler:function()
+																	{
+																		ventanaAM.close();
+																	}
+														}
+													]
+									}
+								);
+	ventanaAM.show();	
+}
+
+
+function removerAsignacion(iE)
+{
+	var form = new Ext.form.FormPanel(	
+										{
+											baseCls: 'x-plain',
+											layout:'absolute',
+											defaultType: 'label',
+											items: 	[
+														{
+                                                        	x:10,
+                                                            y:10,
+                                                            html:'Ingrese el motivo por el cual desea remover el periodo de guardia del juez'
+                                                        },
+                                                        {
+                                                        	x:10,
+                                                            y:40,
+                                                            id:'txtMotivo',
+                                                            xtype:'textarea',
+                                                            width:500,
+                                                            height:80
+                                                        }
+
+													]
+										}
+									);
+	
+	var ventanaAM = new Ext.Window(
+									{
+										title: 'Remover periodo de guardia',
+										width: 550,
+										height:210,
+										layout: 'fit',
+										plain:true,
+										modal:true,
+										bodyStyle:'padding:5px;',
+										buttonAlign:'center',
+										items: form,
+										listeners : {
+													show : {
+																buffer : 10,
+																fn : function() 
+																{
+                                                                	gEx('txtMotivo').focus(false,500);
+																}
+															}
+												},
+										buttons:	[
+														{
+															
+															text: '<?php echo $etj["lblBtnAceptar"]?>',
+                                                            
+															handler: function()
+																	{
+																		var txtMotivo=gEx('txtMotivo');	
+                                                                        if(txtMotivo.getValue()=='')
+                                                                        {
+                                                                        	function resp()
+                                                                            {
+                                                                            	txtMotivo.focus();
+                                                                            }
+                                                                            msgBox('Debe ingresar el motivo por el cual desea remover la asignaci&oacute;n del juez',resp);
+                                                                            return;
+                                                                        }
+                                                                        
+                                                                        
+                                                                        function respQuestion(btn)
+                                                                        {
+                                                                        	if(btn=='yes')
+                                                                            {
+                                                                            	function funcAjax()
+                                                                                {
+                                                                                    var resp=peticion_http.responseText;
+                                                                                    arrResp=resp.split('|');
+                                                                                    if(arrResp[0]=='1')
+                                                                                    {
+                                                                                        scheduler.deleteEvent(bD(iE));
+                                                                                        ventanaAM.close();
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+                                                                                    }
+                                                                                }
+                                                                                obtenerDatosWeb('../paginasFunciones/funcionesPanelCalendario.php',funcAjax, 'POST','funcion=3&tipo=1&motivo='+cv(txtMotivo.getValue())+'&idAsignacion='+bD(iE),true);
+                                                                                
+                                                                            
+                                                                            }
+                                                                        }
+                                                                        msgConfirm('Est&aacute; seguro de querer remover la asignaci&oacute;n del juez',respQuestion);
+                                                                        
+                                                                        
+                                                                        
+																	}
+														},
+														{
+															text: '<?php echo $etj["lblBtnCancelar"]?>',
+															handler:function()
+																	{
+																		ventanaAM.close();
+																	}
+														}
+													]
+									}
+								);
+	ventanaAM.show();
+}

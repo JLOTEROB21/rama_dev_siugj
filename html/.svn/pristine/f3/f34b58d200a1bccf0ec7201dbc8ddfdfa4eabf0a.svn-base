@@ -1,0 +1,146 @@
+<?php 	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+?>
+
+var claveUnidad='';
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	
+	var oConf=	{
+    					idCombo:'cmbDespacho',
+                        anchoCombo:780,
+                       	renderTo:'divComboDespacho',
+                        raiz:'registros',
+                        campoDesplegar:'nombreUnidad',
+                        campoID:'claveUnidad',
+                        funcionBusqueda:24,
+                        ctCls:'campoComboWrapSIUGJAutocompletar',
+	                  	listClass:'listComboSIUGJ',
+                        paginaProcesamiento:'../modulosEspeciales_SIUGJ/paginasFunciones/funcionesSIUGJ.php',
+                        confVista:'<tpl for="."><div class="search-item">{nombreUnidad}<br></div></tpl>',
+                        campos:	[
+                                   	{name:'claveUnidad'},
+                                    {name:'nombreUnidad'}
+
+                                ],
+                       	funcAntesCarga:function(dSet,combo)
+                    				{
+                                    	claveUnidad='';
+                                    	var aValor=combo.getRawValue();
+										dSet.baseParams.criterio=aValor;
+                                        dSet.baseParams.iR=0;
+
+                                        
+                                                                              
+                                        
+                                    },
+                      	funcElementoSel:function(combo,registro)
+                    				{
+                                    	claveUnidad=registro.data.claveUnidad;
+                                        
+                                        
+                                    }  
+    				};
+
+	var cmbDespacho=crearComboExtAutocompletar(oConf);
+
+
+			new Ext.Button (
+                                {
+                                    cls:'btnSIUGJ',
+                                    text:'Guardar',
+                                    width:140,
+                                    height:50,
+                                    id:'btnGuardarForm',
+                                    renderTo:'contenedor1',
+                                    handler:function()
+                                            {
+                                                var cup=gE('cup');
+                                                var noRadicado=gE('noRadicado');
+                                                var txtDescripcion=gE('txtDescripcion');
+                                                
+                                                
+                                                if(claveUnidad=='')
+                                                {
+                                                	function resp()
+                                                    {
+                                                    	gEx('cmbDespacho').focus();
+                                                    }
+                                                    msgBox('Debe ingresar el despacho asignado',resp);
+                                                    return;
+                                                }
+                                                
+                                                if(cup.value=='')
+                                                {
+                                                	function resp2()
+                                                    {
+                                                    	cup.focus();
+                                                    }
+                                                    msgBox('Debe ingresar el c&oacute;digo &uacute;nico de proceso',resp2);
+                                                    return;
+                                                }
+                                                
+                                                if(noRadicado.value=='')
+                                                {
+                                                	function resp3()
+                                                    {
+                                                    	noRadicado.focus();
+                                                    }
+                                                    msgBox('Debe ingresar el no. de radicado',resp3);
+                                                    return;
+                                                }
+                                                
+                                                var idFormulario=gE('idFormulario');
+                                                var idRegistro=gE('idRegistro');
+                                                
+                                                
+                                                var cadObj='{"idFormulario":"'+idFormulario.value+'","idRegistro":"'+idRegistro.value+
+                                                			'","despachoAsignado":"'+claveUnidad+'","cup":"'+cv(cup.value)+'","noRadicacion":"'+cv(noRadicado.value)+
+                                                            '","comentariosAdicionales":"'+cv(txtDescripcion.value)+'"}';
+                                                
+                                            
+                                            
+                                            	function funcAjax()
+                                                {
+                                                    var resp=peticion_http.responseText;
+                                                    arrResp=resp.split('|');
+                                                    if(arrResp[0]=='1')
+                                                    {
+                                                    	if((window.parent)&&(window.parent.recargarMenuDTD))
+                                                        {
+                                                            window.parent.recargarMenuDTD();
+                                                        }
+                                                        msgBox('La informaci&oacute;n ha sido guardada correctamente');
+                                                    }
+                                                    else
+                                                    {
+                                                        msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+                                                    }
+                                                }
+                                                obtenerDatosWeb('../modulosEspeciales_SIUGJ/paginasFunciones/funcionesSIUGJ.php',funcAjax, 'POST','funcion=45&cadObj='+cadObj,true);
+                                            
+                                            }
+                                    
+                                }
+                            )
+
+
+	var arrDatos=eval(bD(gE('arrInfo').value));
+    if(arrDatos.length>0)
+    {
+    	var obj=arrDatos[0];
+    	var cup=gE('cup');
+        var noRadicado=gE('noRadicado');
+        var txtDescripcion=gE('txtDescripcion');
+        
+        cup.value=obj.cup;
+        noRadicado.value=obj.noRadicacion;
+        txtDescripcion=escaparBR(obj.comentariosAdicionales);
+        gEx('cmbDespacho').setRawValue(obj.lblDespacho);
+        claveUnidad=obj.despachoAsignado;
+    }
+
+}

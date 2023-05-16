@@ -1,0 +1,13 @@
+.imgPAutomatico
+{
+	width:13;
+	height:13;
+	background: transparent url(../images/PAutomatico.gif) no-repeat center !important;
+}
+
+.imgPManual
+{
+	width:13;
+	height:13;
+	background: transparent url(../images/PManual.gif) no-repeat center !important;
+}

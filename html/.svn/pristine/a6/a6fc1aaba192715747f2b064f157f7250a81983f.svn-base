@@ -1,0 +1,8 @@
+{
+	"id":"btnAddDisparador",
+	"funcion":"mostrarVentanaDisparadorCmbRadio()",
+	"titulo":"Agregar/modificar disparador",
+	"icono":"database_add.png",
+	"script":"disparador.js.php?idFormulario=@idFormulario",
+	"deshabilitado":"1"
+}

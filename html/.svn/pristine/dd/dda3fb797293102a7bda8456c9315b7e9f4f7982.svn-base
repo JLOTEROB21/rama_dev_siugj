@@ -1,0 +1,7 @@
+{
+	"id":"botonAddCampoOperacion",
+	"funcion":"mostrarVentanaCampoOperacion()",
+	"titulo":"Insertar campo de operación",
+	"icono":"calculator_add.png",
+	"script":"campoOperacion.js.php"
+}

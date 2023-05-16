@@ -1,0 +1,927 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+	
+	
+	$consulta="SELECT idPais,nombre FROM 238_paises ORDER BY nombre";
+	$arrPaises=$con->obtenerFilasArreglo($consulta);
+?>
+
+var arrPaises=<?php echo $arrPaises?>;
+var arrHuellas=[];
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	 new Ext.Button (
+                            {
+                               
+                                text:'Guardar',
+                                width:110,
+                                height:40,
+                                cls:'btnSIUGJ',
+                                renderTo:'contenedor1',
+                                handler:function()
+                                        {
+                                           GuardarIdentifica('nIdentifica');
+                                        }
+                                
+                            }
+                        )
+	if(gE('contenedor2'))
+    {
+    	 new Ext.Button (
+                            {
+                                
+                                cls:'btnSIUGJCancel',
+                                text:'Cancelar',
+                                width:110,
+                                height:40,
+                                renderTo:'contenedor2',
+                                handler:function()
+                                        {
+                                           function resp(btn)
+                                           {
+                                           		if(btn=='yes')
+                                            		window.parent.cerrarVentanaFancy();
+                                           }
+                                           msgConfirm('Est&aacute; seguro de querer cancelar la operaci&oacute;n?',resp);
+                                        }
+                                
+                            }
+                        )
+    }   
+    
+    
+	crearCampoFecha('FNac','FNacimiento',null,null,null,{ctCls:'campoFechaSIUGJ',width:370});
+	
+	
+	gE('Nombre').focus();
+	arrHuellas=eval(gE('arrHuellas').value);
+	crearGridHuellasCapturadas();
+                   
+}
+
+
+function funcFechaCamb(campo,nuevoV,viejoV)
+{
+    var f=new  Date(nuevoV);
+    gE('FNacimiento').value=f.format('d/m/Y');
+}
+
+
+function bloquearDatosUsuario()
+{
+	function funcAjax()
+    {
+        var resp=peticion_http.responseText;
+        arrResp=resp.split('|');
+        if(arrResp[0]=='1')
+        {
+            recargarPagina();
+        }
+        else
+        {
+            msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+        }
+    }
+    obtenerDatosWeb('../paginasFunciones/funcionesRecursosHumanos.php',funcAjax, 'POST','funcion=67&u='+bE(gE('idUsuario').value)+'&s='+bE(1),true);
+}
+
+function desBloquearDatosUsuario()
+{
+	function funcAjax()
+    {
+        var resp=peticion_http.responseText;
+        arrResp=resp.split('|');
+        if(arrResp[0]=='1')
+        {
+         	recargarPagina();   
+        }
+        else
+        {
+            msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+        }
+    }
+    obtenerDatosWeb('../paginasFunciones/funcionesRecursosHumanos.php',funcAjax, 'POST','funcion=67&u='+bE(gE('idUsuario').value)+'&s='+bE(0),true);
+}
+
+
+
+var keyMap = new Ext.KeyMap(document, 
+									{
+										key: 13, 
+										fn: funValidar,
+										scope: this
+									}
+							);
+
+function funValidar()
+{
+	var btnGuardar=gE('btnGuardar');
+	btnGuardar.click();
+	
+}
+
+
+function GuardarIdentifica(form)
+{
+	if (!validarFormularios(form))
+	{
+		return;
+	}
+	else
+	{
+		
+		var cmbTelefonos=gE('cmbTelefono');
+		var cadTelefono='';
+		var x;
+		for(x=0;x<cmbTelefonos.options.length;x++)
+		{
+			if(cadTelefono=='')
+				cadTelefono=cmbTelefonos.options[x].value;
+			else
+				cadTelefono+=','+cmbTelefonos.options[x].value;
+			
+		}
+		gE('telefonos').value=cadTelefono;
+		
+		var cmbMail=gE('cmbMail');
+		var cadMail='';
+		var x;
+		for(x=0;x<cmbMail.options.length;x++)
+		{
+			if(cadMail=='')
+				cadMail=cmbMail.options[x].value;
+			else
+				cadMail+=','+cmbMail.options[x].value;
+			
+		}
+		gE('correos').value=cadMail;
+		
+        
+        var tipoIdentificacion=gE('tipoIdentificacion');
+        var noIdentificacion=gE('noIdentificacion');
+        
+        
+        if(tipoIdentificacion.selectedIndex>0)
+        {
+        	if(noIdentificacion.value=='')
+            {
+            	function respAux()
+                {
+                	noIdentificacion.focus();
+                }
+                msgBox('Debe indicar el n&uacute;mero de identificaci&oacute;',respAux);
+                return;
+            }
+        }
+        
+		if(gE('idUsuario').value=='-1')
+		{
+			function funcAjax()
+			{
+				var resp=peticion_http.responseText;
+				arrResp=resp.split('|');
+				if(arrResp[0]=='1')
+				{
+					var formulario=gE(form);
+					
+					
+					var obj=eval('['+arrResp[1]+']')[0];
+					if(obj.resp=='0')
+						formulario.submit();
+					else
+					{
+						switch(obj.resp)
+						{
+							case '1':
+								msgBox('No se ha podido crear el nuevo usuario debido a la siguiente situaci&oacute;n: <br>'+obj.msg);
+								return;
+							break;
+							case '2':
+								function respAux(btn)
+								{
+								  if(btn=='yes')
+								  {
+									  formulario.submit();
+								  }
+								}
+								msgConfirm('Se ha detectado que existe un usuario registrado bajo el nombre ingresado, desea agregar al nuevo usuario a pesar de lo anterior?',respAux);
+							break;
+						}
+					}
+				}
+				else
+				{
+					msgBox('No se ha podido llevar a cabo la operaci&oacute;n debido al siguiente problema:'+' <br />'+arrResp[0]);
+				}
+			}
+			obtenerDatosWeb('../paginasFunciones/funcionesUsuarios.php',funcAjax, 'POST','funcion=30&tI='+(tipoIdentificacion.options[tipoIdentificacion.selectedIndex].value)+
+            				'&nI='+gE('noIdentificacion').value+'&apPaterno='+cv(gE('Apat').value)+'&apMaterno='+cv(gE('Amat').value)+'&nombre='+cv(gE('Nombre').value)+'&rfc=&curp=&idUsuario='+gE('idUsuario').value,true);
+
+		}
+		else
+		{
+			gE(form).submit();
+		}
+	}
+}//GuardaIdentifica
+
+function solicitarTel(IdUsuario,TipoTel)
+{
+	var form=new Ext.form.FormPanel(
+										{
+											baseCls: 'x-plain',
+											layout:'absolute',
+											disabled:false,
+											items:
+													[
+                                                    	{
+                                                            x:5,
+                                                            y:10,
+                                                            xtype:'label',
+                                                            cls:'SIUGJ_Etiqueta',
+                                                            text: 'Tipo:'
+                                                        },
+														{
+                                                            x:140,
+                                                            y:5,
+                                                            xtype:'radio',
+                                                            checked:true,
+                                                            cls:'SIUGJ_Etiqueta',
+                                                            boxLabel:'<span class="SIUGJ_Etiqueta">Fijo</span>',
+                                                            value:'0',
+                                                            id:'Tel'
+                                                        },
+														{
+                                                            x:230,
+                                                            y:5,
+                                                            checked:false,
+                                                            xtype:'radio',
+                                                            cls:'SIUGJ_Etiqueta',
+                                                            boxLabel:'<span class="SIUGJ_Etiqueta">Celular</span>',
+                                                            value:'2',
+                                                            id:'Movil'
+                                                        },
+                                                        {
+                                                            x:5,
+                                                            y:60,
+                                                            xtype:'label',
+                                                            cls:'SIUGJ_Etiqueta',
+                                                            html: 'Pa&iacute;s:'
+                                                        },
+                                                        {
+                                                            x:140,
+                                                            y:55,
+                                                            xtype:'label',
+                                                            html: '<div id="divComboPais"></div>'
+                                                        },
+                                                    	{
+                                                            x:5,
+                                                            y:110,
+                                                            cls:'SIUGJ_Etiqueta',
+                                                            xtype:'label',
+                                                            html: 'No. Tel&eacute;fono:'
+                                                        },
+                                                        {
+                                                            x:140,
+                                                            y:105,
+                                                            width:150,
+                                                            cls:'controlSIUGJ',
+                                                            xtype:'numberfield',
+                                                            id:'txtTelefono',
+                                                            allowDecimals:false,
+                                                            enableKeyEvents:true
+                                                        },
+                                                        {
+                                                            x:330,
+                                                            y:110,
+                                                            cls:'SIUGJ_Etiqueta',
+                                                            xtype:'label',
+                                                            html: 'Ext.'
+                                                        },
+                                                        {
+                                                            x:375,
+                                                            y:105,
+                                                            xtype:'numberfield',
+                                                            width:75,
+                                                            cls:'controlSIUGJ',
+                                                            id:'txtExtension',
+                                                            allowDecimals:false
+                                                        }
+                                                        
+													]
+										}
+									)
+	var ventana=new Ext.Window(
+							   		{
+										title:'Agregar N&uacute;mero Telef&oacute;nico',
+										width:600,
+										height:270,
+										layout:'fit',
+										buttonAlign:'center',
+										items:[form],
+										modal:true,
+                                        closable:false,
+                                        cls:'msgHistorialSIUGJ',
+										plain:true,
+										listeners:
+											{
+												show:
+												{
+													buffer:10,fn:function()
+															{
+																gEx('txtTelefono').focus(false,500);
+                                                                comboPais=crearComboExt('comboPais',arrPaises,0,0,250,{ctCls:'comboWrapSIUGJControl',cls:'comboSIUGJControl',listClass:'listComboSIUGJControl',renderTo:'divComboPais'});                        
+																comboPais.setValue('52');
+															}
+												}
+											},
+										buttons:
+												[
+												 	{
+														text:'Cancelar',
+                                                        cls:'btnSIUGJCancel',
+                                                        width:140,
+														handler:function ()
+															{
+																ventana.close();
+																hK();
+															}
+													},
+                                                    {
+														text:'Aceptar',
+                                                        cls:'btnSIUGJ',
+                                                        width:140,
+														handler:function ()
+															{
+																var txtTelefono=gEx('txtTelefono');
+																var txtExtension=gEx('txtExtension');
+                                                                var comboPais=gEx('comboPais');
+                                                                var Tel=gEx('Tel');
+                                                                var Movil=gEx('Movil');
+                                                                
+                                                                var tipoTelefono;
+                                                                if(gEx('Tel').getValue())
+                                                                {
+                                                                	tipoTelefono='0';
+                                                                }
+                                                                
+                                                                if(gEx('Movil').getValue())
+                                                                {
+                                                                	tipoTelefono='2';
+                                                                }
+                                                                
+
+                                                                if((txtTelefono.getValue()+'').length!=10)
+                                                                {
+                                                                	function respTel()
+                                                                    {
+                                                                    	txtTelefono.focus();
+                                                                    }
+                                                                    msgBox('El n&uacute;mero de tel&eacute;fono debe ser de 10 d&iacute;gitos',respTel);
+                                                                	return;
+                                                                }
+                                                                
+                                                                
+                                                                
+                                                                var idTelefono=comboPais.getValue()+'_'+txtTelefono.getValue()+'_'+txtExtension.getValue()+'_'+tipoTelefono;
+                                                                var lblPais=comboPais.getRawValue();
+                                                                var tTelefono;
+                                                                switch(tipoTelefono)
+                                                                {
+                                                                    case "0":
+                                                                        tTelefono='Fijo';
+                                                                    break;
+                                                                    case "2":
+                                                                        tTelefono='Celular';
+                                                                    break;
+                                                                }
+                                                                
+                                                                
+                                                                var etiqueta='('+tTelefono+') '+txtTelefono.getValue()+(txtExtension.getValue()==''?'':' Ext. '+txtExtension.getValue())+' ('+lblPais+')';
+                                                                
+																var nuevaOpcion;
+                                                                nuevaOpcion=document.createElement('option');
+                                                                
+                                                                
+                                                                var hTelefonos=gE('telefonos');
+                                                                nuevaOpcion.value=idTelefono;
+                                                                nuevaOpcion.text=etiqueta;
+                                                                var Telefono=gE('cmbTelefono');
+                                                                Telefono.options[Telefono.length]=nuevaOpcion;
+                                                                ventana.close();
+															}
+													}
+												 ]
+									}
+							   )
+	
+	var tel=Ext.getCmp('Tel');
+	var movil=Ext.getCmp('Movil');
+	tel.on('check',radioCheck);
+	movil.on('check',radioCheck);
+	Tipo2='0';
+	ventana.show();
+	dK();
+}//SolictarTel
+
+function radioCheck(chk,valor)
+{
+	
+	if(valor==true)
+	{
+		var tel=Ext.getCmp('Tel');
+		var fax=Ext.getCmp('Fax');
+		var movil=Ext.getCmp('Movil');
+		
+		Tipo2=chk.value;
+		
+		if(tel.id!=chk.id)
+        {
+			tel.setValue(false);
+		}
+		
+        if(movil.id!=chk.id)
+        {
+			movil.setValue(false);
+        }
+        if(Tipo2=='2')
+        {
+        	gEx('txtExtension').disable();
+            gEx('txtExtension').setValue('');
+            
+        }
+        else
+        {
+        	gEx('txtExtension').enable();
+        }
+	}
+    
+
+	
+}//radioCheck
+
+
+function solicitarMail(IdUsuario,tipoMail)
+{
+	var form=new Ext.form.FormPanel(
+										{
+											baseCls: 'x-plain',
+											layout:'absolute',
+											disabled:false,
+											items:
+													[
+													 	new Ext.form.Label(
+																		   		{
+																					x:5,
+																					y:20,
+                                                                                    cls:'SIUGJ_Etiqueta',
+																					text: 'Correo Electrónico:'
+																				}
+																		   ),
+														
+														new Ext.form.TextField
+														(
+																			   {
+															x:200,
+															y:15,
+															width:350,
+															cls:'controlSIUGJ',
+															id:'txtMail'
+														}
+														),
+														new Ext.form.Checkbox
+														(
+															{
+															x:5,
+															y:55,
+                                                            ctCls:'controlSIUGJ',
+															//autoShow:true,
+															checked:true,
+															boxLabel:'Notificarme a este correo',
+															allowBlank :true,
+															value:'1',
+															id:'Notificar'
+															}
+														)
+													]
+										}
+									)
+	var ventana=new Ext.Window(
+							   		{
+										title:'Agregar Correo Electrónico',
+										width:600,
+										height:200,
+                                        cls:'msgHistorialSIUGJ',
+										layout:'fit',
+										buttonAlign:'center',
+										items:[form],
+										modal:true,
+										plain:true,
+										listeners:
+											{
+												show:
+												{
+													buffer:10,fn:function()
+															{
+																var m=Ext.getCmp('txtMail');
+																m.focus(true,10);
+															}
+												}
+											},
+										buttons:
+												[
+												 	{
+														text:'Cancelar',
+                                                        cls:'btnSIUGJCancel',
+                                                        width:140,
+														handler:function ()
+															{
+																ventana.close();
+																hK();
+															}
+													},
+                                                    {
+														text:'Aceptar',
+                                                        cls:'btnSIUGJ',
+                                                        width:140,
+														handler:function ()
+															{
+																var m=Ext.getCmp('txtMail').getValue();
+																var checado=Ext.getCmp('Notificar').checked;
+																if(checado)
+																	Notifica=1;
+																else
+																	Notifica=0;
+																guardarMail(m,Notifica,IdUsuario,tipoMail,ventana);
+															}
+													}
+												 ]
+									}
+							   )
+	ventana.show();
+	dK();
+}//Solicitar Mail//Solicta Mail
+
+
+
+function eliminarTelefono(Tipo)
+{
+	var Telefono;
+	if (Tipo==0)
+		Telefono=gE('cmbTelefono');
+	else
+		Telefono=gE('cmbTelefonoAds');
+	if(Telefono.selectedIndex==-1)
+	{
+		msgBox('Por favor seleccione un Tel&eacute;fono');
+		return;
+	}
+	function resp(btn)
+	{
+		if(btn=='yes')
+		{
+			if(gE('idUsuario').value!='-1')
+			{
+				Telefono.options[Telefono.selectedIndex]=null;
+			}
+			else
+			{
+				Telefono.options[Telefono.selectedIndex]=null;
+			}
+		}
+	}
+	msgConfirm('Est&aacute; seguro de querer eliminar este tel&eacute;fono?',resp);
+	
+}//Eliminar tel
+
+function guardarMail(valor,Notificar,IdUsuario,tipoMail,ventana)
+{
+	var mail=gE('txtMail');
+	if(valor=='')
+	{
+		function funcOk()
+		{
+			mail.focus(true,10);
+		}
+		Ext.MessageBox.alert(lblAplicacion,'El campo mail es obligatorio',funcOk);
+		return;
+	}
+	if(!validarCorreo(valor))
+	{
+		function funcOk()
+		{
+			mail.focus(true,10);
+		}
+		Ext.MessageBox.alert(lblAplicacion,'La direcci&oacute;n de correo ingresada no es v&aacute;lida',funcOk);
+		return;
+	}
+	
+	var Mail;
+	if (tipoMail==0)
+		Mail=gE('cmbMail');
+	else
+		Mail=gE('cmbMailAds');
+	
+	var IdMail=Mail;
+	var x;
+	var nuevaOpcion;
+	var cadMail=valor+'/'+tipoMail+'/'+Notificar;
+	nuevaOpcion=document.createElement('option');
+	nuevaOpcion.value=cadMail;
+	nuevaOpcion.text=valor;
+	Mail.options[Mail.length]=nuevaOpcion;
+	ventana.close();
+	hK();
+}
+
+function eliminarMail(tipoMail)
+{
+	if (tipoMail==0)
+		Mail=gE('cmbMail');
+	else
+		Mail=gE('cmbMailAds');
+			
+	if(Mail.selectedIndex==-1)
+	{
+		Ext.MessageBox.alert(lblAplicacion,'Por favor seleccione un Correo');
+		return;
+	}
+	function resp(btn)
+	{
+		if(btn=='yes')
+		{
+			Mail.options[Mail.selectedIndex]=null;
+		}
+	}
+	Ext.MessageBox.confirm(lblAplicacion,'Est&aacute; seguro de querer eliminar Est&aacute; cuenta de correo?',resp);
+}//Eliminar Mail
+
+//function regresar(usr)
+//{
+//	var arrParam=[['idUsuario',usr]];
+//	enviarFormularioDatos('intermediaMostrar.php',arrParam);	
+//}
+
+
+function paisNacChange(combo)
+{
+	var valor=combo.options[combo.selectedIndex].value;
+	if(valor=='146')
+	{
+		oE('ciudadNac');
+		oE('estNac');
+		gE('ciudadNac').value='';
+		gE('estNac').value='';
+		mE('cmbEstadoNac');
+		mE('cmbCiudadNac');
+	}
+	else
+	{
+		mE('ciudadNac');
+		mE('estNac');
+		oE('cmbEstadoNac');
+		oE('cmbCiudadNac');
+		gE('cmbEstadoNac').selectedIndex=0;
+		limpiarCombo(gE('cmbCiudadNac'));
+		var opcion=cE('option');
+		opcion.value='-1';
+		opcion.text='Seleccione';
+		var cmbCiudadNac=gE('cmbCiudadNac');
+		cmbCiudadNac.options[0]=opcion;
+		cmbCiudadNac.selectedIndex=0;
+	}
+}
+
+function paisResidenciaChange(combo)
+{
+	return;
+	/*var valor=combo.options[combo.selectedIndex].value;
+	if(valor=='146')
+	{
+		oE('Ciudad');
+		oE('Estado');
+		gE('Ciudad').value='';
+		gE('Estado').value='';
+		mE('cmbEstado');
+		mE('cmbCiudad');
+	}
+	else
+	{
+		mE('Ciudad');
+		mE('Estado');
+		oE('cmbEstado');
+		oE('cmbCiudad');
+		gE('cmbEstado').selectedIndex=0;
+		limpiarCombo(gE('cmbCiudad'));
+		var opcion=cE('option');
+		opcion.value='-1';
+		opcion.text='Seleccione';
+		var cmbCiudadNac=gE('cmbCiudad');
+		cmbCiudadNac.options[0]=opcion;
+		cmbCiudadNac.selectedIndex=0;
+	}*/
+}
+
+function estadoNacSel(combo)
+{
+	var valor=combo.options[combo.selectedIndex].value;
+	function funcAjax()
+	{
+		var resp=peticion_http.responseText;
+		arrResp=resp.split('|');
+		if(arrResp[0]=='1')
+		{
+			var arrCiudades=eval(arrResp[1]);
+			llenarCombo(gE('cmbCiudadNac'),arrCiudades);
+		}
+		else
+		{
+			msgBox('No se ha podido llevar cabo la operaci&oacute;n debido al siguiente problema:<br />'+arrResp[0]);
+		}
+	}
+	obtenerDatosWeb('../paginasFunciones/funcionesUsuarios.php',funcAjax, 'POST','funcion=29&cveEstado='+valor,true);
+
+}
+
+function estadoSel(combo)
+{
+	var valor=combo.options[combo.selectedIndex].value;
+	function funcAjax()
+	{
+		var resp=peticion_http.responseText;
+		arrResp=resp.split('|');
+		if(arrResp[0]=='1')
+		{
+			var arrCiudades=eval(arrResp[1]);
+			llenarCombo(gE('cmbCiudad'),arrCiudades);
+		}
+		else
+		{
+			msgBox('No se ha podido llevar cabo la operaci&oacute;n debido al siguiente problema:<br />'+arrResp[0]);
+		}
+	}
+	obtenerDatosWeb('../paginasFunciones/funcionesUsuarios.php',funcAjax, 'POST','funcion=29&cveEstado='+valor,true);
+
+}
+
+
+
+
+function getUsuarioActivo()
+{
+	return gE('idUsuario').value+'|@|1';
+}
+
+function notificarHuellaCapturada()
+{
+	cargarDatosHuellas();	
+}
+
+
+function cargarDatosHuellas()
+{
+	var gridHuellas=gEx('gridHuellas');
+    gridHuellas.getStore().load	(
+    								{
+                                    	funcion:65,
+                                        idUsuario:gE('idUsuario').value,
+                                        tipoUsuario:1
+                                    }
+    							)
+	
+}
+
+function crearGridHuellasCapturadas()
+{
+	  var lector= new Ext.data.JsonReader({
+                                            
+                                            totalProperty:'numReg',
+                                            fields: [
+                                               			{name:'idTipoHuella'},
+		                                                {name: 'registrado'}
+                                            		],
+                                            root:'registros'
+                                            
+                                        }
+                                      );
+	 
+                                                                                      
+	var alDatos=new Ext.data.GroupingStore({
+                                                            reader: lector,
+                                                            proxy : new Ext.data.HttpProxy	(
+
+                                                                                              {
+
+                                                                                                  url: '../paginasFunciones/funcionesRecursosHumanos.php'
+
+                                                                                              }
+
+                                                                                          ),
+                                                            
+                                                            groupField: 'idTipoHuella',
+                                                            remoteGroup:false,
+				                                            remoteSort: true,
+                                                            autoLoad:true
+                                                            
+                                                        }) 
+	alDatos.on('beforeload',function(proxy)
+    								{
+                                    	proxy.baseParams.funcion='65';
+                                        proxy.baseParams.idUsuario=gE('idUsuario').value;
+                                        proxy.baseParams.tipoUsuario=1;
+                                    }
+                        )   
+       
+        var cModelo= new Ext.grid.ColumnModel   	(
+                                                        [
+                                                            {
+                                                                header:'Descripci&oacute;n',
+                                                                width:170,
+                                                                sortable:false,
+                                                                dataIndex:'idTipoHuella',
+                                                                renderer:function(val)
+                                                                		{
+                                                                        	return formatearValorRenderer(arrHuellas,val);
+                                                                        
+                                                                        }
+                                                                
+                                                            },
+                                                            {
+                                                                header:'Registrado',
+                                                                width:140,
+                                                                sortable:false,
+                                                                dataIndex:'registrado',
+                                                                renderer:function(val)
+                                                                		{
+                                                                        	if(val=='0')
+                                                                            	return '<img src="../images/cross.png" width="14" height="14" /> NO Registrado';
+                                                                            
+                                                                            return '<img src="../images/icon_big_tick.gif" width="14" height="14" /> Registrado';
+                                                                            
+                                                                        
+                                                                        }
+                                                                
+                                                            }
+                                                        ]
+                                                    );
+                                                    
+        var tblGrid=	new Ext.grid.GridPanel	(
+                                                            {
+                                                                id:'gridHuellas',
+                                                                store:alDatos,
+                                                                width:400,
+                                                                height:300,
+                                                                frame:false,
+                                                                cm: cModelo,
+                                                                stripeRows :true,
+                                                                loadMask:true,
+                                                                columnLines : true,
+                                                                renderTo:'tblHuellas',
+                                                                view:new Ext.grid.GroupingView({
+                                                                                                    forceFit:false,
+                                                                                                    showGroupName: false,
+                                                                                                    enableGrouping :false,
+                                                                                                    enableNoGroups:false,
+                                                                                                    enableGroupingMenu:false,
+                                                                                                    hideGroupedColumn: false,
+                                                                                                    startCollapsed:false
+                                                                                                })
+                                                            }
+                                                        );
+        return 	tblGrid;	
+
+}
+
+
+function removerFoto(iU)
+{
+	function resp(btn)
+	{
+		if(btn=='yes')
+		{
+			
+			function funcAjax()
+			{
+				var resp=peticion_http.responseText;
+				arrResp=resp.split('|');
+				if(arrResp[0]=='1')
+				{
+					oE('btnRemoveFoto');
+					gE('imgFoto').src='verFoto.php?Id='+bD(iU)+'&rand='+generarNumeroAleatorio(1000,9999);
+					window.parent.gE('imgUsr').src='verFoto.php?Id='+bD(iU)+'&rand='+generarNumeroAleatorio(1000,9999);
+				}
+				else
+				{
+					msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+				}
+			}
+			obtenerDatosWeb('../paginasFunciones/funcionesUsuarios.php',funcAjax, 'POST','funcion=104&iU='+bD(iU),true);
+		}
+	}
+	msgConfirm('Est&aacute; seguro de querer remover la foto del usuario?',resp);
+
+}

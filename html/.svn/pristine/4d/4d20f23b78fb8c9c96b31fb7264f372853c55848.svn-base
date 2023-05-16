@@ -1,0 +1,847 @@
+<?php
+	function actualizarEnvioMagistrado($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		$consulta="UPDATE _944_tablaDinamica SET enviadoAMagistrado=1 WHERE id__944_tablaDinamica=".$idRegistro;
+		return $con->ejecutarConsulta($consulta);
+	}
+	
+	
+	function registrarPartesAplicaProvidencia($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		$arrPersonas=array();
+		$consulta="SELECT personasAplica FROM _899_tablaDinamica WHERE id__899_tablaDinamica=".$idRegistro;
+		$personasAplica=$con->obtenerValor($consulta);
+		
+		if(($personasAplica==0)||($personasAplica==""))
+			return true;
+		
+		$cAdminitrativa=obtenerCarpetaAdministrativaProceso($idFormulario,$idRegistro);
+		
+		$consulta="SELECT idActividad FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$cAdminitrativa."'";
+		$idActividad=$con->obtenerValor($consulta);
+		
+		switch($personasAplica)
+		{
+			case 1://Actor
+			
+				$consulta="SELECT * FROM 7005_relacionFigurasJuridicasSolicitud WHERE idActividad=".$idActividad." AND idFiguraJuridica IN(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='A')";
+				$rPartes=$con->obtenerFilas($consulta);
+				while($fila=mysql_fetch_assoc($rPartes))
+				{
+					array_push($arrPersonas,$fila["idParticipante"]);
+					$consulta="SELECT idParticipante FROM 7005_relacionParticipantes WHERE idActividad=".$idActividad." AND idActorRelacionado= ".$fila["idParticipante"];
+					$rPartesAux=$con->obtenerFilas($consulta);
+					while($filaAux=mysql_fetch_assoc($rPartesAux))
+					{
+						array_push($arrPersonas,$filaAux["idParticipante"]);
+					}
+				}
+			break;
+			case 2: //Demandados
+				$consulta="SELECT * FROM 7005_relacionFigurasJuridicasSolicitud WHERE idActividad=".$idActividad." AND idFiguraJuridica IN(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='D')";
+				$rPartes=$con->obtenerFilas($consulta);
+				while($fila=mysql_fetch_assoc($rPartes))
+				{
+					array_push($arrPersonas,$fila["idParticipante"]);
+					$consulta="SELECT idParticipante FROM 7005_relacionParticipantes WHERE idActividad=".$idActividad." AND idActorRelacionado= ".$fila["idParticipante"];
+					$rPartesAux=$con->obtenerFilas($consulta);
+					while($filaAux=mysql_fetch_assoc($rPartesAux))
+					{
+						array_push($arrPersonas,$filaAux["idParticipante"]);
+					}
+				}
+			break;
+			case 3: //Todos
+				$consulta="SELECT * FROM 7005_relacionFigurasJuridicasSolicitud WHERE idActividad=".$idActividad;
+				$rPartes=$con->obtenerFilas($consulta);
+				while($fila=mysql_fetch_assoc($rPartes))
+				{
+					array_push($arrPersonas,$fila["idParticipante"]);
+				}
+			break;
+		}
+		
+		$x=0;
+		$query=array();
+		$query[$x]="begin";
+		$x++;
+		
+		foreach($arrPersonas as $p)
+		{
+			$query[$x]="INSERT INTO _899_chkPartesJuridicasAplica(idPadre,idOpcion) VALUES(".$idRegistro.",".$p.")";
+			$x++;
+		}
+		$query[$x]="commit";
+		$x++;
+		
+		return $con->ejecutarBloque($query);
+	}
+	
+	
+	function registroDocumentoPrueba($idFormulario,$idRegistro)
+	{
+		global $con;
+		$consulta="INSERT INTO 9503_documentosRegistradosProceso(idActividad,idTipoDocumento,idFormulario,idReferencia) VALUES(-1,34,".$idFormulario.",".$idRegistro.")";
+		return $con->ejecutarConsulta($consulta);
+		
+	}
+	
+	
+	
+	function ejecutarAccionComplementariaProvidencias($idFormulario,$idRegistro)
+	{
+		global $con;
+		$consulta="SELECT * FROM _899_tablaDinamica WHERE id__899_tablaDinamica=".$idRegistro;
+		$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+
+		
+		switch($fRegistro["providenciaAplicar"])
+		{
+			case 20:
+				$consulta="SELECT idFormulario,idRegistro FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$fRegistro["carpetaAdministrativa"]."'";
+				$fRegistroCarpeta=$con->obtenerPrimeraFilaAsoc($consulta);
+				
+				
+				$consulta="SELECT * FROM _917_tablaDinamica WHERE idProcesoPadre=339 AND idReferencia=".$fRegistroCarpeta["idRegistro"];
+				$resFilas=$con->obtenerFilas($consulta);
+				while($fila=mysql_fetch_assoc($resFilas))
+				{
+					$arrDocumentos=NULL;
+					$arrDatos=array();
+					$arrDatos["medioNotificacion"]=1;
+					$arrDatos["carpetaAdministrativa"]=$fila["carpetaAdministrativa"];
+					$arrDatos["tipoEnvioNotificacion"]=1;
+					$arrDatos["tipoNotificacion"]=2;
+					$arrDatos["idProcesoPadre"]=323;
+					$arrDatos["figuraNotifica"]=3;
+					$arrDatos["idReferencia"]=$idRegistro;
+					$arrDatos["tipoDocumentosAdjunta"]="N/E";
+					$idRegistroInstancia=crearInstanciaRegistroFormulario(665,$idRegistro,1,$arrDatos,$arrDocumentos,-1,0);
+				}
+			break;
+		}
+			
+			
+			 
+			 
+			 
+			 
+			 
+			 
+			 
+			
+		
+		
+	}
+	
+	
+	function triggerDocumentoFormatoAutorizado($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+
+		$consulta="SELECT tipoDocumento FROM _696_tablaDinamica WHERE id__696_tablaDinamica=".$idRegistro;
+		$tipoDocumento=$con->obtenerValor($consulta);
+		
+		$consulta="SELECT metodoFirma FROM _10_tablaDinamica WHERE id__10_tablaDinamica=".$tipoDocumento;
+		$metodoFirma=$con->obtenerValor($consulta);
+		if($metodoFirma==2)
+		{
+			$consulta="SELECT idRegistro,carpetaAdministrativa FROM 7035_informacionDocumentos WHERE idFormulario=".$idFormulario." AND idReferencia=".$idRegistro;
+			$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+			$idReferenciaDocumento=$fRegistro["idRegistro"];
+			
+			
+			$consulta="SELECT tipoProceso FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$fRegistro["carpetaAdministrativa"]."'";
+
+			$tipoCarpetaAdministrativa=$con->obtenerValor($consulta);
+	
+			if($tipoCarpetaAdministrativa==8)
+			{
+				cambiarEtapaFormulario($idFormulario,$idRegistro,20,"",-1,"NULL","NULL",0);
+			}
+			else
+			{
+				$consulta="SELECT * FROM 941_bitacoraEtapasFormularios WHERE idFormulario=".$idFormulario." AND idRegistro=".$idRegistro." ORDER BY idRegistroEstado DESC";
+				$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);				
+		
+				switch($fRegistro["etapaActual"])
+				{
+					case 5:
+		
+						$consulta="UPDATE 3000_formatosRegistrados SET documentoBloqueado=2,idDocumentoAdjunto=idDocumento WHERE idFormulario=-2 AND idRegistro=".$idReferenciaDocumento;
+						$con->ejecutarConsulta($consulta);
+						cambiarEtapaFormulario($idFormulario,$idRegistro,6,"",-1,"NULL","NULL",0);
+					break;
+					case 6.5:
+						$consulta="UPDATE 3000_formatosRegistrados SET documentoBloqueado=2,idDocumentoAdjunto=idDocumento WHERE idFormulario=-2 AND idRegistro=".$idReferenciaDocumento;
+						$con->ejecutarConsulta($consulta);
+				
+						cambiarEtapaFormulario($idFormulario,$idRegistro,7,"",-1,"NULL","NULL",0);
+					break;
+				}
+			}
+		}
+
+		
+		
+	}
+	
+	
+	function marcarTerminoProcesalCumplido($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		
+		$idProceso=obtenerIdProcesoFormulario($idFormulario);
+		$cadParametros='{"idFormulario":"'.$idFormulario.'","idRegistro":"'.$idRegistro.'","idProceso":"'.$idProceso.'","idActorProceso":"0","campoTablaDestino":"","etapa":"0","idMacroProceso":"","idRegistroProcesoEtapaMacroProceso":"","idElementoEvaluacion":"","tipoElemento":"","idRegistroElemento":"","lblEtiquetaElemento":""}';
+		$objParametros=json_decode($cadParametros);			
+		
+		$cAdmonMacroProceso=new cMacroProcesoAdmon($idFormulario,$idRegistro,$objParametros);
+		
+		
+		$consulta="SELECT idRegistroElementoMacroProceso FROM _".$idFormulario."_tablaDinamica WHERE id__".$idFormulario."_tablaDinamica=".$idRegistro;
+		$idRegistroElementoMacroProceso=$con->obtenerValor($consulta);
+		if(($idRegistroElementoMacroProceso!="")&&($idRegistroElementoMacroProceso!="-1"))
+			return $cAdmonMacroProceso->marcarRegistroMacroProcesoAtendido($idRegistroElementoMacroProceso);
+		return true;
+	}
+	
+	
+	function triggerDocumentoActuacionAutorizado($idFormulario,$idRegistro)
+	{
+		global $con;
+
+		$consulta="SELECT providenciaAplicar FROM _899_tablaDinamica WHERE id__899_tablaDinamica=".$idRegistro;
+		$providenciaAplicar=$con->obtenerValor($consulta);
+		
+		
+		$consulta="SELECT plantillaAsociada FROM _624_tablaDinamica WHERE id__624_tablaDinamica=".$providenciaAplicar;
+		$plantillaAsociada=$con->obtenerValor($consulta);
+		
+		
+		$consulta="SELECT metodoFirma FROM _10_tablaDinamica WHERE id__10_tablaDinamica=".$plantillaAsociada;
+		$metodoFirma=$con->obtenerValor($consulta);
+	
+		if($metodoFirma==2)
+		{
+			$consulta="SELECT idRegistro FROM 7035_informacionDocumentos WHERE idFormulario=".$idFormulario." AND idReferencia=".$idRegistro;
+			$idReferenciaDocumento=$con->obtenerValor($consulta);
+			
+			
+			$consulta="SELECT * FROM 941_bitacoraEtapasFormularios WHERE idFormulario=".$idFormulario." AND idRegistro=".$idRegistro." ORDER BY idRegistroEstado DESC";
+
+			$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);				
+	
+			switch($fRegistro["etapaActual"])
+			{
+				case 5.5:
+	
+					$consulta="UPDATE 3000_formatosRegistrados SET documentoBloqueado=2,idDocumentoAdjunto=idDocumento WHERE idFormulario=-2 AND idRegistro=".$idReferenciaDocumento;
+					
+					$con->ejecutarConsulta($consulta);
+					
+					cambiarEtapaFormulario($idFormulario,$idRegistro,6,"",-1,"NULL","NULL",0);
+					
+				break;
+				case 6.5:
+					$consulta="UPDATE 3000_formatosRegistrados SET documentoBloqueado=2,idDocumentoAdjunto=idDocumento WHERE idFormulario=-2 AND idRegistro=".$idReferenciaDocumento;
+					$con->ejecutarConsulta($consulta);
+			
+					cambiarEtapaFormulario($idFormulario,$idRegistro,7,"",-1,"NULL","NULL",0);
+				break;
+			}
+		}
+
+		
+		
+	}
+	
+	function analisisRutaFirmaAcuerdoProvidencia($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		$consulta="SELECT providenciaAplicar FROM _899_tablaDinamica WHERE id__899_tablaDinamica=".$idRegistro;
+		$providenciaAplicar=$con->obtenerValor($consulta);
+		
+		
+		$consulta="SELECT plantillaAsociada FROM _624_tablaDinamica WHERE id__624_tablaDinamica=".$providenciaAplicar;
+		$plantillaAsociada=$con->obtenerValor($consulta);
+		
+		
+		$consulta="SELECT metodoFirma FROM _10_tablaDinamica WHERE id__10_tablaDinamica=".$plantillaAsociada;
+		$metodoFirma=$con->obtenerValor($consulta);
+		$etapaCambio=0;
+		switch($metodoFirma)
+		{
+			case 1;
+				$etapaCambio=4;
+			break;
+			case 2;
+				$etapaCambio=20;
+			break;
+		}
+		
+		return cambiarEtapaFormulario($idFormulario,$idRegistro,$etapaCambio,"",-1,"NULL","NULL",0);
+	}
+
+	function asignarDespachoAtencionSuplica($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		$consulta="SELECT tipoActuacion FROM _699_tablaDinamica WHERE id__699_tablaDinamica=".$idRegistro;
+		$tipoActuacion=$con->obtenerValor($consulta);
+		if($tipoActuacion==36)
+		{
+			$cAdminitrativa=obtenerCarpetaAdministrativaProceso($idFormulario,$idRegistro);
+			
+			$consulta="SELECT * FROM _699_tablaDinamica WHERE id__699_tablaDinamica=".$idRegistro;
+
+			$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+			$cAdminitrativa=$fRegistro["carpetaAdministrativaActuacionesIntervinientes"];
+			$consulta="SELECT despachoAsignado FROM 7006_carpetasAdministrativasDespachosColegiados WHERE carpetaAdministrativa='".$cAdminitrativa."'";
+
+			$despachoAsignado=$con->obtenerValor($consulta);
+			
+			$consulta="UPDATE _699_tablaDinamica SET campoComplementario='".$despachoAsignado."' WHERE id__699_tablaDinamica=".$idRegistro;
+			return $con->ejecutarCOnsulta($consulta);
+		}
+		return true;
+	}
+	
+	
+	
+	function asignarSecretariaCorteConstitucional($idFormulario,$idRegistro)
+	{
+		global $con;
+		$consulta="UPDATE _1004_tablaDinamica SET codigoInstitucion='1000000100030010' WHERE id__1004_tablaDinamica=".$idRegistro;
+		return $con->ejecutarConsulta($consulta);
+		
+	}
+	
+	function repartirDemandasProgramaTrabajo($idFormulario,$idRegistro)
+	{
+		global $con;
+	
+		$consulta="SELECT * FROM 04000_demandasProgramaTrabajo WHERE idFormulario=1108 AND idReferencia=".$idRegistro;
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+
+			cambiarEtapaFormulario(1004,$fila["iRegistro"],5,"",-1,"NULL","NULL",0);
+		}
+	}
+	
+	
+	function seSolicitaPruebasDemandadoAuto($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		
+		if(esDestinatarioNotificacionDemandado($idFormulario,$idRegistro)==0)
+			return 0;
+		
+		$consulta="SELECT idReferencia FROM _665_tablaDinamica WHERE id__665_tablaDinamica=".$idRegistro;
+		$idReferencia=$con->obtenerValor($consulta);
+		
+		
+		$consulta="SELECT solicitaPruebasDemandado FROM _1123_tablaDinamica WHERE idReferencia=".$idReferencia;
+		$solicitaPruebasDemandado=$con->obtenerValor($consulta);
+		
+		
+		return $solicitaPruebasDemandado==1?1:0;
+	}
+	
+	function seSolicitaPruebasDemandanteAuto($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		
+		if(esDestinatarioNotificacionDemandante($idFormulario,$idRegistro)==0)
+			return 0;
+		
+		$consulta="SELECT idReferencia FROM _665_tablaDinamica WHERE id__665_tablaDinamica=".$idRegistro;
+		$idReferencia=$con->obtenerValor($consulta);
+		
+		
+		$consulta="SELECT solicitaPruebasDemandate FROM _1123_tablaDinamica WHERE idReferencia=".$idReferencia;
+		$solicitaPruebasDemandate=$con->obtenerValor($consulta);
+		
+		
+		return $solicitaPruebasDemandate==1?1:0;
+	}
+	
+	function esProcesoAccionPublica($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+
+		$carpetaAdministrativa=obtenerCarpetaAdministrativaProceso($idFormulario,$idRegistro);
+		
+		$consulta="SELECT tipoProceso FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa."'";
+
+		$tipoCarpetaAdministrativa=$con->obtenerValor($consulta);
+
+		if($tipoCarpetaAdministrativa==8)
+		{
+			return 1;
+		}
+		
+		return 0;
+		
+	}
+	
+	function esProcesoDistintoAccionPublica($idFormulario,$idRegistro)
+	{
+		global $con;
+
+		$esProcesoAccionPublica=esProcesoAccionPublica($idFormulario,$idRegistro);
+
+		return $esProcesoAccionPublica==1?0:1;
+		
+	}
+	
+	
+	
+	function triggerDocumentoAsignacionDespachoColegiado($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		
+		$arrColegiados=array();
+		$carpetaAdministrativa=obtenerCarpetaAdministrativaProceso($idFormulario,$idRegistro);
+		
+		
+		$consulta="SELECT despachoAsignado FROM 7006_carpetasAdministrativasDespachosColegiados WHERE carpetaAdministrativa='".$carpetaAdministrativa."' order by orden";
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			array_push($arrColegiados,$fila["despachoAsignado"]);
+			
+		}
+
+		$consulta="SELECT tipoDocumento,idRegistro,carpetaAdministrativa FROM 7035_informacionDocumentos WHERE idFormulario=".$idFormulario." AND idReferencia=".$idRegistro;
+		$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+		$idReferenciaDocumento=$fRegistro["idRegistro"];
+		$tipoDocumento=$fRegistro["tipoDocumento"];
+		
+		
+		$consulta="SELECT despachoFimante,orden FROM _04001_firmasColegiadasDocumentos WHERE iFormulario=".$idFormulario." AND iRegistro=".$idRegistro." and firmado=0 order by orden desc";
+		$despachoFimante=$con->obtenerValor($consulta);
+		
+		if($despachoFimante=="")
+		{
+			$posFirmante=0;
+			$consulta="SELECT despachoFimante FROM _04001_firmasColegiadasDocumentos WHERE iFormulario=".$idFormulario." AND iRegistro=".$idRegistro." and firmado=1 order by idRegistro desc";
+			$despachoFimante=$con->obtenerValor($consulta);
+			if($despachoFimante!="")
+			{
+				for($x=0;$x<count($arrColegiados);$x++)
+				{
+					if($arrColegiados[$x]==$despachoFimante)
+					{
+						$posFirmante=$x;
+						$posFirmante++;
+						break;
+					}
+				}
+			}
+			$despachoFirmaActual=$arrColegiados[$posFirmante];
+			$consulta="INSERT INTO _04001_firmasColegiadasDocumentos(iFormulario,iRegistro,despachoFimante,orden) VALUES(".$idFormulario.",".$idRegistro.",'".$despachoFirmaActual."',".$posFirmante.")";
+			$con->ejecutarConsulta($consulta);
+		}
+		
+		$consulta="UPDATE 3000_formatosRegistrados SET documentoBloqueado=2,idDocumentoAdjunto=idDocumento WHERE idFormulario=-2 AND idRegistro=".$idReferenciaDocumento;
+		$con->ejecutarConsulta($consulta);
+			
+	}
+	
+	
+	function triggerDocumentoFirmadoDespachoColegiado($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		
+		$consulta="SELECT despachoFimante,orden,idRegistro FROM _04001_firmasColegiadasDocumentos WHERE iFormulario=".$idFormulario." AND iRegistro=".$idRegistro." and firmado=0 order by orden desc";
+		$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+		$despachoFimante=$fRegistro["despachoFimante"];
+		
+		
+		$consulta="UPDATE _04001_firmasColegiadasDocumentos SET firmado=1 WHERE idRegistro=".$fRegistro["idRegistro"];
+		$con->ejecutarConsulta($consulta);
+		
+		
+		$carpetaAdministrativa=obtenerCarpetaAdministrativaProceso($idFormulario,$idRegistro);
+		
+		$consulta="SELECT orden FROM 7006_carpetasAdministrativasDespachosColegiados WHERE carpetaAdministrativa='".$carpetaAdministrativa."' order by orden desc";
+		$orden=$con->obtenerValor($consulta);
+		if($fRegistro["orden"]>=($orden-1))
+		{
+			cambiarEtapaFormulario($idFormulario,$idRegistro,22,"",-1,"NULL","NULL",0);
+		}
+		else
+		{
+			cambiarEtapaFormulario($idFormulario,$idRegistro,20,"",-1,"NULL","NULL",0);
+		}
+		
+			
+	}
+	
+	function esAutoAdmiteAccionPublica($idFormulario,$idRegistro)
+	{
+		global $con;
+		$consulta="SELECT tipoDocumento FROM _696_tablaDinamica WHERE id__696_tablaDinamica=".$idRegistro;
+		$tipoDocumento=$con->obtenerValor($consulta);
+		
+		return $tipoDocumento==685?1:0;
+			
+	}
+	
+	function reemplazarContestacionDemanda($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		$consulta="SELECT * FROM _707_tablaDinamica WHERE id__707_tablaDinamica=".$idRegistro;
+		$fRegistroBase=$con->obtenerPrimeraFilaAsoc($consulta);
+		
+		$consulta="SELECT * FROM _707_tablaDinamica WHERE carpetaAdministrativa='".$fRegistroBase["carpetaAdministrativa"]."' AND promovente=".$fRegistroBase["promovente"].
+				" AND codigoInstitucion='".$fRegistroBase["codigoInstitucion"]."' and id__707_tablaDinamica<>".$idRegistro;
+	
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			cambiarEtapaFormulario(707,$fila["id__707_tablaDinamica"],20,"",-1,"NULL","NULL",0);
+		}
+	}
+	
+	function esDocumentoNotificaRelatoria($idFormulario,$idRegistro)
+	{
+		global $con;
+		$consulta="SELECT tipoDocumento FROM 7035_informacionDocumentos WHERE idFormulario=".$idFormulario." AND idReferencia=".$idRegistro;
+
+		$tipoDocumento=$con->obtenerValor($consulta);
+	
+		$consulta="SELECT envioRelatoria FROM _10_tablaDinamica WHERE id__10_tablaDinamica=".$tipoDocumento;
+		$envioRelatoria=$con->obtenerValor($consulta);
+		
+		
+		return $envioRelatoria;
+	
+	}
+	
+	function obtenerDocumentoNotificaRelatoria($idFormulario,$idRegistro)
+	{
+		global $con;
+		$consulta="SELECT idRegistro FROM 7035_informacionDocumentos WHERE idFormulario=".$idFormulario." AND idReferencia=".$idRegistro;
+		$iRegistro=$con->obtenerValor($consulta);
+	
+	
+	
+		$consulta="SELECT * FROM 3000_formatosRegistrados WHERE idFormulario=-2 AND idRegistro=".$iRegistro;
+		$fRegistroFormato=$con->obtenerPrimeraFilaAsoc($consulta);
+		$idDocumento=$fRegistroFormato["idDocumento"];
+		
+		return $idDocumento;
+	
+	}
+	
+	
+
+	
+	
+	function esAutoCierraManualExpediente($idFormulario,$idRegistro)
+	{
+		global $con;
+		$nombreTabla=obtenerNombreTabla($idFormulario);
+		$consulta="SELECT tipoDocumento FROM ".$nombreTabla." WHERE id_".$nombreTabla."=".$idRegistro;
+
+		$tipoDocumento=$con->obtenerValor($consulta);
+		
+		$consulta="SELECT cierreExpediente FROM _10_tablaDinamica WHERE id__10_tablaDinamica=".$tipoDocumento;
+		$cierreExpediente=$con->obtenerValor($consulta);
+		return ($cierreExpediente==1)?1:0;
+	}
+	
+	function esAutoCierraAutomaticoExpediente($idFormulario,$idRegistro)
+	{
+		global $con;
+		$nombreTabla=obtenerNombreTabla($idFormulario);
+		$consulta="SELECT tipoDocumento FROM ".$nombreTabla." WHERE id_".$nombreTabla."=".$idRegistro;
+
+		$tipoDocumento=$con->obtenerValor($consulta);
+		
+		$consulta="SELECT cierreExpediente FROM _10_tablaDinamica WHERE id__10_tablaDinamica=".$tipoDocumento;
+		$cierreExpediente=$con->obtenerValor($consulta);
+		return ($cierreExpediente==2)?1:0;
+	}
+	
+	function cambiarEtapaOrdenSinRepuestaEmbargo($idFormulario,$idRegistro)
+	{
+		global $con;
+
+		$nombreTabla=obtenerNombreTabla($idFormulario);
+		$consulta="SELECT idProcesoPadre,idReferencia 
+				FROM ".$nombreTabla." WHERE id_".$nombreTabla."=".$idRegistro;
+		$fNotificacionBase=$con->obtenerPrimeraFilaAsoc($consulta);
+		$idFormularioBase=obtenerFormularioBase($fNotificacionBase["idProcesoPadre"]);
+		$nombreTabla=obtenerNombreTabla($idFormularioBase);
+		
+		$consulta="SELECT idProcesoPadre,idReferencia FROM _708_tablaDinamica WHERE id__708_tablaDinamica=".$fNotificacionBase["idReferencia"];
+		$fRegistroSolicitudNotificacion=$con->obtenerPrimeraFilaAsoc($consulta);
+		if($fRegistroSolicitudNotificacion["idProcesoPadre"]==373)
+		{
+			return cambiarEtapaFormulario(1140,$fRegistroSolicitudNotificacion["idReferencia"],4,"",-1,"NULL","NULL",0);
+			
+			
+		}
+		
+		
+	}
+	
+	function calcularTiempoRetencionArchivoGestion($idFormulario,$idRegistro)
+	{
+		global $con;
+		$consulta="SELECT carpetaAdministrativa FROM _634_tablaDinamica WHERE id__634_tablaDinamica=".$idRegistro;
+		$carpetaAdministrativa=$con->obtenerValor($consulta);
+		
+		$consulta="SELECT tipoProceso FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa."'"; 
+		$tipoProceso=$con->obtenerValor($consulta);
+		
+		
+		$filaFinal=null;
+		
+		$consulta="SELECT trd,serie,subserie FROM _1126_tablaDinamica WHERE idReferencia=".$tipoProceso;
+		$fila=$con->obtenerPrimeraFilaAsoc($consulta);
+	 	if(($fila["subserie"]!="") &&($fila["subserie"]!="-1") )
+		{
+			$consulta="SELECT * FROM 908_registrosTablasRetencionDocumental WHERE idRegistro=".$fila["subserie"];
+		}
+		else
+		{
+			$consulta="SELECT * FROM 908_registrosTablasRetencionDocumental WHERE idRegistro=".$fila["serie"];
+		}
+		
+		$filaFinal=$con->obtenerPrimeraFilaAsoc($consulta);
+		$fechaActual=strtotime(date("Y-m-d"));	
+		$intervalo="";
+		switch($filaFinal["unidadRetencionArchivoGestion"])
+		{
+			case 1:
+				$intervalo="days";
+			break;
+			case 2:
+				$intervalo="months";
+			break;
+			case 3:
+				$intervalo="years";
+			break;
+		}
+		$fechaVencimiento=strtotime("+".$filaFinal["retencionArchivoGestion"]." ".$intervalo,$fechaActual);	
+		
+		return "'".date("Y-m-d",$fechaVencimiento)."'";
+	}
+	
+	function calcularTiempoRetencionArchivoCentral($idFormulario,$idRegistro)
+	{
+		global $con;
+		$consulta="SELECT carpetaAdministrativa FROM _634_tablaDinamica WHERE id__634_tablaDinamica=".$idRegistro;
+		$carpetaAdministrativa=$con->obtenerValor($consulta);
+		
+		$consulta="SELECT tipoProceso FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa."'"; 
+		$tipoProceso=$con->obtenerValor($consulta);
+		
+		
+		$filaFinal=null;
+		
+		$consulta="SELECT trd,serie,subserie FROM _1126_tablaDinamica WHERE idReferencia=".$tipoProceso;
+		$fila=$con->obtenerPrimeraFilaAsoc($consulta);
+	 	if(($fila["subserie"]!="") &&($fila["subserie"]!="-1") )
+		{
+			$consulta="SELECT * FROM 908_registrosTablasRetencionDocumental WHERE idRegistro=".$fila["subserie"];
+		}
+		else
+		{
+			$consulta="SELECT * FROM 908_registrosTablasRetencionDocumental WHERE idRegistro=".$fila["serie"];
+		}
+		
+		$filaFinal=$con->obtenerPrimeraFilaAsoc($consulta);
+		$fechaActual=strtotime(date("Y-m-d"));	
+		$intervalo="";
+		switch($filaFinal["unidadRetencionArchivoCentral"])
+		{
+			case 1:
+				$intervalo="days";
+			break;
+			case 2:
+				$intervalo="months";
+			break;
+			case 3:
+				$intervalo="years";
+			break;
+		}
+		$fechaVencimiento=strtotime("+".$filaFinal["retencionArchivoCentral"]." ".$intervalo,$fechaActual);	
+		
+		return "'".date("Y-m-d",$fechaVencimiento)."'";
+	}
+	
+	function calcularTiempoAplazamiento($idFormulario,$idRegistro)
+	{
+		global $con;
+		$consulta="SELECT carpetaAdministrativa FROM _1195_tablaDinamica WHERE id__1195_tablaDinamica=".$idRegistro;
+		$carpetaAdministrativa=$con->obtenerValor($consulta);
+		$consulta="SELECT periodoAplazamiento,unidadPeriodoAplazamiento FROM _1209_tablaDinamica WHERE idReferencia=".$idRegistro;
+		$filaFinal=$con->obtenerPrimeraFilaAsoc($consulta);
+		$fechaActual=strtotime(date("Y-m-d"));	
+		$intervalo="";
+		switch($filaFinal["unidadPeriodoAplazamiento"])
+		{
+			case 1:
+				$intervalo="days";
+			break;
+			case 2:
+				$intervalo="months";
+			break;
+			case 3:
+				$intervalo="years";
+			break;
+		}
+		$fechaVencimiento=strtotime("+".$filaFinal["periodoAplazamiento"]." ".$intervalo,$fechaActual);	
+		
+		return "'".date("Y-m-d",$fechaVencimiento)."'";
+	}
+	
+	
+	function removerArchivosRepositorioCentral($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		$consulta="SELECT carpetaAdministrativa FROM _1195_tablaDinamica WHERE id__1195_tablaDinamica=".$idRegistro;
+		$carpetaAdministrativa=$con->obtenerValor($consulta);
+		
+		$consulta="UPDATE 7007_contenidosCarpetaAdministrativa SET eliminadoRepositorio=1 WHERE carpetaAdministrativaRaiz='".$carpetaAdministrativa."'";
+		if($con->ejecutarConsulta($consulta))
+		{
+		
+		
+			$comentariosAdicionales="Se confirma la eliminación del expediente: ".$carpetaAdministrativa." debido a que su tiempo de retención en archivo central a concluído";
+		
+			guardarRegistroBitacoraSistema("Proceso: Registro de vencimiento de tiempo de retención",$idRegistro,16,$comentariosAdicionales);
+		}
+		return true;
+	}
+	
+	function aplazarEliminacionArchivosRepositorioCentral($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		
+		$consulta="SELECT carpetaAdministrativa FROM _1195_tablaDinamica WHERE id__1195_tablaDinamica=".$idRegistro;
+		$carpetaAdministrativa=$con->obtenerValor($consulta);
+		
+		$consulta="SELECT motivoAplazamiento FROM _1209_tablaDinamica WHERE idReferencia=".$idRegistro;
+		$motivoAplazamiento=$con->obtenerValor($consulta);
+		
+		$comentariosAdicionales="Se aplaza la eliminación del expediente: ".$carpetaAdministrativa." toda vez que su tiempo de retención en archivo central a concluído.<br><br>Motivo:<br><br>".$motivoAplazamiento;
+		
+		guardarRegistroBitacoraSistema("Proceso: Registro de vencimiento de tiempo de retención",$idRegistro,15,$comentariosAdicionales);
+	}
+	
+	
+	function copiarAutoNotificacionLevantamientoEmbargo($idFormulario,$idRegistro)
+	{
+		global $con;
+
+		$consulta="SELECT idRegistroElementoMacroProceso FROM _981_tablaDinamica WHERE id__981_tablaDinamica=".$idRegistro;
+		$idReferenciaArrancador=$con->obtenerValor($consulta);
+		
+		$consulta="SELECT iFormulario,iRegistro FROM 00013_registrosMacroProceso WHERE idRegistro=".$idReferenciaArrancador;
+
+		$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+
+		
+		$consulta="INSERT INTO 9074_documentosRegistrosProceso(idFormulario,idRegistro,idDocumento,tipoDocumento)
+				 SELECT '".$idFormulario."' AS idFormulario,'".$idRegistro."' AS idRegistro,idDocumento,'1' as tipoDocumento 
+				 FROM 9074_documentosRegistrosProceso WHERE idFormulario=".$fRegistro["iFormulario"]." AND idRegistro=".$fRegistro["iRegistro"];
+
+		return $con->ejecutarConsulta($consulta);		 
+		
+	}
+	
+	function cambiarSituacionAudiencia($idFormulario,$idRegistro,$situacionAudiencia)
+	{
+		global $con;
+		$consulta="UPDATE 7000_eventosAudiencia SET situacion=".$situacionAudiencia." WHERE idFormulario=".$idFormulario.
+				" AND idRegistroSolicitud=".$idRegistro;
+		return $con->ejecutarConsulta($consulta);
+	}
+	
+	
+	function suspenderTerminosProcesales($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		$consulta="SELECT carpetaAdministrativa,ambitoAplicacion FROM _1234_tablaDinamica WHERE id__1234_tablaDinamica=".$idRegistro;
+		$fRegistroBase=$con->obtenerPrimeraFilaAsoc($consulta);
+		if($fRegistroBase["ambitoAplicacion"]==1)
+		{
+			$carpetaAdministrativa="'".$fRegistroBase["carpetaAdministrativa"]."'";
+		}
+		
+
+		
+		$consulta="UPDATE 00013_registrosMacroProceso SET situacionActual=5,fechaOriginalTermino=fechaMaximaAtencion,fechaSuspension='".date("Y-m-d")."',iFormularioSuspension=".$idFormulario.
+					",iRegistroSuspension=".$idRegistro.",fechaMaximaAtencion=NULL WHERE carpetaAdministrativa in(".$carpetaAdministrativa.")
+					AND fechaMaximaAtencion IS NOT NULL AND situacionActual=1";
+		return $con->ejecutarConsulta($consulta);
+	}
+	
+	
+	function reanudarTerminosProcesales($idFormulario,$idRegistro)
+	{
+		global $con;
+		$fechaActual=date("Y-m-d");
+		$x=0;
+		$query[$x]="begin";
+		$x++;
+		$consulta="SELECT * FROM 00013_registrosMacroProceso WHERE iFormularioSuspension=".$idFormulario." AND iRegistroSuspension=".$idRegistro;
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+
+			$diferenciaDias=obtenerDiferenciaDiasHabiles($fila["fechaSuspension"],$fila["fechaOriginalTermino"]);
+			$diferenciaDias++;
+
+			
+			
+			$nuevaFecha=sumarDiasHabiles($fechaActual,$diferenciaDias);
+			$query[$x]="UPDATE 00013_registrosMacroProceso SET fechaMaximaAtencion='".($nuevaFecha." ".date("H:i",strtotime($fila["fechaOriginalTermino"])))."',situacionActual=1 WHERE idRegistro=".$fila["idRegistro"];
+			$x++;
+		}
+		
+		$query[$x]="commit";
+		$x++;
+		
+		eB($query);
+		
+	}
+	
+	function esDocumentoSuspendeTerminos($idFormulario,$idRegistro)
+	{
+		global $con;
+		$consulta="SELECT tipoDocumento FROM 7035_informacionDocumentos WHERE idFormulario=".$idFormulario." AND idReferencia=".$idRegistro;
+
+		$tipoDocumento=$con->obtenerValor($consulta);
+
+		$consulta="SELECT suspendeTerminos FROM _10_tablaDinamica WHERE id__10_tablaDinamica=".$tipoDocumento;
+		$suspendeTerminos=$con->obtenerValor($consulta);
+		
+		
+		return $suspendeTerminos;
+	
+	}
+	
+?>

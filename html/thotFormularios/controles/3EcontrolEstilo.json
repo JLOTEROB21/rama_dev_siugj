@@ -1,0 +1,7 @@
+{
+	"id":"btnEstilo",
+	"funcion":"mostrarVentanaAdmonEstilos()",
+	"titulo":"Crear estilo",
+	"icono":"paintbrush.png",
+	"script":"estilo.js.php"
+}

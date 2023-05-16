@@ -1,0 +1,8 @@
+{
+	"id":"btnAddAyuda",
+	"funcion":"mostrarVentanaAyuda()",
+	"titulo":"Agregar/modificar mensaje de ayuda",
+	"icono":"sInterrogacion.jpg",
+	"script":"ayuda.js.php",
+	"deshabilitado":"1"
+}

@@ -1,0 +1,95 @@
+<?php
+include("conexionBD.php");
+
+if(isset($_GET['id'])) 
+{	
+	$idDocumento=bD($_GET['id']);
+	
+	if(strpos($idDocumento,"_")===false)
+	{
+		$sql = "SELECT nomArchivoOriginal,documento,tipoArchivo,tamano,enBD,documentoRepositorio FROM 908_archivos WHERE idArchivo=".$idDocumento;
+		
+		$res=$con->obtenerRegistros($sql);
+		$res[0]=str_replace(",","",$res[0]);
+		header("Content-type: ".$res[2]);
+		header("Content-length: ".$res[3]); 
+
+		header("Content-Disposition: attachment; filename=".$res[0]);
+
+		if($res[4]==1)
+			echo $res[1];
+		else
+		{
+			if(file_exists($baseDir."/documentosUsr/archivo_".bD($_GET["id"])))
+				readfile($baseDir."/documentosUsr/archivo_".bD($_GET["id"]));
+			else
+			{
+				$rutaDocumento=obtenerRutaDocumento(bD($_GET["id"]));
+		
+				if($rutaDocumento!="")
+				{
+					if(strpos($rutaDocumento,"http")!==false)
+					{
+						$cuerpoDocumento=file_get_contents($rutaDocumento);
+						echo bD($cuerpoDocumento);
+					}
+					else
+					{
+						header("Content-length: ".filesize($rutaDocumento));
+						readfile($rutaDocumento);
+					}
+				}
+				else
+				{
+					if($res[5]!="")
+					{
+						$cadObj=file_get_contents("http://10.2.51.41:8000/api/document?instanceName=tsj&idGlobal=".$res[5]);
+						$objDocumento=json_decode($cadObj);
+						
+						echo bD($objDocumento->file64);
+						
+					}
+					else
+						echo file_get_contents("http://172.19.202.116/paginasFunciones/obtenerDocumentoEditorArchivos.php?id=".$_GET['id']."&nombreArchivo=".$res[0]);
+				}
+			}
+		}
+	}
+	else
+	{
+
+		
+		
+		
+		if(file_exists($baseDir."/archivosTemporales/".$idDocumento))
+		{
+			header("Content-length: ".filesize($baseDir."/archivosTemporales/".$idDocumento)); 
+			header("Content-Disposition: attachment; filename=".$idDocumento);
+			readfile($baseDir."/archivosTemporales/".$idDocumento);
+		}
+		else
+		{
+			$arrArchivos=explode("_",bD($_GET["id"]));
+			$rutaDocumento=obtenerRutaDocumento($arrArchivos[sizeof($arrArchivos)-1]);
+
+			if($rutaDocumento!="")
+			{
+				$sql = "SELECT nomArchivoOriginal,documento,tipoArchivo,tamano,enBD,documentoRepositorio FROM 908_archivos WHERE idArchivo=".$arrArchivos[sizeof($arrArchivos)-1];
+				$filaArchivo=$con->obtenerPrimeraFilaAsoc($sql);
+				if(strpos($rutaDocumento,"http")!==false)
+				{
+					$cuerpoDocumento=file_get_contents($rutaDocumento);
+					echo bD($cuerpoDocumento);
+				}
+				else
+				{
+					header("Content-type: application/pdf");
+					header("Content-Disposition: attachment; filename=".$filaArchivo["nomArchivoOriginal"]);
+					header("Content-length: ".filesize($rutaDocumento));
+					readfile($rutaDocumento);
+				}
+			}
+		}
+	}
+}
+?>

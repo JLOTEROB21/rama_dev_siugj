@@ -1,0 +1,7 @@
+{
+	"id":"btnAddTexto",
+	"funcion":"mostrarVentanaPreguntasAbiertas()",
+	"titulo":"Insertar campo de texto",
+	"icono":"textfield_add.png",
+	"script":"campoTexto.js.php"
+}

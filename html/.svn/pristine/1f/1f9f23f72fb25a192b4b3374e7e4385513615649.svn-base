@@ -1,0 +1,72 @@
+<?php
+	session_start();
+
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+
+	$idFormulario=bD($_GET["iF"]);
+
+	$idRegistro=bD($_GET["iR"]);
+
+	$idRef=bD($_GET["iRef"]);
+
+	$fechaActual=date("Y-m-d")	;
+
+	$horaActual=date("H:i");
+
+	
+	$consulta="SELECT p.cuantia FROM _1162_tablaDinamica r,_1163_tablaDinamica p WHERE id__1162_tablaDinamica=9
+				AND p.carpetaAdministrativa=r.carpetaAdministrativa";
+	$cuantia=$con->obtenerValor($consulta);	
+
+
+
+?>
+var cadenaFuncionValidacion='validarSumaDeposito';
+var cuantia=<?php echo $cuantia?>;
+
+
+function inyeccionCodigo()
+{
+	
+	
+}
+
+function beforeEdit_15515(rowEdit,fila)
+{
+	gEx('editor_porcentaje').on('change',function(ctrl,nuevoValor,viejoValor)
+    									{
+                                        	gEx('editor_montoAsignacion').setValue(cuantia*(nuevoValor/100));
+                                        }
+    						)
+    gEx('editor_montoAsignacion').on('change',function(ctrl,nuevoValor,viejoValor)
+    									{
+                                        	var pocentaje=(nuevoValor*100)/cuantia;
+                                        	gEx('editor_porcentaje').setValue(pocentaje);
+                                        }
+                                     )
+}
+
+
+function validarSumaDeposito()
+{
+	var x;
+    var fila;
+    var grid=gEx('grid_15515');
+    var sumaTotal=0;
+    for(x=0;x<grid.getStore().getCount();x++)
+    {
+    	fila=grid.getStore().getAt(x);
+        sumaTotal+=parseFloat(fila.data.porcentaje);
+        
+        
+    }
+
+    if(sumaTotal!=100)
+    {
+    	msgBox('La suma total del porcentaje debe ser igual a 100%');
+    	return false;
+    }
+    
+    return true;
+}

@@ -1,0 +1,234 @@
+<?php include_once("conexionBD.php");
+class cInformacionSistema
+{
+	
+	function cInformacionSistema()
+	{
+		
+	}
+	
+	
+	function obtenerInformacionTablaSistema()
+	{
+		
+		global $con;
+		try
+		{
+			$consulta="select TABLE_NAME,ENGINE,TABLE_TYPE,TABLE_COLLATION  from information_schema.TABLES where TABLE_SCHEMA='".$con->bdActual."' AND TABLE_TYPE<>'VIEW'";
+			$arrRegistros=$con->obtenerFilasJSON($consulta);
+			
+			
+			$cadObj='{"resultado":"1","registros":'.$arrRegistros.'}';
+			
+			return $cadObj;
+			
+		}
+		catch(Exception $e)
+		{
+			return '{"resultado":"0","error":"'.cv($e->getMessage()).'","codigoError":"30"}';
+
+		}
+	}
+	
+	function obtenerInformacionTablaDetalleSistema($nombreTabla)
+	{
+		
+		global $con;
+		
+		try
+		{
+			$consulta="select TABLE_NAME,ENGINE,TABLE_TYPE,TABLE_COLLATION  from information_schema.TABLES where TABLE_SCHEMA='".$con->bdActual."' and TABLE_NAME='".$nombreTabla."'";
+			$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+			if(!$fRegistro)
+			{
+				$cadObj='{"resultado":"0","error":"La tabla solicitada NO existe","codigoError":"20"}';
+			}
+			else
+			{
+				$arrInfoTablas="";
+				
+				
+				$consulta="SELECT COLUMN_NAME,COLUMN_DEFAULT,IS_NULLABLE,DATA_TYPE,CHARACTER_MAXIMUM_LENGTH,NUMERIC_PRECISION,COLUMN_TYPE,
+						COLUMN_KEY,EXTRA FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='".$con->bdActual."' AND TABLE_NAME='".$nombreTabla."'
+						order by ORDINAL_POSITION";
+				$arrEsquema=utf8_encode($con->obtenerFilasJSON($consulta));				
+				
+						
+				
+				
+				$aIndice=array();
+				$arrIndice="";
+				$infoTbl='{"TABLE_NAME":"'.$fRegistro["TABLE_NAME"].'","ENGINE":"'.$fRegistro["ENGINE"].'","TABLE_TYPE":"'.$fRegistro["TABLE_TYPE"].
+							'","TABLE_COLLATION":"'.$fRegistro["TABLE_COLLATION"].'"}';
+				$consulta="SHOW INDEX FROM ".$nombreTabla;
+				$resIndice=$con->obtenerFilas($consulta);
+				while($fIndice=mysql_fetch_assoc($resIndice))
+				{
+					if(!isset($aIndice[$fIndice["Key_name"]]))
+					{
+						$aIndice[$fIndice["Key_name"]]=array();
+						$aIndice[$fIndice["Key_name"]]="";
+					}
+					if($aIndice[$fIndice["Key_name"]]=="")
+						$aIndice[$fIndice["Key_name"]]="'".$fIndice["Column_name"]."'";
+					else
+						$aIndice[$fIndice["Key_name"]].=",'".$fIndice["Column_name"]."'";
+					
+				}
+				foreach($aIndice as $nombreIndice=>$campos)
+				{
+					$oIndice='{"nombreIndice":"'.cv($nombreIndice).'","campos":"'.$campos.'"}';
+					if($arrIndice=="")
+						$arrIndice=$oIndice;
+					else
+						$arrIndice.=",".$oIndice;
+				}
+				$infoTabla='{"tablaBase":'.$infoTbl.',"esquema":'.$arrEsquema.',"indices":['.$arrIndice.']}';
+				
+				
+				$cadObj= '{"resultado":"1","infoTabla":['.$infoTabla.']}';
+			}
+			return $cadObj;
+			
+		}
+		catch(Exception $e)
+		{
+			return '{"resultado":"0","error":"'.cv($e->getMessage()).'","codigoError":"30"}';
+
+		}
+	}
+
+	function obtenerRegistrosTablaDetalleSistema($nombreTabla)
+	{
+		global $con;
+		
+		try
+		{
+			$consulta="select TABLE_NAME,ENGINE,TABLE_TYPE,TABLE_COLLATION  from information_schema.TABLES where TABLE_SCHEMA='".$con->bdActual."' and TABLE_NAME='".$nombreTabla."'";
+			$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+			if(!$fRegistro)
+			{
+				$cadObj='{"resultado":"0","error":"La tabla solicitada NO existe","codigoError":"20"}';
+			}
+			else
+			{
+				$consulta="SELECT * FROM ".$nombreTabla;
+				
+				$arrRegistros=utf8_encode($con->obtenerFilasJSON($consulta));	
+				
+				
+				$cadObj= '{"resultado":"1","arrRegistros":'.$arrRegistros.'}';
+			}
+			return $cadObj;
+			
+		}
+		catch(Exception $e)
+		{
+			return '{"resultado":"0","error":"'.cv($e->getMessage()).'","codigoError":"30"}';
+
+		}
+	}
+
+	function obtenerInformacionVistasDetalleSistema()
+	{
+		
+		global $con;
+		
+		try
+		{
+			$arrRegistros='';
+			$consulta="SELECT TABLE_NAME,VIEW_DEFINITION FROM information_schema.VIEWS WHERE TABLE_SCHEMA='".$con->bdActual."'";
+			$res=$con->obtenerFilas($consulta);
+			while($fila=mysql_fetch_assoc($res))
+			{
+				$o='{"TABLE_NAME":"'.$fila["TABLE_NAME"].'","VIEW_DEFINITION":"'.bE($fila["VIEW_DEFINITION"]).'"}';
+				if($arrRegistros=="")
+					$arrRegistros=$o;
+				else
+					$arrRegistros.=",".$o;
+			}
+			
+			$cadObj='{"resultado":"1","registros":'.$arrRegistros.'}';
+			return $cadObj;
+		}
+		catch(Exception $e)
+		{
+			return '{"resultado":"0","error":"'.cv($e->getMessage()).'","codigoError":"30"}';
+
+		}
+	}
+	
+	function obtenerInformacionProcedimientosAlmacenadosDetalleSistema()
+	{
+		
+		global $con;
+		
+		try
+		{
+			$arrRegistros='';
+			$consulta="SELECT ROUTINE_NAME,ROUTINE_DEFINITION FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA='".$con->bdActual."'";
+			$res=$con->obtenerFilas($consulta);
+			while($fila=mysql_fetch_assoc($res))
+			{
+				$consulta="SHOW CREATE PROCEDURE ".$con->bdActual.".".$fila["ROUTINE_NAME"];
+				$fProcedimiento=$con->obtenerPrimeraFilaAsoc($consulta);
+
+				$consulta="SELECT PARAMETER_NAME,DATA_TYPE  FROM information_schema.PARAMETERS WHERE SPECIFIC_SCHEMA='".$con->bdActual.
+						"' AND SPECIFIC_NAME='".cv($fila["ROUTINE_NAME"])."' ORDER BY ORDINAL_POSITION";
+				$arrParametros=$con->obtenerFilasJSON($consulta);		
+				$o='{"ROUTINE_NAME":"'.$fila["ROUTINE_NAME"].'","ROUTINE_DEFINITION":"'.bE($fila["ROUTINE_DEFINITION"]).'","PARAMETERS":'.$arrParametros.'}';
+				if($arrRegistros=="")
+					$arrRegistros=$o;
+				else
+					$arrRegistros.=",".$o;
+			}
+			
+			$cadObj='{"resultado":"1","registros":'.$arrRegistros.'}';
+			return $cadObj;
+		}
+		catch(Exception $e)
+		{
+			return '{"resultado":"0","error":"'.cv($e->getMessage()).'","codigoError":"30"}';
+
+		}
+	}
+	
+	function obtenerInformacionTriggersDetalleSistema()
+	{
+		
+		global $con;
+		
+		try
+		{
+			$arrRegistros='';
+			$consulta="SELECT TRIGGER_NAME,ACTION_TIMING,EVENT_MANIPULATION,EVENT_OBJECT_TABLE,ACTION_STATEMENT FROM 
+						information_schema.TRIGGERS WHERE TRIGGER_SCHEMA='".$con->bdActual."'";
+			$res=$con->obtenerFilas($consulta);
+			while($fila=mysql_fetch_assoc($res))
+			{
+				$o='{"TRIGGER_NAME":"'.$fila["ACTION_TIMING"].'","EVENT_MANIPULATION":"'.$fila["EVENT_MANIPULATION"].'","EVENT_OBJECT_TABLE":"'.
+					$fila["EVENT_OBJECT_TABLE"].'","ACTION_STATEMENT":"'.bE($fila["ACTION_STATEMENT"]).'"}';
+				if($arrRegistros=="")
+					$arrRegistros=$o;
+				else
+					$arrRegistros.=",".$o;
+			}
+			
+			$cadObj='{"resultado":"1","registros":'.$arrRegistros.'}';
+			return $cadObj;
+		}
+		catch(Exception $e)
+		{
+			return '{"resultado":"0","error":"'.cv($e->getMessage()).'","codigoError":"30"}';
+
+		}
+	}
+	
+	
+	
+   
+	
+}    
+
+
+?>

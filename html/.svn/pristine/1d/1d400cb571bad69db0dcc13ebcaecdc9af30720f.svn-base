@@ -1,0 +1,246 @@
+/* CSS Document */
+
+.fc-axis span
+{
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 20px;
+	color: #2B2B2B;
+}
+
+.fc-unthemed .fc-today
+{
+	/*background-color:#FFF;*/
+}
+
+.fc-slats table tbody tr
+{
+	height:50px;
+}
+
+.fc-ltr .fc-axis 
+{
+    text-align: center !important;
+}
+
+
+.filaHoraCero
+{
+	border-bottom-style: dashed;
+    border-bottom-width: 1.5px;
+}
+
+.fc-day-grid
+{
+	
+}
+
+.fc-divider
+{
+	
+}
+
+.tituloCalendarioDia
+{
+	font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+    color: #2B2B2B;
+}
+
+.tituloCalendarioFechaDia
+{
+	font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 300;
+    font-size: 30px;
+    line-height: 37px;
+    color: #2B2B2B;
+}
+
+
+.fc-state-default 
+{
+	background-color: transparent;
+	background-image:none;
+	border-color: #E6EFFD;
+	border: none;
+	
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 600;
+	font-size: 16px !important;
+	height:50px !important;
+	line-height: 30px;
+	color: #656572;
+}
+
+.fc-button-group
+{
+	background: #E6EFFD;
+	border-radius: 50px;
+}
+
+
+.fc-state-down, .fc-state-active 
+{
+    background-color: #1A3E9A;
+    background-image: none;
+    box-shadow:none;
+}
+
+
+.fc-state-default.fc-corner-left
+{
+	width:85px;
+}
+
+
+.fc-state-default.fc-corner-right
+{
+	width:85px;
+}
+
+.fc-state-default.fc-corner-right.fc-state-active
+{
+	background-color:#1A3E9A !important;
+	color:#FFF !important;
+	border-radius: 50px;
+}
+
+.fc-state-default.fc-corner-left.fc-state-active
+{
+	background-color:#1A3E9A !important;
+	color:#FFF !important;
+	border-radius: 50px;
+}
+
+.fc-state-default.fc-state-active
+{
+	background-color:#1A3E9A !important;
+	color:#FFF !important;
+
+}
+
+
+.fc-state-default.fc-corner-right.fc-state-down
+{
+	background-color:#1A3E9A !important;
+	color:#FFF !important;
+	border-radius: 50px;
+	-moz-opacity: 0.6 !important;
+    opacity: .6  !important;
+    filter: alpha(opacity=60)  !important;	
+}
+
+.fc-state-default.fc-corner-left.fc-state-down
+{
+	background-color:#1A3E9A !important;
+	color:#FFF !important;
+	border-radius: 50px;
+	-moz-opacity: 0.6 !important;
+    opacity: .6  !important;
+    filter: alpha(opacity=60)  !important;	
+}
+
+.fc-state-default.fc-state-down
+{
+	background-color:#1A3E9A !important;
+	-moz-opacity: 0.6 !important;
+    opacity: .6  !important;
+    filter: alpha(opacity=60)  !important;	
+	color:#FFF !important;
+
+}
+
+
+.letraHoraEventoDia
+{
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 600;
+	font-size: 16px;
+	line-height: 20px;
+	color: #2B2B2B;
+
+}
+
+.letraTituloEventoDia
+{
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 17px;
+	color: #2B2B2B;
+
+}
+
+.letraHoraEventoSemana
+{
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 600;
+	font-size: 14px !important;
+	line-height: 17px;
+	color: #2B2B2B;
+
+}
+
+.letraTituloEventoSemana
+{
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 12px !important;
+	line-height: 15px;
+	color: #2B2B2B;
+
+}
+
+.letraHoraEventoMes
+{
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 600 !important;
+	font-size: 12px !important;
+	line-height: 15px;
+	color: #2B2B2B;
+
+}
+
+.letraTituloEventoMes
+{
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 400 !important;
+	font-size: 12px !important;
+	line-height: 15px;
+	color: #2B2B2B;
+
+}
+
+
+.fc-day-grid-event .fc-content 
+{
+    white-space: nowrap;
+    overflow: hidden;
+    height: 35px;
+    line-height: 40px;
+    padding-left: 10px;
+}
+
+.fc-divider
+{
+	display:none;
+}
+
+
+.filaOculta
+{
+	display:none;
+}

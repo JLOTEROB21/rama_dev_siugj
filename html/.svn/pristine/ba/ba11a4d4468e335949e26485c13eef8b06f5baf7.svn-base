@@ -1,0 +1,288 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+	
+	$consulta="SELECT valor,texto FROM 1004_siNo ORDER BY valor";
+	$arrSiNo=$con->obtenerFilasArreglo($consulta);
+	
+?>
+
+var arrSiNo=<?php echo $arrSiNo?>;
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+    new Ext.Viewport(	{
+                                layout: 'border',
+                                items: [
+                                            {
+                                                xtype:'panel',
+                                                region:'center',
+                                                layout:'border',
+                                                border:false,
+                                                items:	[
+                                                  			crearGridRegistrosPublicacion()          
+                                                        ]
+                                            }
+                                         ]
+                            }
+                        )   
+}
+
+function crearGridRegistrosPublicacion()
+{
+	var cmbIncluyePublicacion=crearComboExt('cmbIncluyePublicacion',arrSiNo,0,0,null,{transform:false,ctCls:'comboWrapSIUGJGrid',cls:'comboSIUGJGrid',listClass:'listComboSIUGJGrid listComboSIUGJGridExpediente'});
+	 var lector= new Ext.data.JsonReader({
+                                            
+                                            totalProperty:'numReg',
+                                            fields: [
+                                               			{name:'idRegistro'},
+		                                                {name: 'codigo'},
+                                                        {name: 'incluirProgramacion'},
+		                                                {name:'resumenActuacion'},
+		                                                {name: 'comentariosAdicionales'},
+                                                        {name: 'carpetaAdministrativa'},
+                                                        {name: 'demandante'},
+                                                        {name:'demandando'},
+                                                        {name:'tipoProceso'},
+                                                        {name: 'fechaAuto', type:'date', dateFormat:'Y-m-d'},
+                                                        {name: 'fechaPublicacion', type:'date', dateFormat:'Y-m-d'}
+                                            		],
+                                            root:'registros'
+                                            
+                                        }
+                                      );
+	 
+                                                                                      
+	var alDatos=new Ext.data.GroupingStore({
+                                                            reader: lector,
+                                                            proxy : new Ext.data.HttpProxy	(
+
+                                                                                              {
+
+                                                                                                  url: '../modulosEspeciales_SIUGJ/paginasFunciones/funcionesScriptsFormularios.php'
+
+                                                                                              }
+
+                                                                                          ),
+                                                            sortInfo: {field: 'codigo', direction: 'ASC'},
+                                                            groupField: 'codigo',
+                                                            remoteGroup:false,
+				                                            remoteSort: true,
+                                                            autoLoad:true
+                                                            
+                                                        }) 
+                                                        
+	alDatos.on('beforeload',function(proxy)
+    								{
+                                    	proxy.baseParams.funcion='16';
+                                        proxy.baseParams.idFormulario=gE('idFormulario').value;
+                                        proxy.baseParams.idRegistro=gE('idRegistro').value; 
+                                        proxy.baseParams.sL=gE('sL').value; 
+                                        proxy.baseParams.medioNotificacion=gE('idFormulario').value=='1256'?1:(gE('idFormulario').value=='1259'?4:2);
+                                        
+                                                            
+                                        
+
+                                    }
+                        )   
+       
+    var cModelo= new Ext.grid.ColumnModel   	(
+                                                    [
+                                                        new  Ext.grid.RowNumberer({width:45}),
+                                                        {
+                                                            header:'',
+                                                            width:50,
+                                                            sortable:true,
+                                                            align:'center',
+                                                            dataIndex:'idRegistro',
+                                                            renderer:function(val)
+                                                            		{
+                                                                    	return '<a href="javascript:mostrarVentanaPublicacion(\''+bE(val)+'\')"><img src="../principalPortal/imagesSIUGJ/magnifier.png"></a>';
+                                                                    }
+                                                        },
+                                                        {
+                                                            header:'Incluir en publicaci&oacute;n',
+                                                            width:200,
+                                                            sortable:true,
+                                                            align:'center',
+                                                            dataIndex:'incluirProgramacion',
+                                                            editor:cmbIncluyePublicacion,
+                                                            renderer:function(val)
+                                                            		{
+                                                                    	return formatearValorRenderer(arrSiNo,val);
+                                                                    }
+                                                        },
+                                                        {
+                                                            header:'C&oacute;digo &uacute;nico de proceso',
+                                                            width:250,
+                                                            sortable:true,
+                                                            dataIndex:'carpetaAdministrativa'
+                                                        },
+                                                        {
+                                                            header:'Clase de proceso',
+                                                            width:250,
+                                                            sortable:true,
+                                                            dataIndex:'tipoProceso'
+                                                        },
+                                                        
+                                                        {
+                                                            header:'Descripci&oacute;n actuaci&oacute;n',
+                                                            width:450,
+                                                            sortable:true,
+                                                            dataIndex:'resumenActuacion'
+                                                        },
+                                                         {
+                                                            header:'Fecha auto',
+                                                            width:150,
+                                                            sortable:true,
+                                                            dataIndex:'fechaAuto',
+                                                            renderer:function(val)
+                                                            		{
+                                                                    	return val.format('d/m/Y');
+                                                                    }
+                                                        },
+                                                        {
+                                                            header:'Fecha estimada de publicaci&oacute;n',
+                                                            width:270,
+                                                            align:'center',
+                                                            sortable:true,
+                                                            dataIndex:'fechaPublicacion',
+                                                            renderer:function(val)
+                                                            		{
+                                                                    	return val.format('d/m/Y');
+                                                                    }
+                                                        },
+                                                        {
+                                                            header:'Demandante',
+                                                            width:350,
+                                                            sortable:true,
+                                                            dataIndex:'demandante',
+                                                            renderer:mostrarValorDescripcion
+                                                        },
+                                                        {
+                                                            header:'Demandado',
+                                                            width:350,
+                                                            sortable:true,
+                                                            dataIndex:'demandando',
+                                                            renderer:mostrarValorDescripcion
+                                                        }
+                                                    ]
+                                                );
+                                                
+    var tblGrid=	new Ext.grid.EditorGridPanel	(
+                                                        {
+                                                            id:'gRegistrosPublicacion',
+                                                            store:alDatos,
+                                                            region:'center',
+                                                            frame:false,
+                                                            cm: cModelo,
+                                                            stripeRows :false,
+                                                            loadMask:true,
+                                                            columnLines : false,
+                                                            clicksToEdit:1,
+                                                            cls:'gridSiugjPrincipal',
+                                                            tbar:	[
+                                                            			{
+                                                                        	icon:'../images/pencil_go.png',
+                                                                            cls:'x-btn-text-icon',
+                                                                            text:'Generar publicaci&oacute;n',
+                                                                            handler:function()
+                                                                            		{
+                                                                                    
+                                                                                    	
+                                                                                    
+                                                                                    	function resp(btn)
+                                                                                        {
+                                                                                        	if(btn=='yes')
+                                                                                            {
+                                                                                            	var arrRegistros='';
+                                                                                                var x;
+                                                                                                var o;
+                                                                                                var fila;
+                                                                                                for(x=0;x<gEx('gRegistrosPublicacion').getStore().getCount();x++)
+                                                                                                {
+                                                                                                	fila=gEx('gRegistrosPublicacion').getStore().getAt(x);
+                                                                                                    o='{"idActuacion":"'+fila.data.idRegistro+'","publicar":"'+fila.data.incluirProgramacion+'"}';
+                                                                                                    if(arrRegistros=='')
+                                                                                                    	arrRegistros=o;
+                                                                                                    else
+                                                                                                    	arrRegistros+=','+o;
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                }
+                                                                                                
+                                                                                                var cadObj='{"idFormulario":"'+gE('idFormulario').value+
+                                                                                                		'","idRegistro":"'+gE('idRegistro').value+
+                                                                                                        '","arrRegistros":['+arrRegistros+']}';
+                                                                                                
+                                                                                            
+                                                                                            
+                                                                                            	function funcAjax()
+                                                                                                {
+                                                                                                    var resp=peticion_http.responseText;
+                                                                                                    arrResp=resp.split('|');
+                                                                                                    if(arrResp[0]=='1')
+                                                                                                    {
+                                                                                                    
+                                                                                                    	window.parent.recargarMenuDTD();
+                                                                                                    
+                                                                                                        if(window.parent.gEx('frameFormulario_1265'))
+                                                                                                        {
+                                                                                                        	window.parent.gEx('frameFormulario_1265').getFrameWindow().recargarPagina();
+                                                                                                            window.parent.seccionSeleccionada('Mw==');
+                                                                                                        }
+                                                                                                        if(window.parent.gEx('frameFormulario_1266'))
+                                                                                                        {
+                                                                                                        	window.parent.gEx('frameFormulario_1266').getFrameWindow().recargarPagina();
+                                                                                                            window.parent.seccionSeleccionada('Mw==');
+                                                                                                        }
+                                                                                                        if(window.parent.gEx('frameFormulario_1268'))
+                                                                                                        {
+                                                                                                        	window.parent.gEx('frameFormulario_1268').getFrameWindow().recargarPagina();
+                                                                                                            window.parent.seccionSeleccionada('Mw==');
+                                                                                                        }
+                                                                                                    }
+                                                                                                    else
+                                                                                                    {
+                                                                                                        msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+                                                                                                    }
+                                                                                                }
+                                                                                                obtenerDatosWeb('../modulosEspeciales_SIUGJ/paginasFunciones/funcionesScriptsFormularios.php',funcAjax, 'POST','funcion=17&cadObj='+cadObj,true);
+                                                                                                
+                                                                                            
+                                                                                            }
+                                                                                        }
+                                                                                        msgConfirm('¿Est&aacute; seguro de querer generar la publicaci&oacute;n?',resp);
+                                                                                    }
+                                                                            
+                                                                        }
+                                                            		],
+                                                            view:new Ext.grid.GroupingView({
+                                                                                                forceFit:false,
+                                                                                                showGroupName: false,
+                                                                                                enableGrouping :false,
+                                                                                                enableNoGroups:false,
+                                                                                                enableGroupingMenu:false,
+                                                                                                hideGroupedColumn: false,
+                                                                                                startCollapsed:false
+                                                                                            })
+                                                        }
+                                                    );
+    return 	tblGrid;
+
+}
+
+
+function mostrarVentanaPublicacion(iR)
+{
+	var obj={};
+    obj.ancho='100%';
+    obj.alto='100%';
+    obj.url='../modeloPerfiles/vistaDTDv3.php';
+    obj.params=[['idFormulario',1251],['idRegistro',bD(iR)],['actor',bE(0)],['dComp',bE('auto')]];
+    obj.modal=true;
+    window.parent.abrirVentanaFancy(obj);
+}

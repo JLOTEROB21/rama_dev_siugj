@@ -1,0 +1,267 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+
+	$arrTipoConectores="";
+
+	$consulta="SELECT idTipoConector,nombreConector,nombreClase FROM 20000_conectoresServiciosNube ORDER BY nombreConector";
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_assoc($res))
+	{
+		$consulta=" SELECT s.idServicioNube,s.nombreServicioNube FROM 20000_serviciosPermiteConector sC,20002_catalogoServiciosNube s WHERE sC.idTipoConector=".$fila["idTipoConector"]." AND sC.tipoServicio=s.idServicioNube order by nombreServicioNube";
+		$arrServiciosNube=$con->obtenerFilasArreglo($consulta);
+		
+		$o="['".$fila["idTipoConector"]."','".cv($fila["nombreConector"])."',".$arrServiciosNube.",'".cv($fila["nombreClase"])."']";
+		if($arrTipoConectores=="")
+			$arrTipoConectores=$o;
+		else
+			$arrTipoConectores.=",".$o;
+	}
+	
+	$arrTipoConectores="[".$arrTipoConectores."]";
+?>
+
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	window.addEventListener('storage', almcenamientoModificado, false);
+
+}
+
+var cadConexionGlobal=null;
+var arrTipoConectores=<?php echo $arrTipoConectores?>;
+function mostrarVentanaCrearConexion()
+{
+	var cmbTipoConexion=crearComboExt('cmbTipoConexion',arrTipoConectores,180,35,270);
+    cmbTipoConexion.on('select',function(cmb,registro)
+    							{
+                                	gEx('gServicios').getStore().removeAll();
+                                    gEx('gServicios').getStore().loadData(registro.data.valorComp);
+                                }
+    				)
+    
+	var form = new Ext.form.FormPanel(	
+										{
+											baseCls: 'x-plain',
+											layout:'absolute',
+											defaultType: 'label',
+											items: 	[
+                                            			{
+                                                        	x:10,
+                                                            y:10,
+                                                            html:'Nombre de la Conexi&oacute;n:'
+                                                        },
+                                                        {
+                                                        	x:180,
+                                                            y:5,
+                                                            xtype:'textfield',
+                                                            width:350,
+                                                            id:'txtNombreConexion'
+                                                        },
+                                                        {
+                                                        	x:10,
+                                                            y:40,
+                                                            html:'Tipo de Conexi&oacute;n:'
+                                                        },
+                                                        cmbTipoConexion,
+                                                         
+                                                        {
+                                                        	x:10,
+                                                            y:70,
+                                                            html:'Descripci&oacute;n de la Conexi&oacute;n:'
+                                                        },
+                                                        {
+                                                        	x:10,
+                                                            y:100,
+                                                            xtype:'textarea',
+                                                            width:600,
+                                                            height:60,
+                                                            id:'txtDescripcionConexion'
+                                                        },
+                                                        {
+                                                        	x:10,
+                                                            y:170,
+                                                            html:'Servicios a Utilizar:'
+                                                        },
+                                                        crearGridServicios()
+                                                        
+													]
+										}
+									);
+	
+	var ventanaAM = new Ext.Window(
+									{
+										title: 'Configuraci&oacute;n de Conexi&oacute;n',
+										width: 650,
+										height:450,
+										layout: 'fit',
+										plain:true,
+										modal:true,
+										bodyStyle:'padding:5px;',
+										buttonAlign:'center',
+										items: form,
+										listeners : {
+													show : {
+																buffer : 10,
+																fn : function() 
+																{
+                                                                	gEx('txtNombreConexion').focus(false,500);
+																}
+															}
+												},
+										buttons:	[
+														{
+															
+															text: 'Siguiente >>',
+                                                            
+															handler: function()
+																	{
+																		var txtNombreConexion=gEx('txtNombreConexion');
+                                                                        var txtDescripcionConexion=gEx('txtDescripcionConexion');
+																	
+                                                                    	if(txtNombreConexion.getValue()=='')
+                                                                        {
+                                                                        	function resp()
+                                                                            {
+                                                                            	txtNombreConexion.focus();
+                                                                            }
+                                                                            msgBox('Debe indicar el nombre de la conexi&oacute;n',resp);
+                                                                            return;
+                                                                        }
+                                                                        
+                                                                        if(cmbTipoConexion.getValue()=='')
+                                                                        {
+                                                                        	function resp2()
+                                                                            {
+                                                                            	cmbTipoConexion.focus();
+                                                                            }
+                                                                            msgBox('Debe indicar el tipo de conexi&oacute;n',resp2);
+                                                                            return;
+                                                                        }
+                                                                        
+                                                                        var gServicios=gEx('gServicios');
+                                                                        var listaServicios='';
+                                                                        var x;
+                                                                        var filas=gServicios.getSelectionModel().getSelections();
+                                                                        var f;
+                                                                        for (x=0;x<filas.length;x++)
+                                                                        {
+                                                                        	f=filas[x];
+                                                                            if(listaServicios=='')
+                                                                            	listaServicios=f.data.idServicio;
+                                                                            else
+                                                                            	listaServicios+=','+f.data.idServicio;
+                                                                        }
+                                                                        
+                                                                        if(listaServicios=='')
+                                                                        {
+                                                                        	function resp3()
+                                                                            {
+                                                                            	txtNombreConexion.focus();
+                                                                            }
+                                                                            msgBox('Debe indicar lo servicios a utilizar a trav&eacute;s de esta conexi&oacute;n',resp3);
+                                                                            return;
+                                                                        }
+                                                                        
+                                                                        
+                                                                        var cadObj='{"nombreConexion":"'+cv(txtNombreConexion.getValue())+'","tipoConexion":"'+cmbTipoConexion.getValue()+
+                                                                        			'","descripcion":"'+cv(txtDescripcionConexion.getValue())+'","servicios":"'+listaServicios+'"}';
+                                                                    	cadConexionGlobal=cadObj;
+                                                                        
+                                                                        
+                                                                        
+                                                                        function funcAjax()
+                                                                        {
+                                                                            var resp=peticion_http.responseText;
+                                                                            arrResp=resp.split('|');
+                                                                            if(arrResp[0]=='1')
+                                                                            {
+                                                                                var pos=existeValorMatriz(arrTipoConectores,cmbTipoConexion.getValue());
+                                                                                var nombreClase=arrTipoConectores[pos][3];
+                                                                                
+                                                                                eval(nombreClase+'.continueConfiguration(cadConexionGlobal);');
+                                                                                localStorage.removeItem("cuentaNube");
+                                                                                ventanaAM.close();
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+                                                                            }
+                                                                        }
+                                                                        obtenerDatosWeb('../paginasFunciones/funcionesEspecialesSistema.php',funcAjax, 'POST','funcion=5&cadObj='+cadObj,true);
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                    }
+														},
+														{
+															text: '<?php echo $etj["lblBtnCancelar"]?>',
+															handler:function()
+																	{
+																		ventanaAM.close();
+																	}
+														}
+													]
+									}
+								);
+	ventanaAM.show();	
+
+}
+
+function crearGridServicios()
+{
+	var dsDatos=[];
+    var alDatos=	new Ext.data.SimpleStore	(
+                                                    {
+                                                        fields:	[
+                                                                    {name: 'idServicio'},
+                                                                    {name: 'descripcionServicio'}
+                                                                ]
+                                                    }
+                                                );
+
+    alDatos.loadData(dsDatos);
+	var chkRow=new Ext.grid.CheckboxSelectionModel();
+	
+	var cModelo= new Ext.grid.ColumnModel   	(
+												 	[
+													 	new  Ext.grid.RowNumberer(),
+														chkRow,
+														{
+															header:'Servicio',
+															width:500,
+															sortable:true,
+															dataIndex:'descripcionServicio'
+														}
+													]
+												);
+                                                
+	var tblGrid=	new Ext.grid.EditorGridPanel	(
+                                                        {
+                                                            
+                                                            store:alDatos,
+                                                            frame:false,
+                                                            y:200,
+                                                            x:10,
+                                                            width:600,
+                                                            height:160,
+                                                            cm: cModelo,
+                                                            stripeRows :true,
+                                                            loadMask:true,
+                                                            stripeRows :true,
+                                                            id:'gServicios',
+                                                            columnLines : true,
+                                                            sm:chkRow
+                                                            
+                                                        }
+                                                    );
+	return 	tblGrid;	
+}
+
+function almcenamientoModificado()
+{
+	gEx('grid_tblTabla').getStore().reload();
+}

@@ -1,0 +1,476 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+?>
+
+var arrResultado=[
+                    {name: 'idCalculo'},
+                    {name: 'etiqueta'},
+                    {name: 'resultado'},
+                    {name: 'formatoPresentacion'}
+                ]
+                
+var regResultado;                
+var arrTiposEntrada=[['1','Valor Entero'],['2','Valor Decimal'],['3','Moneda'],['4','Fecha'],['5','Opciones Cerradas (Combo)'],['6','Opci\xF3n M\xFAltiple (Combo)']];
+ 
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	regResultado=crearRegistro(arrResultado); 
+    new Ext.Viewport(	{
+                                layout: 'border',
+                                items: [
+                                            {
+                                                xtype:'panel',
+                                                region:'center',
+                                                layout:'border',
+                                                cls:'panelSiugj',
+                                                
+                                                title: '<span><b>Liquidador Judicial</span>',
+                                                items:	[
+                                                			{
+                                                            	xtype:'tabpanel',
+                                                                region:'center',
+                                                                id:'panelGlobal',
+                                                                cls:'tabPanelSIUGJ',
+                                                                tbar:	[
+                                                                            {
+                                                                                html:'<span class="SIUGJ_Etiqueta"><b>Concepto de Liquidaci&oacute;n:</b>&nbsp;&nbsp;&nbsp;</span><span class="SIUGJ_ControlEtiqueta">'+gE('nombrePerfil').value+'</b></span>  '
+                                                                            },
+                                                                             {
+                                                                                xtype:'tbspacer',
+                                                                                width:20
+                                                                            },
+                                                                            {
+                                                                                icon:'../images/icon_big_tick.gif',
+                                                                                cls:'x-btn-text-icon',
+                                                                                text:'Calcular',
+                                                                                handler:function()
+                                                                                        {
+                                                                                        	gEx('panelGlobal').hideTabStripItem(1); 
+                                                                                            gEx('panelGlobal').setActiveTab(0);
+                                                                                        	var objParametros='"idPerfil":"'+gE('idPerfil').value+'"';
+                                                                                            var token='';
+                                                                                         	var x;
+                                                                                            var fila;
+                                                                                            var gParametros=gEx('gParametros');
+                                                                                            for(x=0;x<gParametros.getStore().getCount();x++)
+                                                                                            {
+                                                                                            	fila=gParametros.getStore().getAt(x);
+                                                                                                if(fila.data.valor==='')
+                                                                                                {
+                                                                                                	function resp()
+                                                                                                    {
+                                                                                                    	gParametros.startEditing(x,3);
+                                                                                                    }
+                                                                                                    msgBox('Debe ingresar el valor del par&aacute;metro: '+fila.data.etiqueta,resp);
+                                                                                                    return;
+                                                                                                }
+                                                                                                
+                                                                                                token='"'+fila.data.nombreParametro+'":"'+cv(fila.data.tipoEntrada=='4'?fila.data.valor.format('Y-m-d'):fila.data.valor)+'"';
+                                                                                                if(objParametros=='')
+                                                                                                	objParametros=token;
+                                                                                                 else
+                                                                                                 	objParametros+=','+token;
+                                                                                            }   
+                                                                                            
+                                                                                            objParametros='{'+objParametros+'}';
+                                                                                            
+                                                                                            var gResultados=gEx('gResultados');
+                                                                                            gResultados.getStore().removeAll();
+                                                                                            function funcAjax()
+                                                                                            {
+                                                                                                var resp=peticion_http.responseText;
+                                                                                                arrResp=resp.split('|');
+                                                                                                if(arrResp[0]=='1')
+                                                                                                {
+                                                                                                 	var arrResultados=eval(arrResp[1]);
+                                                                                                    var x;
+                                                                                                    var r;
+                                                                                                    for(x=0;x<arrResultados.length;x++)
+                                                                                                    {
+                                                                                                    	r=new regResultado(arrResultados[x]);
+                                                                                                        gResultados.getStore().add(r);
+                                                                                                    }   
+                                                                                                    gEx('panelGlobal').unhideTabStripItem(1);
+                                                                                                	gEx('panelGlobal').setActiveTab(1);
+                                                                                                    gEx('btnExportar').show();
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+                                                                                                }
+                                                                                            }
+                                                                                            obtenerDatosWeb('../paginasFunciones/funcionesLiquidador.php',funcAjax, 'POST','funcion=11&cadObj='+objParametros,true);
+
+                                                                                        }
+                                                                                
+                                                                            },
+                                                                            {
+                                                                                xtype:'tbspacer',
+                                                                                width:20
+                                                                            },
+                                                                            {
+                                                                                icon:'../images/script_go.png',
+                                                                                cls:'x-btn-text-icon',
+                                                                                id:'btnExportar',
+                                                                                hidden:true,
+                                                                                text:'Exportar resultado...',
+                                                                                menu:	[
+                                                                                			{
+                                                                                                cls:'x-btn-text-icon',
+                                                                                                text:'Formato Excel',
+                                                                                                handler:function()
+                                                                                                        {
+                                                                                                        	var arrParametros='';
+	                                                                                                        var gParametros=gEx('gParametros');
+                                                                                                            var x;
+                                                                                                            var fila;
+                                                                                                            var o='';
+                                                                                                            for(x=0;x<gParametros.getStore().getCount();x++)
+                                                                                                            {
+                                                                                                            	fila=gParametros.getStore().getAt(x);
+                                                                                                                o='{"parametro":"'+fila.data.etiqueta+'","valor":"'+formatearValorParametro(fila.data.valor,null,fila)+'"}';
+                                                                                                                if(arrParametros=='')
+                                                                                                                	arrParametros=o;
+                                                                                                                else
+                                                                                                                	arrParametros+=','+o;
+                                                                                                                
+                                                                                                            }
+                                                                                                            var gResultados=gEx('gResultados');
+                                                                                                            var arrCalculos='';
+                                                                                                            for(x=0;x<gResultados.getStore().getCount();x++)
+                                                                                                            {
+                                                                                                            	fila=gResultados.getStore().getAt(x);
+                                                                                                                o='{"calculo":"'+fila.data.etiqueta+'","valor":"'+cv(fila.data.resultado,false,true)+'"}';
+                                                                                                                if(arrCalculos=='')
+                                                                                                                	arrCalculos=o;
+                                                                                                                else
+                                                                                                                	arrCalculos+=','+o;
+                                                                                                                
+                                                                                                            }
+                                                                                                            
+                                                                                                            var cadObj='{"nombreConcepto":"'+cv(gE('nombrePerfil').value,false,true)+'","tipoReporte":"1","arrParametros":['+
+                                                                                                            	arrParametros+'],"arrCalculos":['+arrCalculos+']}';
+                                                                                                        	
+                                                                                                            var aParams=[['cadObj',bE(cadObj)]];
+                                                                                                        	enviarFormularioDatosV('../reportes/liquidador/reporteCalculo.php',aParams,'POST');
+                                                                                                            
+                                                                                                        }
+                                                                                                
+                                                                                            },'-',
+                                                                                            {
+                                                                                                cls:'x-btn-text-icon',
+                                                                                                text:'Formato PDF',
+                                                                                                handler:function()
+                                                                                                        {
+                                                                                                            var arrParametros='';
+	                                                                                                        var gParametros=gEx('gParametros');
+                                                                                                            var x;
+                                                                                                            var fila;
+                                                                                                            var o='';
+                                                                                                            for(x=0;x<gParametros.getStore().getCount();x++)
+                                                                                                            {
+                                                                                                            	fila=gParametros.getStore().getAt(x);
+                                                                                                                o='{"parametro":"'+fila.data.etiqueta+'","valor":"'+formatearValorParametro(fila.data.valor,null,fila)+'"}';
+                                                                                                                if(arrParametros=='')
+                                                                                                                	arrParametros=o;
+                                                                                                                else
+                                                                                                                	arrParametros+=','+o;
+                                                                                                                
+                                                                                                            }
+                                                                                                            var gResultados=gEx('gResultados');
+                                                                                                            var arrCalculos='';
+                                                                                                            for(x=0;x<gResultados.getStore().getCount();x++)
+                                                                                                            {
+                                                                                                            	fila=gResultados.getStore().getAt(x);
+                                                                                                                o='{"calculo":"'+fila.data.etiqueta+'","valor":"'+cv(fila.data.resultado,false,true)+'"}';
+                                                                                                                if(arrCalculos=='')
+                                                                                                                	arrCalculos=o;
+                                                                                                                else
+                                                                                                                	arrCalculos+=','+o;
+                                                                                                                
+                                                                                                            }
+                                                                                                            
+                                                                                                            var cadObj='{"nombreConcepto":"'+cv(gE('nombrePerfil').value,false,true)+'","tipoReporte":"2","arrParametros":['+
+                                                                                                            	arrParametros+'],"arrCalculos":['+arrCalculos+']}';
+                                                                                                        	
+                                                                                                            var aParams=[['cadObj',bE(cadObj)]];
+                                                                                                        	enviarFormularioDatosV('../reportes/liquidador/reporteCalculo.php',aParams,'POST');
+                                                                                                        }
+                                                                                                
+                                                                                            }
+                                                                                		]
+                                                                                
+                                                                            }
+                                                                          ],
+                                                                activeTab:0,
+                                                                items:	[
+                                                                			crearGridParametrosEntrada(),
+                                                                            {
+                                                                                title:'Resultado',
+                                                                                id:'tabPanelResultado',
+                                                                                layout:'border',
+                                                                                items:	[
+                                                                                			crearGridResultado()
+                                                                                        ]
+                                                                            }
+                                                                		]
+                                                            }
+                                                            
+                                                        ]
+                                            }
+                                         ]
+                            }
+                        )   
+	gEx('panelGlobal').hideTabStripItem(1);                        
+}
+
+function crearGridParametrosEntrada()
+{
+	var lector= new Ext.data.JsonReader({
+                                            
+                                            totalProperty:'numReg',
+                                            fields: [
+                                               			{name:'nombreParametro'},
+		                                                {name: 'etiqueta'},
+		                                                {name:'valor'},
+                                                        {name: 'tipoEntrada'},
+                                                        {name: 'opciones'}
+                                            		],
+                                            root:'registros'
+                                            
+                                        }
+                                      );
+	 
+                                                                                      
+	var alDatos=new Ext.data.GroupingStore({
+                                                            reader: lector,
+                                                            proxy : new Ext.data.HttpProxy	(
+
+                                                                                              {
+
+                                                                                                  url: '../paginasFunciones/funcionesLiquidador.php'
+
+                                                                                              }
+
+                                                                                          ),
+                                                            sortInfo: {field: 'etiqueta', direction: 'ASC'},
+                                                            groupField: 'etiqueta',
+                                                            remoteGroup:false,
+				                                            remoteSort: false,
+                                                            autoLoad:true
+                                                            
+                                                        }) 
+	alDatos.on('beforeload',function(proxy)
+    								{
+                                    	proxy.baseParams.funcion='10';
+                                        proxy.baseParams.idPerfil=gE('idPerfil').value;
+                                        proxy.baseParams.iF=gE('idFormulario').value;
+                                        proxy.baseParams.iR=gE('idRegistro').value;
+                                    }
+                        )   
+       
+        var cModelo= new Ext.grid.ColumnModel   	(
+                                                        [
+                                                            new  Ext.grid.RowNumberer({width:40}),
+                                                            
+                                                            {
+                                                                header:'Par&aacute;metro',
+                                                                width:300,
+                                                                sortable:true,
+                                                                dataIndex:'etiqueta',
+                                                                renderer:function(val)
+                                                                		{
+                                                                        	return '<b>'+val+':</b>';
+                                                                        }
+                                                            },
+                                                            {
+                                                                header:'Tipo de Dato',
+                                                                width:270,
+                                                                sortable:true,
+                                                                dataIndex:'tipoEntrada',
+                                                                renderer:function(val)
+                                                                		{
+                                                                        	return formatearValorRenderer(arrTiposEntrada,val);
+                                                                        }
+                                                            },
+                                                            {
+                                                                header:'Valor',
+                                                                width:450,
+                                                                editor:	{xtype:'textfield'},
+                                                                sortable:true,
+                                                                dataIndex:'valor',
+                                                                renderer:formatearValorParametro
+                                                            }
+                                                        ]
+                                                    );
+                                                    
+        var tblGrid=	new Ext.grid.EditorGridPanel	(
+                                                            {
+                                                                id:'gParametros',
+                                                                store:alDatos,
+                                                                region:'center',
+                                                                frame:false,
+                                                                clicksToEdit:1,
+                                                                cls:'gridSiugj',
+                                                                cm: cModelo,
+                                                                title:'Datos de Entrada',
+                                                                stripeRows :true,
+                                                                loadMask:true,
+                                                                
+                                                                columnLines : true,                                                                
+                                                                view:new Ext.grid.GroupingView({
+                                                                                                    forceFit:false,
+                                                                                                    showGroupName: false,
+                                                                                                    enableGrouping :false,
+                                                                                                    enableNoGroups:false,
+                                                                                                    enableGroupingMenu:false,
+                                                                                                    hideGroupedColumn: false,
+                                                                                                    startCollapsed:false
+                                                                                                })
+                                                            }
+                                                        );
+
+	tblGrid.on('beforeedit',function(e)
+    						{
+                            	var ctrl=null;
+
+                                    switch(parseInt(e.record.data.tipoEntrada))
+                                    {
+                                        
+                                        case 1:
+                                            ctrl=new Ext.form.NumberField (
+                                                                            {
+                                                                                allowDecimals:false,
+                                                                                cls:'controlSIUGJ'
+                                                                            }
+                                                                        )
+                                        break;
+                                        case 2:
+                                            ctrl=new Ext.form.NumberField (
+                                                                            {
+                                                                                allowDecimals:true,
+                                                                                cls:'controlSIUGJ'
+                                                                            }
+                                                                        )
+                                        break;
+                                        case 3:
+                                            ctrl=new Ext.form.NumberField (
+                                                                            {
+                                                                                allowDecimals:true,
+                                                                                cls:'controlSIUGJ'
+                                                                            }
+                                                                        )
+                                        break;
+                                        case 4:
+                                            ctrl=new Ext.form.DateField ();
+                                        break;
+                                         case 5:
+                                            ctrl=crearComboExt('cmbEditor',e.record.data.opciones,0,0,null,{transform:false,ctCls:'comboWrapSIUGJGrid',cls:'comboSIUGJGrid',listClass:'listComboSIUGJGrid'});
+                                        break;
+                                         case 6:
+                                            ctrl=crearComboExt('cmbEditor',e.record.data.opciones,0,0,null,{multiSelect:true,transform:false,ctCls:'comboWrapSIUGJGrid',cls:'comboSIUGJGrid',listClass:'listComboSIUGJGrid'});
+                                        break;
+                                        
+                                   
+                                    }
+                                    
+                                    if(ctrl)
+	                                	e.grid.getColumnModel().setEditor(3,ctrl);
+                                    else
+                                    	e.cancel=true;
+                            }
+    			)
+        return 	tblGrid;
+}
+
+
+
+function formatearValorParametro(val,meta,registro)
+{
+
+    switch(parseInt(registro.data.tipoEntrada))
+    {
+        
+        case 1:
+            return Ext.util.Format.number(val,'0,000');
+        break;
+        case 2:
+            return Ext.util.Format.number(val,'0,000.00');
+        break;
+        case 3:
+            return Ext.util.Format.usMoney(val);
+        break;
+        case 4:
+            if(val)
+                return val.format('d/m/Y');
+        break;
+        case 5:
+        case 6:
+            return formatearValorRenderer(registro.data.opciones,val);
+        break;
+        
+    
+    }
+
+}
+function crearGridResultado()
+{
+	var dsDatos=[];
+    var alDatos=	new Ext.data.SimpleStore	(
+                                                    {
+                                                        fields:	arrResultado
+                                                    }
+                                                );
+
+    alDatos.loadData(dsDatos);
+	var chkRow=new Ext.grid.CheckboxSelectionModel();
+	
+	var cModelo= new Ext.grid.ColumnModel   	(
+												 	[
+													 	new  Ext.grid.RowNumberer({width:40}),
+														{
+															header:'Concepto',
+															width:300,
+															sortable:true,
+															dataIndex:'etiqueta',
+                                                            renderer:function(val)
+                                                                		{
+                                                                        	return '<b>'+val+':</b>';
+                                                                        }
+														},
+														{
+															header:'Resultado',
+															width:300,
+															sortable:true,
+															dataIndex:'resultado',
+                                                            renderer:function(val,meta,registro)
+                                                            		{
+                                                                    	meta.attr='style="text-align:right";'
+                                                                    	return val;
+                                                                        
+                                                                        
+                                                                    }
+														}
+													]
+												);
+                                                
+	var tblGrid=	new Ext.grid.EditorGridPanel	(
+                                                        {
+                                                            id:'gResultados',
+                                                            store:alDatos,
+                                                            frame:false,
+                                                            cm: cModelo,
+                                                            cls:'gridSiugj',
+                                                            stripeRows :true,
+                                                            loadMask:true,
+                                                            stripeRows :true,
+                                                            region:'center',
+                                                            columnLines : true,
+                                                        }
+                                                    );
+	return 	tblGrid;	
+}

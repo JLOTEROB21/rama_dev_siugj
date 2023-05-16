@@ -1,0 +1,28 @@
+<?php session_start();
+	include_once("conexionBD.php");	
+	aperturarSesionUsuario(1);
+	$consulta="SELECT archivoInclude FROM 20000_conectoresServiciosNube"; 
+	$res=$con->obtenerFilas($consulta);
+	while($filaConector=mysql_fetch_assoc($res))
+	{
+		include_once($filaConector["archivoInclude"]);	
+	}
+	include_once("cConectoresServicios/cConectorCalendarOffice365.php");
+	
+	$fechaActual=date("Y-m-d H:i:s");
+	$consulta="SELECT * FROM 7000_eventosAudiencia WHERE grabacionConsolidada=0 AND idEventoMeet IS NOT NULL AND idConectorMeet IS NOT NULL";
+	
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_assoc($res))
+	{
+		$infoComp["idConexion"]=$fila["idConectorMeet"];
+		$cCalendario=new cMicrosoftCalendarOffice365("","","","",$infoComp);
+		$urlAudencia=@$cCalendario->obtenerUrlGrabacionEvento($fila["idRegistroEvento"]);
+		if($urlAudencia!="")
+		{
+			$consulta="update 7000_eventosAudiencia set grabacionConsolidada=1, situacion=2,urlMultimedia='".$urlAudencia."' where idRegistroEvento=".$fila["idRegistroEvento"];
+			$con->ejecutarConsulta($consulta);
+		}
+		
+	}
+?>

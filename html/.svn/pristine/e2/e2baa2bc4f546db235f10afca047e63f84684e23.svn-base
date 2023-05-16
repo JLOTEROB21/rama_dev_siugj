@@ -1,0 +1,26 @@
+<?php session_start();
+ini_set("memory_limit","3000M");
+set_time_limit(999000);
+error_reporting(E_ALL);
+//include_once("nusoap/nusoap.php");
+//include("cConectoresGestorContenido/cOneDrive.php");
+include("SIUGJ/libreriaFunciones.php");
+
+$_SESSION["habiltarDebugCorreo"]=1;
+$consulta="SELECT * FROM _665_tablaDinamica WHERE id__665_tablaDinamica IN(4116)";
+$res=$con->obtenerFilas($consulta);
+while($fila=mysql_fetch_assoc($res))
+{
+	enviarCorreoNotificacionV2(665,$fila["id__665_tablaDinamica"]);
+}
+
+return;
+/*$infoComp["idConexion"]=65;
+$cDrive=new cOneDrive("","","","",$infoComp);
+$cDrive->conectar();
+
+$contenidoDocumento=leerContenidoArchivo( $baseDir."/archivosTemporales/pruebaDocumento.docx");
+$cDrive->crearDocumento("/","pruebaDocumento.docx",$contenidoDocumento);
+*/
+
+?>

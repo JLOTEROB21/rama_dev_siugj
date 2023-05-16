@@ -1,0 +1,57 @@
+<?php session_start();
+ini_set("memory_limit","3000M");
+set_time_limit(999000);
+error_reporting(E_ALL);
+include_once("conexionBD.php");
+include_once("SIUGJ/libreriaFuncionesReparto.php");
+
+generarRepartoProceso(1010,49);
+return;
+//enviarCorreoNotificacionV2(665,5706);
+//
+//
+//
+$arrParam["login"]="marco.magana@grupolatis.net";
+$arrParam["password"]="123456";
+$arrParam["nombreUsuario"]="Marco Antonio Magaña Rairez";
+$arrParam["idUsuario"]="1";
+$arrParam["idActivacion"]=bE("cuenta:1");
+$arrParam["mailDestinatario"]=trim("marco.magana@grupolatis.net");
+varDUmp($funcionEnvioCorreoElectronico);
+enviarMensajeEnvio(13,$arrParam,$funcionEnvioCorreoElectronico);
+return;
+
+varDump(buscarInformacionEFinomina("30728152"));
+return;
+
+$arrDestinatario=array();
+$mail[0]="marco.magana@linktic.com";
+$mail[1]="marco.magana@linktic.com";
+array_push($arrDestinatario,$mail);
+
+$arrArchivos=array();
+$oArchivos=array();
+$oArchivos[0]="/var/www/html/repositorioDocumentos/documento_7783";
+$oArchivos[1]="archivo.pdf";
+array_push($arrArchivos,$oArchivos);
+
+sendMensajeEnvioTwilio($arrDestinatario,"prueba","Esta es una prueba","notificaciones_siugj@linktic.com","",$arrArchivos);
+
+return;
+$cadParametros='{"idFormulario":"1","idRegistro":"2","idProceso":"3","iFormulario":"1","iRegistro":"2","idActorProceso":"4","campoTablaDestino":"",'.
+				'"etapa":"5","idMacroProceso":"6","idRegistroProcesoEtapaMacroProceso":"7","idElementoEvaluacion":"8","tipoElemento":"9",'.
+				'"idRegistroElemento":"10","lblEtiquetaElemento":"11","parametro1":"param1"}';
+$objParametros=json_decode($cadParametros);
+$cacheCalculos=false;
+$resultado=resolverExpresionCalculoPHP(480,$objParametros,$cacheCalculos);
+echo $resultado;
+return;
+varDUmp($_SESSION);
+registrarDocumentoCarpetaAdministrativa("660013105001-20220000201",7778,696,1970,-1);
+$nomPagina=$_SERVER["PHP_SELF"];
+$arrPagina=	explode("/",$nomPagina);
+$nElementos=sizeof($arrPagina);
+$nomPagina=$arrPagina[$nElementos-1];
+$rutaNomPagina=$arrPagina[$nElementos-2]."/".$arrPagina[$nElementos-1];
+echo $rutaNomPagina;
+?>

@@ -1,0 +1,111 @@
+
+	
+.campoFechaSIUGJ
+{
+	font-family: Montserrat-Regular !important;
+	font-style: normal !important;
+	font-weight: 300 !important;
+	font-size: 16px !important;
+
+	color: #656572 !important;
+
+	background-image:none;
+	height:40px !important;
+	border-style: none !important;
+	background-color:transparent !important;
+	
+	
+	border: 1px solid #E5E5E5 !important;
+	box-sizing: border-box !important;
+	border-radius: 5px !important;
+	background-color: #FFF;
+	
+
+	
+}	
+
+
+.campoFechaSIUGJ .x-form-field-wrap .x-form-date-trigger 
+{
+    background-image: url(../imagesSIUGJ/btnDate.png) !important;
+	border: none;
+	background-position: 0px 10px;
+    height: 35px;
+	
+}
+
+.campoFechaSIUGJ input
+{
+	
+	border-color: transparent !important;
+	background-image: none !important; 
+    height: 35px !important;
+    background-color: transparent !important;
+	
+	font-family: Montserrat-Regular !important;
+    font-style: normal !important;
+    font-weight: 300 !important;
+    font-size: 16px !important;
+    color: #656572 !important;
+	
+	
+}	
+
+.campoComboSIUGJAutocompletar
+{
+	font-family: Montserrat-Regular !important;
+	font-style: normal !important;
+	font-weight: 300 !important;
+	font-size: 16px !important;
+	color: #656572 !important;
+	background-color:#FFF;
+	background-image:none;
+	height:30px !importantmtives;
+	border-style: none !important;
+	padding-top:10px;
+
+
+}
+
+.campoComboWrapSIUGJAutocompletar
+{
+	background: #FFFFFF;
+	border-radius: 5px;
+	height: 30px !important;
+    border: 1px solid #E5E5E5 !important;
+	
+}
+
+.campoComboWrapSIUGJAutocompletar input
+{
+	background-color: transparent !important;
+	background-image: none !important;
+	border-style: none;
+    padding-left: 10px;
+	font-family: Montserrat-Regular !important;
+    font-style: normal !important;
+    font-weight: 300 !important;
+    font-size: 16px !important;
+    color: #656572 !important;
+	height:25px !important;
+
+
+}
+
+.campoComboWrapSIUGJAutocompletar .x-form-trigger
+{
+	background-image: url(../imagesSIUGJ/lupaBusqueda.png) !important;
+	border-bottom-color: #FFF;
+	background-position: 0px 5px;
+    height: 25px;
+
+}
+	
+.campoComboWrapSIUGJAutocompletar .x-form-trigger-over
+{
+	background-image: url(../imagesSIUGJ/lupaBusqueda.png) !important;
+	border-bottom-color: #FFF;
+	background-position: 0px 5px;
+    height: 25px;
+
+}

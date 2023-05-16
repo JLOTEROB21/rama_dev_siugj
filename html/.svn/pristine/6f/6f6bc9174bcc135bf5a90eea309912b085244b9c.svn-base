@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 6.3.2.2 (Windows)"/>
+	<meta name="created" content="2021-02-10T13:09:27.559000000"/>
+	<meta name="changed" content="2021-02-10T15:19:12.312000000"/>
+	<style type="text/css">
+		@page { margin: 2cm }
+		td p { margin-bottom: 0.25cm; background: transparent; line-height: 115% }
+		p { margin-bottom: 0.25cm; background: transparent; line-height: 115% }
+	</style>
+</head>
+<body lang="es-MX" dir="ltr">
+<table width="100%" cellpadding="2" cellspacing="0" style="page-break-before: always">
+	<col width="202*"/>
+
+	<col width="54*"/>
+
+	<tr>
+			<td align="right" style="border: none; padding: 0cm" width="250"><img align="left" border="0" height="90" name="Imagen1" src="https://test-siugj.linktic.co/principalPortal/imagesInstitucionales/logoRamaJudicial2.png" style="float: right;" width="260" /></td>
+		</tr>
+</table>
+<p align="center" style="margin-bottom: 0cm; line-height: 100%"><b>Acta de Reparto Casaci&oacute;n - Corte Suprema</b></p>
+<p align="left" style="margin-bottom: 0cm; line-height: 100%"><br/>
+
+</p>
+<p align="left" style="margin-bottom: 0cm; line-height: 100%"><br/>
+
+</p>
+<p align="justify" style="margin-bottom: 0cm; line-height: 100%"><span style="font-weight: normal">Siendo
+las </span><b>[horasRecepcion]</b> <span style="font-weight: normal">hrs.
+del d&iacute;a </span><b>[fechaRecepcion]</b><span style="font-weight: normal">,
+se recibi&oacute; documentaci&oacute;n referente a un recurso de Casaci&oacute;n sobre el C&oacute;digo &Uacute;nico de Proceso </span><b>[procesoJudicial]</b>
+<span style="font-weight: normal">del despacho </span><b>[despachoEnvia]</b><span style="font-weight: normal">
+</span><span style="font-weight: normal"> bajo la siguiente informaci&oacute;n:</span>
+</p>
+<p align="left" style="margin-bottom: 0cm; line-height: 100%"><br/>
+
+</p>
+<table width="100%" cellpadding="5" cellspacing="0">
+	<col width="82*"/>
+
+	<col width="174*"/>
+
+	<tr valign="top">
+		<td width="32%" style="background: transparent" style="border: none; padding: 0cm"><p align="left" style="font-variant: normal; font-style: normal; text-decoration: none">
+			<font color="#000000"><font face="Liberation Serif, serif"><font size="3" style="font-size: 12pt"><b>Folio de Registro:</b></font></font></font></p>
+		</td>
+		<td width="68%" style="background: transparent" style="border: none; padding: 0cm"><p align="left">
+			[folioRegistro]</p>
+		</td>
+	</tr>
+</table>
+
+<table width="100%" cellpadding="5" cellspacing="0">
+	<col width="82*"/>
+
+	<col width="174*"/>
+
+	 <tr valign="top">
+		<td width="32%" style="background: transparent" style="border: none; padding: 0cm"><p align="left" style="font-variant: normal; font-style: normal; text-decoration: none">
+			<font color="#000000"><font face="Liberation Serif, serif"><font size="3" style="font-size: 12pt"><b>Jurisdicci&oacute;n:</b></font></font></font></p>
+		</td>
+		<td width="68%" style="background: transparent" style="border: none; padding: 0cm"><p align="left">
+			[jurisdiccion]</p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="32%" style="background: transparent" style="border: none; padding: 0cm"><p align="left" style="font-variant: normal; font-style: normal; text-decoration: none">
+			<font color="#000000"><font face="Liberation Serif, serif"><font size="3" style="font-size: 12pt"><b>Especialidad:</b></font></font></font></p>
+		</td>
+		<td width="68%" style="background: transparent" style="border: none; padding: 0cm"><p align="left">
+			[especialidad]</p>
+		</td>
+	</tr>
+   
+	
+	<tr valign="top">
+		<td width="32%" style="background: transparent" style="border: none; padding: 0cm"><p align="left" style="font-variant: normal; font-style: normal; text-decoration: none">
+			<font color="#000000"><font face="Liberation Serif, serif"><font size="3" style="font-size: 12pt"><b>
+			C&oacute;digo &Uacute;nico de Proceso:</b></font></font></font></p>
+		</td>
+		<td width="68%" style="background: transparent" style="border: none; padding: 0cm"><p align="left">
+			[procesoJudicial]</p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="32%" style="background: transparent" style="border: none; padding: 0cm"><p align="left" style="font-variant: normal; font-style: normal; text-decoration: none">
+			<font color="#000000"><font face="Liberation Serif, serif"><font size="3" style="font-size: 12pt"><b>
+			Sujetos Procesales:</b></font></font></font></p>
+		</td>
+		<td width="68%" style="background: transparent" style="border: none; padding: 0cm"><p align="left">
+			[partes]</p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="32%" style="background: transparent" style="border: none; padding: 0cm"><p align="left" style="font-variant: normal; font-style: normal; text-decoration: none">
+			<font color="#000000"><font face="Liberation Serif, serif"><font size="3" style="font-size: 12pt"><b>Despacho que Env&iacute;a:</b></font></font></font></p>
+		</td>
+		<td width="68%" style="background: transparent" style="border: none; padding: 0cm"><p align="left">
+			[despachoEnvia]</p>
+		</td>
+	</tr>
+    <tr valign="top">
+		<td width="32%" style="background: transparent" style="border: none; padding: 0cm"><p align="left" style="font-variant: normal; font-style: normal; text-decoration: none">
+			<font color="#000000"><font face="Liberation Serif, serif"><font size="3" style="font-size: 12pt"><b>Despacho Asignado:</b></font></font></font></p>
+		</td>
+		<td width="68%" style="background: transparent" style="border: none; padding: 0cm"><p align="left">
+			[despachoAsignado]</p>
+		</td>
+	</tr>
+    <tr valign="top">
+		<td width="32%" style="background: transparent" style="border: none; padding: 0cm"><p align="left" style="font-variant: normal; font-style: normal; text-decoration: none">
+			<font color="#000000"><font face="Liberation Serif, serif"><font size="3" style="font-size: 12pt"><b>Código Único de Proceso Asignado:</b></font></font></font></p>
+		</td>
+		<td width="68%" style="background: transparent" style="border: none; padding: 0cm"><p align="left">
+			[procesoJudicialAsignado]</p>
+		</td>
+	</tr>
+</table>
+<table width="100%" cellpadding="5" cellspacing="0">
+	<col width="82*"/>
+
+	<col width="174*"/>
+
+	<tr valign="top">
+		<td width="32%" style="background: transparent" style="border: none; padding: 0cm"><p align="left" style="font-variant: normal; font-style: normal; text-decoration: none">
+			<font color="#000000"><font face="Liberation Serif, serif"><font size="3" style="font-size: 12pt"><b>Sujetos Procesales:</b></font></font></font></p>
+		</td>
+		<td width="68%" style="background: transparent" style="border: none; padding: 0cm"><p align="left">
+			[partes]</p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="32%" style="background: transparent" style="border: none; padding: 0cm"><p align="left" style="font-variant: normal; font-style: normal; text-decoration: none">
+			<font color="#000000"><font face="Liberation Serif, serif"><font size="3" style="font-size: 12pt"><b>Documentaci&oacute;n
+			Recibida:</b></font></font></font></p>
+		</td>
+		<td width="68%" style="background: transparent" style="border: none; padding: 0cm"><p align="left">
+			[documentacion]</p>
+		</td>
+	</tr>
+</table>
+<p style="margin-bottom: 0cm; line-height: 100%"><br/>
+
+</p>
+</body>
+</html>

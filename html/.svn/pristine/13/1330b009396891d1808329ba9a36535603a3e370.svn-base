@@ -1,0 +1,190 @@
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+    new Ext.Viewport(	{
+                                layout: 'border',
+                                items: [
+                                            {
+                                                xtype:'panel',
+                                                region:'center',
+                                                layout:'border',
+                                                title: 'Bit&aacute;cora de reparto',
+                                                items:	[
+                                                            crearGridBitacora()
+                                                        ]
+                                            }
+                                         ]
+                            }
+                        )   
+}
+
+
+function crearGridBitacora()
+{
+	var lector= new Ext.data.JsonReader({
+                                            
+                                            totalProperty:'numReg',
+                                            fields: [
+                                               			{name:'idAsignacion'},
+		                                                {name: 'idFormulario'},
+		                                                {name:'idRegistro'},
+                                                        {name:'idObjetoReferido'},
+                                                        {name:'idUnidadReferida'},
+                                                        {name:'tipoRonda'},
+                                                        {name:'noRonda'},
+		                                                {name:'fechaAsignacion', type:'date', dateFormat:'Y-m-d H:i:s'},
+                                                        {name: 'situacion'},
+                                                        {name: 'rondaPagada'},
+                                                        {name: 'comentariosAdicionales'},
+                                                        {name:'tipoAsignacion'},
+                                                        {name:'idAsignacionPagada'},
+                                                        {name: 'objParametros'}
+                                            		],
+                                            root:'registros'
+                                            
+                                        }
+                                      );
+	 
+                                                                                      
+	var alDatos=new Ext.data.GroupingStore({
+                                                            reader: lector,
+                                                            proxy : new Ext.data.HttpProxy	(
+
+                                                                                              {
+
+                                                                                                  url: '../modulosEspeciales_SIUGJ/paginasFunciones/funcionesScriptsFormularios.php'
+
+                                                                                              }
+
+                                                                                          ),
+                                                            sortInfo: {field: 'idAsignacion', direction: 'ASC'},
+                                                            groupField: 'idAsignacion',
+                                                            remoteGroup:false,
+				                                            remoteSort: true,
+                                                            autoLoad:true
+                                                            
+                                                        }) 
+	alDatos.on('beforeload',function(proxy)
+    								{
+                                    	proxy.baseParams.funcion='21';
+
+                                    }
+                        )   
+       
+        var cModelo= new Ext.grid.ColumnModel   	(
+                                                        [
+                                                            new  Ext.grid.RowNumberer({width:50}),
+                                                            {
+                                                                header:'ID asignaci&oacute;n',
+                                                                width:180,
+                                                                sortable:true,
+                                                                dataIndex:'idAsignacion',
+                                                                renderer:mostrarValorDescripcion
+                                                                
+                                                            },
+                                                            {
+                                                                header:'Fecha de asignaci&oacute;n',
+                                                                width:210,
+                                                                sortable:true,
+                                                                dataIndex:'fechaAsignacion',
+                                                                renderer:function(val)
+                                                                		{
+                                                                        	if(val)
+                                                                            	return val.format('d/m/Y H:i');
+                                                                        }
+                                                                
+                                                            },
+                                                            {
+                                                                header:'Despacho asignado',
+                                                                width:300,
+                                                                sortable:true,
+                                                                dataIndex:'idUnidadReferida',
+                                                                renderer:mostrarValorDescripcion
+                                                                
+                                                            },
+                                                            {
+                                                                header:'Cve. ronda',
+                                                                width:250,
+                                                                sortable:true,
+                                                                dataIndex:'tipoRonda',
+                                                                renderer:mostrarValorDescripcion
+                                                                
+                                                            },
+                                                            {
+                                                                header:'No. ronda',
+                                                                width:150,
+                                                                sortable:true,
+                                                                dataIndex:'noRonda',
+                                                                renderer:mostrarValorDescripcion
+                                                                
+                                                            },
+                                                            {
+                                                                header:'Situaci&oacute;n',
+                                                                width:180,
+                                                                sortable:true,
+                                                                dataIndex:'situacion'
+                                                                
+                                                            },
+                                                            {
+                                                                header:'Pago de ronda',
+                                                                width:180,
+                                                                sortable:true,
+                                                                dataIndex:'rondaPagada',
+                                                                renderer:function(val)
+                                                                		{
+                                                                        	if(val=='1')
+                                                                            	return 'S&iacute;';
+                                                                            return 'No';
+                                                                        }
+                                                                
+                                                            },
+                                                             {
+                                                                header:'Comentarios',
+                                                                width:400,
+                                                                sortable:true,
+                                                                dataIndex:'comentariosAdicionales',
+                                                                renderer:mostrarValorDescripcion
+                                                                
+                                                            },
+                                                            {
+                                                                header:'ID Asignaci&oacute;n pagada',
+                                                                width:100,
+                                                                sortable:true,
+                                                                dataIndex:'idAsignacionPagada'
+                                                                
+                                                            },
+                                                            {
+                                                                header:'Condiciones de asignaci&oacute;n',
+                                                                width:300,
+                                                                sortable:true,
+                                                                dataIndex:'objParametros'
+                                                                
+                                                            }
+                                                        ]
+                                                    );
+                                                    
+        var tblGrid=	new Ext.grid.GridPanel	(
+                                                            {
+                                                                id:'gBitacoraReparto',
+                                                                store:alDatos,
+                                                                cls:'gridSiugjPrincipal',
+                                                                region:'center',
+                                                                frame:false,
+                                                                cm: cModelo,
+                                                                stripeRows :true,
+                                                                loadMask:true,
+                                                                columnLines : true,                                                                
+                                                                view:new Ext.grid.GroupingView({
+                                                                                                    forceFit:false,
+                                                                                                    showGroupName: false,
+                                                                                                    enableGrouping :false,
+                                                                                                    enableNoGroups:false,
+                                                                                                    enableGroupingMenu:false,
+                                                                                                    hideGroupedColumn: false,
+                                                                                                    startCollapsed:false
+                                                                                                })
+                                                            }
+                                                        );
+        return 	tblGrid;
+}

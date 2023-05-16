@@ -1,0 +1,88 @@
+<?php session_start();
+	include_once("conexionBD.php");
+	include_once("utiles.php");
+	
+
+
+	
+	if(isset($_POST["parametros"]))
+		$parametros=$_POST["parametros"];
+	if(isset($_POST["funcion"]))
+		$funcion=$_POST["funcion"];
+	$lenguaje=$_SESSION["leng"];
+	
+	switch($funcion)
+	{
+		case 1:
+			obtenerSeccionesRelatoria();
+		break;
+		case 2:
+			guardarValorSeccion();
+		break;
+		
+	}
+	
+
+
+
+
+	function obtenerSeccionesRelatoria()
+	{
+		global $con;
+		$idFormulario=$_POST["idFormulario"];
+		$idDocumento=$_POST["idDocumento"];
+		$idRegistro=$_POST["idRegistro"];
+		
+		$arrSecciones="";
+		$consulta="SELECT claveElemento,nombreElemento,datosComplementarios FROM 1018_catalogoVarios WHERE tipoElemento=41 ORDER BY idElementoCatalogo";
+		
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			
+			$consulta="SELECT valorSeccion FROM _1137_seccionesRelatoria WHERE idFormulario=".$idFormulario." AND idReferencia=".$idRegistro." AND idSeccion=".$fila["claveElemento"];
+			$valorSeccion=$con->obtenerValor($consulta);
+			
+			$icono="cancel_round.png";
+			if($valorSeccion!="")
+			{
+				$icono="accept_green.png";
+			}
+			
+			$o='{"expanded":true,"icon":"../images/'.$icono.'","id":"s_'.$fila["claveElemento"].'","text":"'.cv($fila["nombreElemento"]).'","leaf":true,"valorSeccion":"'.bE($valorSeccion).
+				'","datosComplementarios":"'.bE($fila["datosComplementarios"]).'"}';
+			if($arrSecciones=="")
+				$arrSecciones=$o;
+			else
+				$arrSecciones.=",".$o;
+		}
+		
+		
+		
+		echo '['.$arrSecciones.']';
+	}
+	
+	
+	function guardarValorSeccion()
+	{
+		global $con;
+		
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		
+		$consulta="SELECT idRegistroRelatoria FROM _1137_seccionesRelatoria WHERE idFormulario=".$obj->idFormulario." AND idReferencia=".$obj->idReferencia." AND idSeccion=".$obj->idSeccion;
+		$idRegistroRelatoria=$con->obtenerValor($consulta);
+		if($idRegistroRelatoria=="")
+		{
+			$consulta="INSERT INTO _1137_seccionesRelatoria(idFormulario,idReferencia,idSeccion,valorSeccion) VALUES(".$obj->idFormulario.",".
+						$obj->idReferencia.",".$obj->idSeccion.",'".cv($obj->valorSeccion)."')";
+		}
+		else
+		{
+			$consulta="update _1137_seccionesRelatoria set valorSeccion='".cv($obj->valorSeccion)."' where idRegistroRelatoria=".$idRegistroRelatoria;
+		}
+		
+		eC($consulta);
+	}
+	
+?>

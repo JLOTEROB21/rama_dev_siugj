@@ -1,0 +1,65 @@
+<?php
+require_once '../thotReporter/stimulsoft/helper.php';
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Documento sin título</title>
+	<link href="../thotReporter/css/stimulsoft.viewer.office2013.whiteblue.css" rel="stylesheet">
+	<script src="../thotReporter/Scripts/stimulsoft.reports.src.js" type="text/javascript"></script>
+	<script src="../thotReporter/Scripts/stimulsoft.viewer.src.js" type="text/javascript"></script>
+    <?php
+		
+		StiHelper::init('../thotReporter/stimulsoft/adapters/handler.php', 30);
+		
+		$idReporte=3;
+		if(isset($_GET["iR"]))
+		{
+			$idReporte=$_GET["iR"];
+		}
+	?>
+    <script type="text/javascript">
+
+	Stimulsoft.Base.StiLicense.key =	"6vJhGtLLLz2GNviWmUTrhSqnOItdDwjBylQzQcAOiHmgkBxjU0/UmAjZbab0bLsWj2KKQ1f2h2zVQgROa923/J9aga" + 
+										"lcVnGg+nc1D5EeJo2HbKA2gEtCNP1pehPSy8G2ctYYmeZGyYMb+h5TJxkcjMmZxSMvsnptsiE5D9l1poNO8vJpc58v" + 
+										"Pf9NBDcAxhmdWUAgFU3vGPYO/WhpOzoBpdplAgurmxCeB5gXDlFZla/9iPOlHgfLKNzGZ+aVv1OkSeuzGqPjNVUvBL" + 
+										"oSuCqhEnKqWr7MHmtHoVAqjda2vsrUEnCpKidQPanTeWodnY96ask+VehI4xI/GPFvD5UeaCdm2sW550Ex9x2NumT/" + 
+										"ZGY7Dsdg4XuapPzxJ9vrAqdmib5S9FmeW+DZnHwkhKi/3SccdPhbhOWw/CntjnlDWzGz9jqiy7rxe6kLhxgrQP37rm" + 
+										"yLWmMRoYTRk/j6Nh0j1jtvf4VSQTo97uB3l7GUk2IjDpWOtkQD4jQh6m7bccdK8+kYCIIRZ2Wi1Hr2Jfqohy1D/WBh" + 
+										"xWOtFroLhG+SJ100PwjepP7KtKmB+J+KPoVz";
+	
+    Stimulsoft.Base.Localization.StiLocalization.setLocalizationFile("es.xml");
+
+										
+	var report = new Stimulsoft.Report.StiReport();
+
+	report.loadFile("../reportes/formulario2021_<?php echo $idReporte ?>.mrt");
+	
+	 
+	
+	var options = new Stimulsoft.Viewer.StiViewerOptions();
+	options.appearance.htmlRenderMode = Stimulsoft.Report.Export.StiHtmlExportMode.Div;	
+	options.appearance.scrollbarsMode = true;
+	options.appearance.showTooltips = false;
+	options.toolbar.showPrintButton = true;
+	options.toolbar.showDesignButton = false;
+	options.toolbar.showAboutButton = false;
+	options.exports.showExportToPdf = true;
+	options.exports.ShowExportToWord2007 = true;
+	options.appearance.fullScreenMode = true;
+	options.toolbar.showOpenButton=false;
+	//options.WebServer.encryptData = false;
+
+
+	//options.WebServer.url = "https://test-siugj.linktic.co/thotReporter/latis/handlerlatis.php";
+	var viewer = new Stimulsoft.Viewer.StiViewer(options);
+	
+	viewer.report = report;		
+									
+	</script>
+</head>
+
+<body>
+</body>
+</html>

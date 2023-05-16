@@ -1,0 +1,64 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+?>
+
+
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	new Ext.Button (
+                                {
+                                    icon:'../images/icon_big_tick.gif',
+                                    cls:'x-btn-text-icon',
+                                    text:'Guardar',
+                                    width:110,
+                                    height:30,
+                                    id:'btnGuardarForm',
+                                    renderTo:'contenedor1',
+                                    handler:function()
+                                            {
+                                                validarFrm('frmEnvio')
+                                            }
+                                    
+                                }
+                            )
+	
+    
+    new Ext.Button (
+                                {
+                                    icon:'../images/cross.png',
+                                    cls:'x-btn-text-icon',
+                                    text:'Cancelar',
+                                    width:110,
+                                    height:30,
+                                    id:'btnCancelarForm',
+                                    renderTo:'contenedor2',
+                                    handler:function()
+                                            {
+                                            	function  resp(btn)
+                                                {
+                                                	if(btn=='yes')
+                                                    {
+                                                    	location.href='../gestorDocumental/tblTiposDocumentos.php';
+                                                    }
+                                                }
+                                                msgConfirm('Est&aacute; seguro de querer cancelar la operaci&oacute;n?',resp)
+                                                
+                                            }
+                                    
+                                }
+                            )
+}
+
+
+function validarFrm()
+{
+	if(validarFormularios('frmEnvio'))
+    {
+    	gE('frmEnvio').submit();
+    }
+}
+

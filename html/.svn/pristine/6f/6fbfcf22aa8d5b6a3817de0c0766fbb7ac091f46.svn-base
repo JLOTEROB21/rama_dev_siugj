@@ -1,0 +1,152 @@
+<?php session_start();
+	include_once("conexionBD.php");
+	include_once("utiles.php");
+	
+	
+	if(isset($_POST["parametros"]))
+		$parametros=$_POST["parametros"];
+	if(isset($_POST["funcion"]))
+		$funcion=$_POST["funcion"];
+	$lenguaje=$_SESSION["leng"];
+	
+	switch($funcion)
+	{
+		case 1:
+			registrarDocumentosProceso();
+		break;
+		case 2:
+			registrarDocumentosProcesoCarpetaJudicial();
+		break;
+		case 3:
+			removerDocumentosProcesoCarpetaJudicial();
+		break;
+	}
+
+
+
+
+	function registrarDocumentosProceso()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		
+		$listaDocumentos="";
+		$x=0;
+		$consulta[$x]="begin";
+		$x++;
+		foreach($obj->arrDocumentos as $d)
+		{
+			if(($d->presentaDocumento==1)&&($d->idRegistro!=-1))
+			{
+				if($listaDocumentos=="")
+					$listaDocumentos=$d->idRegistro;
+				else
+					$listaDocumentos.=",".$d->idRegistro;
+			}
+			
+		}
+		if($listaDocumentos=="")
+			$listaDocumentos=-1;
+
+		if($obj->idActividad!=-1)
+			$consulta[$x]="DELETE FROM 9503_documentosRegistradosProceso WHERE idActividad=".$obj->idActividad." AND idRegistro NOT IN(".$listaDocumentos.")";
+		else
+			$consulta[$x]="DELETE FROM 9503_documentosRegistradosProceso WHERE idFormulario=".$obj->idFormulario." AND idReferencia=".$obj->idRegistro." and idRegistro NOT IN(".$listaDocumentos.")";
+		$x++;
+		
+		foreach($obj->arrDocumentos as $d)
+		{
+			
+			if($d->presentaDocumento==1)
+			{
+
+				$idDocumento="NULL";
+				
+				if($d->documentoDigital!="")
+				{
+					
+					$arrDocumentosNombre=explode("|",$d->documentoDigital);
+					$idDocumento=$arrDocumentosNombre[1];
+					$nombreDocumento=$arrDocumentosNombre[0];
+					
+					if(strpos($idDocumento,"_")!==false)
+					{
+						$idDocumento=registrarDocumentoServidorRepositorio($idDocumento,$nombreDocumento,$d->idDocumento,"");
+					}
+					
+				}
+				if($d->idRegistro<0)
+				{
+					$consulta[$x]="INSERT INTO 9503_documentosRegistradosProceso(idActividad,idTipoDocumento,idDocumento,presentaDocumento,idFormulario,idReferencia)
+								VALUES(".$obj->idActividad.",".$d->idDocumento.",".$idDocumento.",1,".$obj->idFormulario.",".$obj->idRegistro.")";
+					$x++;
+				}
+				else
+				{
+					$consulta[$x]="UPDATE 9503_documentosRegistradosProceso SET idDocumento=".$idDocumento." WHERE idRegistro=".$d->idRegistro;
+					$x++;
+				}
+			}
+		}
+		
+		
+		$consulta[$x]="commit";
+		$x++;
+		if($con->ejecutarBloque($consulta))
+		{
+			$arrDocumentos=obtenerDocumentacionRequeridaClaseProceso($obj->idFormulario,$obj->idRegistro);
+			echo "1|".bE($arrDocumentos);
+		}
+		
+	}
+	
+	
+	function registrarDocumentosProcesoCarpetaJudicial()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		
+		$listaDocumentos="";
+		$x=0;
+		$consulta[$x]="begin";
+		$x++;
+		foreach($obj->arrDocumentos as $d)
+		{
+			$query="SELECT categoriaDocumentos FROM 908_archivos WHERE idArchivo=".$d->idDocumento;
+			$idTipoDocumento=$con->obtenerValor($query);
+			
+			$consulta[$x]="INSERT INTO 9503_documentosRegistradosProceso(idTipoDocumento,idDocumento,presentaDocumento,idFormulario,idReferencia)
+							values(".$idTipoDocumento.",".$d->idDocumento.",1,".$obj->idFormulario.",".$obj->idReferencia.")";
+			
+			$x++;
+		}
+		$consulta[$x]="commit";
+		$x++;
+		
+		if($con->ejecutarBloque($consulta))
+		{
+			$arrDocumentos=obtenerDocumentacionRequeridaClaseProceso($obj->idFormulario,$obj->idReferencia);
+			echo "1|".bE($arrDocumentos);
+		}
+	}
+	
+	function removerDocumentosProcesoCarpetaJudicial()
+	{
+		global $con;
+		$listaDocumentos=$_POST["listaDocumentos"];
+		$x=0;
+		$consulta[$x]="begin";
+		$x++;
+		$consulta[$x]="DELETE FROM 9503_documentosRegistradosProceso WHERE idRegistro IN(".$listaDocumentos.")";
+		$x++;
+		$consulta[$x]="commit";
+		$x++;
+		
+		if($con->ejecutarBloque($consulta))
+		{
+			echo "1|";
+		}
+	}
+?>

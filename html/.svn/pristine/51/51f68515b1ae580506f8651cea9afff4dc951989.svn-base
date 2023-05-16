@@ -1,0 +1,790 @@
+<?php
+	function mostrarSeccionEdicionDocumentoSeleccionFormatoInformeSecretarial($idFormulario,$idRegistro,$idFormularioEvaluacion)
+	{
+		global $con;
+		
+		$documentoBloqueado=0;
+		$consulta="SELECT idRegistro FROM 7035_informacionDocumentos WHERE idFormulario=".$idFormulario.
+					" AND idReferencia=".$idRegistro." AND idFormularioProceso=".$idFormularioEvaluacion;
+	
+		$iRegistro=$con->obtenerValor($consulta);	
+		if($iRegistro!="")
+		{
+			$consulta="SELECT documentoBloqueado FROM 3000_formatosRegistrados WHERE idFormulario=-2 AND idRegistro=".$iRegistro." AND idFormularioProceso=".$idFormularioEvaluacion;
+			
+			$documentoBloqueado=$con->obtenerValor($consulta);	
+		}
+		if($documentoBloqueado==1)
+			return 0;
+		
+		$consulta="SELECT tipoApelacion FROM _944_tablaDinamica WHERE id__944_tablaDinamica=".$idRegistro;
+		$tipoApelacion=$con->obtenerValor($consulta);
+			
+		if($tipoApelacion==2)
+			return 1;
+				
+		$consulta="SELECT COUNT(*) FROM _966_tablaDinamica WHERE idReferencia=".$idRegistro;	
+		$numReg=$con->obtenerValor($consulta);
+			
+		return $numReg>0?1:0;
+		
+	}
+	
+	function mostrarSeccionEdicionDocumentoSeleccionFormatoGeneraAuto($idFormulario,$idRegistro,$idFormularioEvaluacion)
+	{
+		global $con;
+		
+		$documentoBloqueado=0;
+		$consulta="SELECT idRegistro FROM 7035_informacionDocumentos WHERE idFormulario=".$idFormulario.
+					" AND idReferencia=".$idRegistro." AND idFormularioProceso=".$idFormularioEvaluacion;
+	
+		$iRegistro=$con->obtenerValor($consulta);	
+		if($iRegistro!="")
+		{
+			$consulta="SELECT documentoBloqueado FROM 3000_formatosRegistrados WHERE idFormulario=-2 AND idRegistro=".$iRegistro." AND idFormularioProceso=".$idFormularioEvaluacion;
+			
+			$documentoBloqueado=$con->obtenerValor($consulta);	
+		}
+		if($documentoBloqueado==1)
+			return 0;
+			
+			
+		$nombreTabla=obtenerNombreTabla($idFormulario);
+		$consulta="SELECT tipoDocumento FROM ".$nombreTabla." WHERE id_".$nombreTabla."=".$idRegistro;
+	
+		$tipoDocumento=$con->obtenerValor($consulta);	
+		
+		switch($tipoDocumento)
+		{
+			case 540:
+			case 606:
+				$consulta="SELECT COUNT(*) FROM _975_tablaDinamica WHERE idReferencia=".$idRegistro;
+				$numReg=$con->obtenerValor($consulta);
+				if($numReg==0)
+					return 0;
+				
+			break;
+			case 608:
+				$consulta="SELECT COUNT(*) FROM _984_tablaDinamica WHERE idReferencia=".$idRegistro;
+				$numReg=$con->obtenerValor($consulta);
+				if($numReg==0)
+					return 0;
+				
+			break;
+			case 628:
+				$consulta="SELECT COUNT(*) FROM _1063_tablaDinamica WHERE idReferencia=".$idRegistro;
+				$numReg=$con->obtenerValor($consulta);
+				if($numReg==0)
+					return 0;
+				
+			break;
+			case 685:
+				$consulta="SELECT COUNT(*) FROM _1123_tablaDinamica WHERE idReferencia=".$idRegistro;
+				$numReg=$con->obtenerValor($consulta);
+				if($numReg==0)
+					return 0;
+				
+			break;
+		}
+			
+		return 1;
+		
+	}
+	
+	function mostrarSeccionEdicionDocumentoSeleccionFormatoProvidencia($idFormulario,$idRegistro,$idFormularioEvaluacion)
+	{
+		global $con;
+		
+		$documentoBloqueado=0;
+		$consulta="SELECT idRegistro FROM 7035_informacionDocumentos WHERE idFormulario=".$idFormulario.
+					" AND idReferencia=".$idRegistro." AND idFormularioProceso=".$idFormularioEvaluacion;
+	
+		$iRegistro=$con->obtenerValor($consulta);	
+		if($iRegistro!="")
+		{
+			$consulta="SELECT documentoBloqueado FROM 3000_formatosRegistrados WHERE idFormulario=-2 AND idRegistro=".$iRegistro." AND idFormularioProceso=".$idFormularioEvaluacion;
+			
+			$documentoBloqueado=$con->obtenerValor($consulta);	
+		}
+		if($documentoBloqueado==1)
+			return 0;
+			
+			
+		$nombreTabla=obtenerNombreTabla($idFormulario);
+		$consulta="SELECT * FROM ".$nombreTabla." WHERE id_".$nombreTabla."=".$idRegistro;
+		$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+		
+		$providenciaAplica=$fRegistro["providenciaAplicar"];	
+		$consulta="SELECT plantillaAsociada FROM _624_tablaDinamica WHERE id__624_tablaDinamica=".$providenciaAplica;
+		
+		$plantillaAsociada=$con->obtenerValor($consulta);
+		if(($plantillaAsociada=="")||($plantillaAsociada=="-1"))
+		{
+			return 0;
+		}
+		
+		switch($providenciaAplica)
+		{
+			case 22:
+			case 37:
+				$consulta="SELECT COUNT(*) FROM _1018_tablaDinamica WHERE idReferencia=".$idRegistro;
+				$numElementos=$con->obtenerValor($consulta);
+				if($numElementos==0)
+					return 0;
+			break;
+			case 42:
+				$consulta="SELECT COUNT(*) FROM _1104_tablaDinamica WHERE idReferencia=".$idRegistro;
+				$numElementos=$con->obtenerValor($consulta);
+				if($numElementos==0)
+					return 0;
+			break;
+		}
+		
+		
+		$consulta="SELECT count(*) FROM _624_tablaDinamica WHERE id__624_tablaDinamica=".$fRegistro["providenciaAplicar"]." and  generaOrdenProgramacionAudiencia=1";
+		$numReg=$con->obtenerValor($consulta);
+		
+		if(($numReg>0) &&($fRegistro["fechaAudiencia"]==""))
+		{
+			return 0;
+		}
+		
+		
+		$consulta="SELECT count(*) FROM _624_tablaDinamica WHERE id__624_tablaDinamica=".$fRegistro["providenciaAplicar"]." and  preguntarDecretaPruebas=1";
+		$numReg=$con->obtenerValor($consulta);
+		
+		if(($numReg>0) &&($fRegistro["decretaPruebas"]==""))
+		{
+			return 0;
+		}
+		
+		
+		$consulta="SELECT count(*) FROM _624_tablaDinamica WHERE id__624_tablaDinamica=".$fRegistro["providenciaAplicar"]." and  decretaSentencia=1";
+		$numReg=$con->obtenerValor($consulta);
+		
+		if(($numReg>0) &&($fRegistro["sentidoFalloSentencia"]==""))
+		{
+			return 0;
+		}
+
+			
+		return 1;
+		
+	}
+	
+	
+	function esProvidenciaConAuto($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		$nombreTabla=obtenerNombreTabla($idFormulario);
+		$consulta="SELECT providenciaAplicar FROM ".$nombreTabla." WHERE id_".$nombreTabla."=".$idRegistro;
+		
+		$providenciaAplica=$con->obtenerValor($consulta);	
+		$consulta="SELECT plantillaAsociada FROM _624_tablaDinamica WHERE id__624_tablaDinamica=".$providenciaAplica;
+		
+		$plantillaAsociada=$con->obtenerValor($consulta);
+		if(($plantillaAsociada=="")||($plantillaAsociada=="-1"))
+		{
+			return 0;
+		}
+		
+		$consulta="SELECT COUNT(*) FROM 7035_informacionDocumentos WHERE idFormulario=".$idFormulario." AND idReferencia=".$idRegistro;
+
+		$numReg=$con->obtenerValor($consulta);
+		return $numReg>0?1:0;
+	}
+	
+	
+	function esProvidenciaSinAuto($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		
+		$nombreTabla=obtenerNombreTabla($idFormulario);
+		$consulta="SELECT providenciaAplicar FROM ".$nombreTabla." WHERE id_".$nombreTabla."=".$idRegistro;
+		
+		$providenciaAplica=$con->obtenerValor($consulta);	
+		$consulta="SELECT plantillaAsociada FROM _624_tablaDinamica WHERE id__624_tablaDinamica=".$providenciaAplica;
+		
+		$plantillaAsociada=$con->obtenerValor($consulta);
+		if(($plantillaAsociada=="")||($plantillaAsociada=="-1"))
+		{
+			return 1;
+		}
+		return 0;
+	}
+	
+	function esSecretarioSustanciadorApelacionOrdinarioAuto($idRegistro,$actor)
+	{
+		global $con;
+		
+		$consulta="SELECT tipoApelacion FROM _944_tablaDinamica WHERE id__944_tablaDinamica=".$idRegistro;
+		$tipoApelacion=$con->obtenerValor($consulta);
+		
+		if($tipoApelacion!=1)
+			return 0;
+		
+			
+		$arrActor["1633"]=1;
+		$arrActor["1634"]=1;
+		$arrActor["1636"]=1;
+		$arrActor["1635"]=1;
+		
+		if(!isset($arrActor[$actor]))
+		{
+			return 0;
+		}
+		return 1;
+		
+	}
+	
+	function esSecretarioSustanciadorApelacionOrdinarioSentencia($idRegistro,$actor)
+	{
+		global $con;
+		
+		$consulta="SELECT tipoApelacion FROM _944_tablaDinamica WHERE id__944_tablaDinamica=".$idRegistro;
+		$tipoApelacion=$con->obtenerValor($consulta);
+		
+		if($tipoApelacion!=2)
+			return 0;
+		
+			
+		$arrActor["1633"]=1;
+		$arrActor["1634"]=1;
+		$arrActor["1635"]=1;
+		$arrActor["1636"]=1;
+		
+		if(!isset($arrActor[$actor]))
+		{
+			return 0;
+		}
+		return 1;
+		
+	}
+	
+	
+	function esProcesoApelacionSobreAuto($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		$consulta="SELECT tipoApelacion FROM _944_tablaDinamica WHERE id__944_tablaDinamica=".$idRegistro;
+		$tipoApelacion=$con->obtenerValor($consulta);
+		
+		return $tipoApelacion==1?1:0;
+		
+	}
+	
+	function esProcesoApelacionSobreSentencia($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		$consulta="SELECT tipoApelacion FROM _944_tablaDinamica WHERE id__944_tablaDinamica=".$idRegistro;
+		$tipoApelacion=$con->obtenerValor($consulta);
+		
+		return $tipoApelacion==2?1:0;
+		
+	}
+	
+	function esProcesoApelacionSobreSentenciaSeccion($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		return esProcesoApelacionSobreSentencia($idFormulario,$idRegistro);
+		
+	}
+	
+	function _esSecretarioApelacion200($idFormulario,$idRegistro,$actor)
+	{
+		global $con;
+		
+		$consulta="SELECT tipoApelacion FROM _944_tablaDinamica WHERE id__944_tablaDinamica=".$idRegistro;
+		$tipoApelacion=$con->obtenerValor($consulta);
+		
+		if($tipoApelacion==2)
+			return 0;
+		
+			
+		$arrActor["1638"]=1;
+		
+		
+		if(!isset($arrActor[$actor]))
+		{
+			return 0;
+		}
+		return 1;
+	}
+	
+	
+	function mostrarSentidoFalloGeneracionAuto($idFormulario,$idRegistro)
+	{
+		global $con;
+		$consulta="SELECT * FROM _696_tablaDinamica WHERE id__696_tablaDinamica=".$idRegistro;
+		$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+		
+		if(($fRegistro["tipoDocumento"]!=608)||($fRegistro["idProcesoPadre"]!=0))
+		{
+			return 0;
+		}
+		
+		
+		return 1;
+		
+	}
+	
+	function mostrarSeccionGeneraConstanciaPrueba($idFormulario,$idRegistro,$idFormularioEvaluacion,$actor)
+	{
+		global $con;
+		
+		$documentoBloqueado=0;
+		$consulta="SELECT idRegistro FROM 7035_informacionDocumentos WHERE idFormulario=".$idFormulario.
+					" AND idReferencia=".$idRegistro." AND idFormularioProceso=".$idFormularioEvaluacion;
+	
+		$iRegistro=$con->obtenerValor($consulta);	
+		if($iRegistro!="")
+		{
+			$consulta="SELECT documentoBloqueado FROM 3000_formatosRegistrados WHERE idFormulario=-2 AND idRegistro=".$iRegistro." AND idFormularioProceso=".$idFormularioEvaluacion;
+			
+			$documentoBloqueado=$con->obtenerValor($consulta);	
+		}
+		if($documentoBloqueado==1)
+			return 0;
+			
+		if($actor!=1449)
+			return  0;	
+		return 1;
+		
+	}
+	
+	
+	function esProvidenciaMedidaProvisional($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		
+		$nombreTabla=obtenerNombreTabla($idFormulario);
+		$consulta="SELECT providenciaAplicar FROM ".$nombreTabla." WHERE id_".$nombreTabla."=".$idRegistro;
+		
+		$providenciaAplica=$con->obtenerValor($consulta);	
+		
+		if(($providenciaAplica==22)||($providenciaAplica==37))
+		{
+			return 1;
+		}
+		return 0;
+	}
+	
+	function esProvidenciaMedidaProvisionalSeccion($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		
+		$nombreTabla=obtenerNombreTabla($idFormulario);
+		$consulta="SELECT providenciaAplicar FROM ".$nombreTabla." WHERE id_".$nombreTabla."=".$idRegistro;
+		
+		$providenciaAplica=$con->obtenerValor($consulta);	
+		
+		if($providenciaAplica==22)
+		{
+			return 1;
+		}
+		return 0;
+	}
+
+	function esProvidenciaCamposCompletos($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		
+			
+		$nombreTabla=obtenerNombreTabla($idFormulario);
+		$consulta="SELECT * FROM ".$nombreTabla." WHERE id_".$nombreTabla."=".$idRegistro;
+		$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+		
+		
+		$providenciaAplica=$fRegistro["providenciaAplicar"];	
+		$consulta="SELECT plantillaAsociada FROM _624_tablaDinamica WHERE id__624_tablaDinamica=".$providenciaAplica;
+		
+		$plantillaAsociada=$con->obtenerValor($consulta);
+		if(($plantillaAsociada=="")||($plantillaAsociada=="-1"))
+		{
+			return 0;
+		}
+		
+		$consulta="SELECT count(*) FROM _624_tablaDinamica WHERE id__624_tablaDinamica=".$fRegistro["providenciaAplicar"]." and  generaOrdenProgramacionAudiencia=1";
+
+		$numReg=$con->obtenerValor($consulta);
+		
+		if(($numReg>0) &&($fRegistro["fechaAudiencia"]==""))
+		{
+
+			return 0;
+		}
+		
+		
+		$consulta="SELECT count(*) FROM _624_tablaDinamica WHERE id__624_tablaDinamica=".$fRegistro["providenciaAplicar"]." and  preguntarDecretaPruebas=1";
+		$numReg=$con->obtenerValor($consulta);
+		
+		if(($numReg>0) &&($fRegistro["decretaPruebas"]==""))
+		{
+
+			return 0;
+		}
+		
+		
+		$consulta="SELECT count(*) FROM _624_tablaDinamica WHERE id__624_tablaDinamica=".$fRegistro["providenciaAplicar"]." and  decretaSentencia=1";
+		$numReg=$con->obtenerValor($consulta);
+		
+		if(($numReg>0) &&($fRegistro["sentidoFalloSentencia"]==""))
+		{
+
+			return 0;
+		}
+
+			
+		$consulta="SELECT COUNT(*) FROM 7035_informacionDocumentos WHERE idFormulario=".$idFormulario." AND idReferencia=".$idRegistro;
+
+		
+		$numReg=$con->obtenerValor($consulta);
+		return $numReg>0?1:0;	
+			
+
+		
+	}
+	
+	function esAutoCausalRechazoDePlano($idFormulario,$idRegistro)
+	{
+		global $con;
+		$consulta="SELECT tipoDocumento FROM _696_tablaDinamica WHERE id__696_tablaDinamica=".$idRegistro;
+		$tipoDocumento=$con->obtenerValor($consulta);
+		
+		
+		return $tipoDocumento==628?1:0;
+	}
+	
+	function esUsuarioSecretarioConstancia($idFormulario,$idRegistro,$idFormularioEvaluacion,$actor)
+	{
+		global $con;
+		
+		if($actor!="1468")
+		{
+			return 0;
+		}
+		
+		$carpetaAdministrativa=obtenerCarpetaAdministrativaProceso($idFormulario,$idRegistro);
+		
+		$consulta="SELECT tipoProceso FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa."'";
+		$tipoProceso=$con->obtenerValor($consulta);
+		if($tipoProceso==13)
+			return 0;
+			
+		return mostrarSeccionEdicionDocumentoSeleccionFormato($idFormulario,$idRegistro,$idFormularioEvaluacion);
+	}
+	
+	function esUsuarioSecretarioInforme($idFormulario,$idRegistro,$idFormularioEvaluacion,$actor)
+	{
+		global $con;
+		
+		if($actor!="1468")
+		{
+			return 0;
+		}
+		
+		$carpetaAdministrativa=obtenerCarpetaAdministrativaProceso($idFormulario,$idRegistro);
+		
+		$consulta="SELECT tipoProceso FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa."'";
+		$tipoProceso=$con->obtenerValor($consulta);
+		if($tipoProceso!=13)
+			return 0;
+			
+		return mostrarSeccionEdicionDocumentoSeleccionFormato($idFormulario,$idRegistro,$idFormularioEvaluacion);
+	}
+	
+	
+	function esJuezRecepcionContestacionDemanda($idFormulario,$idRegistro,$actor)
+	{
+		global $con;
+		if(($actor!=1428)&&($actor!=1831))
+			return 0;
+		$carpetaAdministrativa=obtenerCarpetaAdministrativaProceso($idFormulario,$idRegistro);
+		
+		$consulta="SELECT tipoProceso FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa."'";
+		$tipoProceso=$con->obtenerValor($consulta);
+		if($tipoProceso==6)
+			return 0;
+		return 1;
+		
+		
+		
+	}
+	
+	function mostrarSeccionEdicionDocumentoSeleccionFormatoDocumentoBloqueadoSustanciacionContancia($idFormulario,$idRegistro,$idFormularioEvaluacion,$actor)
+	{
+		global $con;
+		
+		$documentoBloqueado=0;
+		$consulta="SELECT idRegistro FROM 7035_informacionDocumentos WHERE idFormulario=".$idFormulario.
+					" AND idReferencia=".$idRegistro;
+	
+		$iRegistro=$con->obtenerValor($consulta);	
+		if($iRegistro!="")
+		{
+			$consulta="SELECT documentoBloqueado FROM 3000_formatosRegistrados WHERE idFormulario=-2 AND idRegistro=".$iRegistro;
+			
+			$documentoBloqueado=$con->obtenerValor($consulta);	
+		}
+		if($documentoBloqueado==1)
+			return 0;
+			
+		$consulta="SELECT idEstado FROM _1051_tablaDinamica WHERE id__1051_tablaDinamica=".$idRegistro;
+		$idEstado=$con->obtenerValor($consulta);
+		
+
+		if(($idEstado==1.5) &&($actor==1792))
+			return 1;	
+		
+		return 0;
+		
+	}
+	
+	function mostrarSeccionEdicionDocumentoSeleccionFormatoDocumentoBloqueadoSustanciacionInforme($idFormulario,$idRegistro,$idFormularioEvaluacion,$actor)
+	{
+		global $con;
+		
+		$documentoBloqueado=0;
+		$consulta="SELECT idRegistro FROM 7035_informacionDocumentos WHERE idFormulario=".$idFormulario.
+					" AND idReferencia=".$idRegistro;
+	
+		$iRegistro=$con->obtenerValor($consulta);	
+		if($iRegistro!="")
+		{
+			$consulta="SELECT documentoBloqueado FROM 3000_formatosRegistrados WHERE idFormulario=-2 AND idRegistro=".$iRegistro;
+			
+			$documentoBloqueado=$con->obtenerValor($consulta);	
+		}
+		if($documentoBloqueado==1)
+			return 0;
+			
+		$consulta="SELECT idEstado FROM _1051_tablaDinamica WHERE id__1051_tablaDinamica=".$idRegistro;
+		$idEstado=$con->obtenerValor($consulta);
+		
+		if(($idEstado==1.6) &&($actor==1810))
+			return 1;	
+		return 0;
+		
+	}
+	
+	
+	function esContestacionConExcepcionesPrevias($idFormulario,$idRegistro)
+	{
+		global $con;
+		$arrInformacion=array();
+		
+			$consulta="SELECT * FROM _846_tablaDinamica WHERE idReferencia=".$idRegistro;
+			$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+			if(!$fRegistro)
+			{
+				return 0;
+			}
+			
+			if($fRegistro["existenExcepcionesPrevias"]==1)
+			{
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+		
+	}
+	
+	function esContestacionSinExcepcionesPrevias($idFormulario,$idRegistro)
+	{
+		global $con;
+		$arrInformacion=array();
+		
+			$consulta="SELECT * FROM _846_tablaDinamica WHERE idReferencia=".$idRegistro;
+			$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+			if(!$fRegistro)
+			{
+				return 0;
+			}
+			
+			if($fRegistro["existenExcepcionesPrevias"]==1)
+			{
+				return 0;
+			}
+			else
+			{
+				return 1;
+			}
+		
+	}
+	
+	
+	function mostrarSeccionEdicionDocumentoSeleccionFormatoInformeSecretarialContestacionExcepciones($idFormulario,$idRegistro,$idFormularioEvaluacion,$actor)
+	{
+		global $con;
+		
+		$documentoBloqueado=0;
+		$consulta="SELECT idRegistro FROM 7035_informacionDocumentos WHERE idFormulario=".$idFormulario.
+					" AND idReferencia=".$idRegistro." AND idFormularioProceso=".$idFormularioEvaluacion;
+
+		$iRegistro=$con->obtenerValor($consulta);	
+		if($iRegistro!="")
+		{
+			$consulta="SELECT documentoBloqueado FROM 3000_formatosRegistrados WHERE idFormulario=-2 AND idRegistro=".$iRegistro." AND idFormularioProceso=".$idFormularioEvaluacion;
+			
+			$documentoBloqueado=$con->obtenerValor($consulta);	
+		}
+		if($documentoBloqueado==1)
+			return 0;
+		
+		if($actor==1833)
+			return 1;
+
+		return 0;
+	}
+	
+	
+	function mostrarSeccionEdicionDocumentoSeleccionFormatoConstanciaContestacionExcepciones($idFormulario,$idRegistro,$idFormularioEvaluacion,$actor)
+	{
+		global $con;
+		
+		$documentoBloqueado=0;
+		$consulta="SELECT idRegistro FROM 7035_informacionDocumentos WHERE idFormulario=".$idFormulario.
+					" AND idReferencia=".$idRegistro." AND idFormularioProceso=".$idFormularioEvaluacion;
+
+		$iRegistro=$con->obtenerValor($consulta);	
+		if($iRegistro!="")
+		{
+			$consulta="SELECT documentoBloqueado FROM 3000_formatosRegistrados WHERE idFormulario=-2 AND idRegistro=".$iRegistro." AND idFormularioProceso=".$idFormularioEvaluacion;
+			
+			$documentoBloqueado=$con->obtenerValor($consulta);	
+		}
+		if($documentoBloqueado==1)
+			return 0;
+		
+		if($actor==1452)
+			return 1;
+
+		return 0;
+	}
+	
+	
+	function esTipoProcesoMedioControl($idFormulario,$idRegistro)
+	{
+		global $con;
+		$carpetaAdministrativa=obtenerCarpetaAdministrativaProceso($idFormulario,$idRegistro);
+		
+		$consulta="SELECT tipoProceso FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa."'";
+		$tipoProceso=$con->obtenerValor($consulta);
+		if(($tipoProceso==10)||($tipoProceso==7)||($tipoProceso==11)||($tipoProceso==12))
+			return 1;
+		return 0;
+	}
+	
+	function esTipoProcesoDiferenteMedioControl($idFormulario,$idRegistro)
+	{
+		global $con;
+		$carpetaAdministrativa=obtenerCarpetaAdministrativaProceso($idFormulario,$idRegistro);
+		
+		$consulta="SELECT tipoProceso FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa."'";
+		$tipoProceso=$con->obtenerValor($consulta);
+		if(($tipoProceso!=10)&& ($tipoProceso!=7)&&($tipoProceso!=11)&&($tipoProceso!=12)&&($tipoProceso!=8))
+			return 1;
+		return 0;
+	}
+	
+	function esProvidenciaMedidaCautelar($idFormulario,$idRegistro)
+	{
+		global $con;
+		
+		
+		$nombreTabla=obtenerNombreTabla($idFormulario);
+		$consulta="SELECT providenciaAplicar FROM ".$nombreTabla." WHERE id_".$nombreTabla."=".$idRegistro;
+		
+		$providenciaAplica=$con->obtenerValor($consulta);	
+		
+		if($providenciaAplica==42)
+		{
+			return 1;
+		}
+		return 0;
+	}
+	
+	function mostrarSeccionNotificacionFisica($idFormulario,$idRegistro)
+	{
+		global $con;	
+		$consulta="SELECT medioNotificacion FROM _665_tablaDinamica WHERE id__665_tablaDinamica=".$idRegistro;
+		$medioNotificacion=$con->obtenerValor($consulta);
+		
+		return $medioNotificacion==2?1:0;
+	}
+	
+	function mostrarSeccionEmbargoSecuestro($idFormulario,$idRegistro,$idFormularioEvaluacion)
+	{
+		global $con;
+		
+		$consulta="SELECT bienEmbargado FROM _1140_tablaDinamica WHERE id__1140_tablaDinamica=".$idRegistro;
+		$bienEmbargado=$con->obtenerValor($consulta);
+		
+		switch($idFormularioEvaluacion)
+		{
+			case 1141:
+				return $bienEmbargado==1?1:0;
+			break;
+			case 1142:
+				return $bienEmbargado==2?1:0;
+			break;
+			case 1143:
+				return $bienEmbargado==4?1:0;
+			break;
+			case 1144:
+				return $bienEmbargado==5?1:0;
+			break;
+			case 1145:
+				return $bienEmbargado==3?1:0;
+			break;
+		}
+	}
+	
+	function mostrarSeccionRegistroDocumentos($idFormulario,$idRegistro)
+	{
+		global $con;
+		$consulta="SELECT tipoActuacion FROM _699_tablaDinamica WHERE id__699_tablaDinamica=".$idRegistro;
+		$tipoActuacion=$con->obtenerValor($consulta);
+		
+		if($tipoActuacion=="")
+			return 0;
+		else
+			return 1;
+		
+	}
+	
+	function mostrarBtnEnvioDespachoActuacion($idFormulario,$idRegistro)
+	{
+		global $con;
+		$consulta="SELECT tipoActuacion FROM _699_tablaDinamica WHERE id__699_tablaDinamica=".$idRegistro;
+		$tipoActuacion=$con->obtenerValor($consulta);
+		
+		if($tipoActuacion=="")
+			return 0;
+		else
+		{
+			$consulta="SELECT COUNT(*) FROM 9503_documentosRegistradosProceso WHERE idFormulario=".$idFormulario." AND idReferencia=".$idRegistro;
+			$numReg=$con->obtenerValor($consulta);
+			return $numReg>0?1:0;
+		}
+	}
+	
+	function mostrarAmbitoAplicacionSuspensionTerminos($idFormulario,$idRegistro)
+	{
+		global $con;
+		$consulta="SELECT ambitoAplicacion FROM _1234_tablaDinamica WHERE id__1234_tablaDinamica=".$idRegistro;
+		$ambitoAplicacion=$con->obtenerValor($consulta);
+		if($ambitoAplicacion==1)
+			return 0;
+		return 1;
+	}
+?>

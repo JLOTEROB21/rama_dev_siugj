@@ -1,0 +1,80 @@
+<?php
+	session_start();
+
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+
+	$idFormulario=bD($_GET["iF"]);
+
+	$idRegistro=bD($_GET["iR"]);
+
+
+	$fechaActual=date("Y-m-d")	;
+
+	$horaActual=date("H:i");
+
+	$idActividad=-1;
+	
+	if($idRegistro==-1)
+		$idActividad=generarIDActividad($idFormulario);
+
+
+
+?>
+
+var idActividad=<?php echo $idActividad?>;
+
+function inyeccionCodigo()
+{
+	
+    if(esRegistroFormulario())
+    {
+    
+    	if(gE('idRegistroG').value=='-1')
+        {
+            if(gEx('f_sp_fechadeRecepciondte')) 
+            {
+             	gEx('f_sp_fechadeRecepciondte').setValue('<?php echo $fechaActual?>');
+             	gEx('f_sp_fechadeRecepciondte').fireEvent('change', gEx('f_sp_fechadeRecepciondte'), gEx('f_sp_fechadeRecepciondte').getValue());
+
+             	gEx('f_sp_fechadeRecepciondte').fireEvent('select', gEx('f_sp_fechadeRecepciondte'));
+             }
+
+             if(gEx('f_sp_horaRecepciontme'))
+             {
+	             gEx('f_sp_horaRecepciontme').setValue('<?php echo $horaActual?>');
+
+             	gEx('f_sp_horaRecepciontme').fireEvent('change', gEx('f_sp_horaRecepciontme'), gEx('f_sp_horaRecepciontme').getValue());
+             }   
+             
+             
+                  	
+        }
+       
+        
+        if(gE('idRegistroG').value=='-1')
+            gEN('_idActividadvch')[0].value=idActividad;
+        else
+            idActividad=gEN('_idActividadvch')[0].value;
+        
+    	 <?php
+		if(existeRol("'23_0'"))
+		{
+		?>
+            gEx('f_sp_fechadeRecepciondte').disable();
+            gEx('f_sp_horaRecepciontme').disable();
+    	<?php
+		}
+		?>
+    }
+    else
+    {
+    	if(gE('sp_13850').innerHTML=='No')
+        {
+        	oE('div_13876');
+            oE('div_13877');
+        }	
+    }
+}
+
+

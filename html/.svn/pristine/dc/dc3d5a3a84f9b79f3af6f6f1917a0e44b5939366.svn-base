@@ -1,0 +1,19 @@
+<?php session_start();
+ini_set("memory_limit","3000M");
+set_time_limit(999000);
+error_reporting(E_ALL);
+//include_once("nusoap/nusoap.php");
+include_once("SIUGJ/libreriaFunciones.php");
+
+include_once("SIUGJ/libreriaFuncionesIntegraciones.php");
+include_once("SIUGJ/libreriaFuncionesIntegraciones.php");
+include_once("conexionBD.php");
+//include_once("cMacroProcesoAdmon.php");
+//include_once("SIUGJ/libreriaFuncionesRenderer.php");
+//include("conectoresAccesoDatos/cConexionMySQL.php");
+
+//$con1=new cConexionMySQL("localhost","3306","",$passwd,$bd);
+//$con2=new cConexionMySQL($host,"3306",$login,$passwd,$bd);
+realizarRepartoProcesosVarios(944,65);
+return;
+?>

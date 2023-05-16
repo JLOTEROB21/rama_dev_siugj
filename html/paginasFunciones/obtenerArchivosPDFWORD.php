@@ -1,0 +1,105 @@
+<?php
+include("conexionBD.php");
+
+if(isset($_GET['id'])) 
+{	
+	if(strpos($_GET['id'],"____")!==false)
+	{
+		$_GET['id']="id=".$_GET['id'];
+		$arrParametros=explode("____",$_GET['id']);
+		foreach($arrParametros as $p)
+		{
+				
+			$arrValor=explode("=",$p);
+			$_GET[$arrValor[0]]=$arrValor[1];
+		}
+		
+	}
+	$arrDocumento=explode("_",bD($_GET['id']));
+	$idDocumento=$arrDocumento[1];
+	switch($arrDocumento[0]	)
+	{
+		case 1:
+		
+		
+			$sql = "SELECT nomArchivoOriginal,documento,tipoArchivo,tamano,enBD,documentoRepositorio,tipoDocumento,repositorioDocumento,idArchivo FROM 
+					908_archivos WHERE idArchivo=".$idDocumento;
+			$fInfo=$con->obtenerPrimeraFilaAsoc($sql);
+			if($fInfo["repositorioDocumento"]==0)
+			{			
+				$pathDocumentoWord=obtenerRutaDocumento($idDocumento);
+				
+				$pathDocumento=$urlRepositorioDocumentos."/repositorioPDFWord/documento_".$idDocumento;
+				if($tipoServidor==2)
+				{
+					$pathDocumento=str_replace("/","\\",$pathDocumento);
+				}
+				$sql = "SELECT nomArchivoOriginal,documento,tipoArchivo,tamano,enBD FROM 908_archivos WHERE idArchivo=".$idDocumento;
+				$res=$con->obtenerPrimeraFila($sql);
+				$res[0]=str_replace(",","",$res[0]);
+				
+				
+				$arrNombreOriginal=explode(".",$res[0]);
+				$nomArchivoOriginal="";
+				for($x=0;$x<sizeof($arrNombreOriginal);$x++)
+				{
+					if($x==(sizeof($arrNombreOriginal)-1))
+					{
+						$nomArchivoOriginal.=".".$arrNombreOriginal[$x];
+					}
+					else
+						if($nomArchivoOriginal=="")
+							$nomArchivoOriginal=$arrNombreOriginal[$x];
+						else
+							$nomArchivoOriginal.="_".$arrNombreOriginal[$x];
+				}
+	
+				$arrArchivos=explode(".",$nomArchivoOriginal);
+				$nomArchivoOriginal=$nomArchivoOriginal.".pdf";
+	
+				if(($arrArchivos[sizeof($arrArchivos)-1]=="pdf")||($arrArchivos[sizeof($arrArchivos)-1]=="PDF"))
+				{
+					$pathDocumento=$pathDocumentoWord;
+				}
+				else
+				{
+					if(!file_exists($pathDocumento))
+					{
+	
+						convertirWordToPDFServidorConversion($pathDocumentoWord,$pathDocumento);
+					}
+				}
+	
+				
+				
+				$tamano=filesize($pathDocumento);
+				header("Content-type: application/pdf");
+				header("Content-length: ".$tamano); 
+				
+				$modo="attachment";
+				if(isset($_GET["modoPrinter"]))
+					$modo="inline";
+				header("Content-Disposition: ".$modo."; filename=".$nomArchivoOriginal);
+				
+				if($res[4]==1)
+					echo $res[1];
+				else
+					readfile($pathDocumento);
+			}
+			else
+			{
+				header("Content-type: application/pdf");
+				$modo="attachment";
+				if(isset($_GET["modoPrinter"]))
+					$modo="inline";
+				header("Content-Disposition: ".$modo."; filename=".$fInfo["nomArchivoOriginal"]);
+				$conexion=generarInstanciaConectorGestor($fInfo["repositorioDocumento"]);
+				$contenidoArchivo=$conexion->obtenerDocumento($fInfo["documentoRepositorio"]);
+				echo $contenidoArchivo;
+			}
+		break;				
+	}
+
+	
+}
+?>

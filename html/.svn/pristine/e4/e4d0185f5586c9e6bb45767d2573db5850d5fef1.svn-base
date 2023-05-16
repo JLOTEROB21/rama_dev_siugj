@@ -1,0 +1,172 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+	
+	$consulta="SELECT idEtapaProcesal,descripcionEtapa FROM 7009_etapasProcesales ORDER BY descripcionEtapa";
+	$arrEtapaProcesal=$con->obtenerFilasArreglo($consulta);
+?>
+
+var arrEtapaProcesal=<?php echo $arrEtapaProcesal?>; 
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+    new Ext.Viewport(	{
+                                layout: 'border',
+                                items: [
+                                            {
+                                                xtype:'panel',
+                                                region:'center',
+                                                layout:'border',
+                                                items:	[
+                                                            {
+                                                            	xtype:'panel',
+                                                                region:'center',
+                                                                layout:'absolute',
+                                                                items:	[
+                                                                			new Ext.ux.IFrameComponent({ 
+                
+                                                                                                            id: 'frameTimeLine', 
+                                                                                                            anchor:'100% 100%',
+                                                                                                            loadFuncion:function(iFrame)
+                                                                                                            			{
+                                                                                                                        	
+                                                                                                                        },
+
+                                                                                                            url: '../paginasFunciones/white.php',
+                                                                                                            style: 'width:100%;height:100%' 
+                                                                                                    })
+                                                                                                   
+                                                                
+                                                                		]
+                                                            },
+                                                            {
+                                                                xtype:'panel',
+                                                                collapsible:true,
+                                                                collapsed:true,
+                                                                width:250,
+                                                                layout:'border',
+                                                                region:'west',
+                                                                items:	[
+                                                                			crearGridEventosTimeLine()
+                                                                        ]
+                                                            
+                                                            } 
+                                                        ]
+                                            }
+                                         ]
+                            }
+                        )   
+
+
+	gEx('frameTimeLine').load	(
+									{
+										url:'../modulosEspeciales_SGJ/historialCarpetaJudicial.php',
+										params:	{
+													cA:gE('cA').value,
+													cPagina:'sFrm=true'
+												}
+									}
+								)
+}
+
+function crearGridEventosTimeLine()
+{
+	
+     var lector= new Ext.data.JsonReader({
+                                            
+                                            totalProperty:'numReg',
+                                            fields: [
+                                                        {name: 'idEvento'},
+                                                        {name: 'fechaEvento', type:'date',dateFormat:'Y-m-d H:i:s'},
+                                                        {name: 'etapaProcesal'},
+                                                        {name: 'leyenda'}
+                                                    ],
+                                            root:'registros'
+                                            
+                                        }
+                                      );
+    
+	var alDatos=new Ext.data.GroupingStore({
+                                                            reader: lector,
+                                                            sortInfo: {field: 'fechaEvento', direction: 'ASC'},
+                                                            groupField: 'etapaProcesal',
+                                                            remoteGroup:false,
+				                                            remoteSort: false,
+                                                            autoLoad:false
+                                                            
+                                                        }) 
+
+    //alDatos.loadData(dsDatos);
+	
+	var cModelo= new Ext.grid.ColumnModel   	(
+												 	[
+													 	new  Ext.grid.RowNumberer(),
+														{
+															header:'Fecha Evento',
+															width:200,
+															sortable:true,
+															dataIndex:'fechaEvento',
+                                                            renderer:function(val,meta,registro)
+                                                            		{
+                                                                    	return '<span style="color:#900; font-size:11px"><b>'+val.format('d/m/Y H:i')+' hrs.</b></span><br />'+registro.data.leyenda;
+                                                                    }
+														},
+														{
+															header:'Etapa Procesal',
+															width:300,
+															sortable:true,
+															dataIndex:'etapaProcesal',
+                                                            renderer:function(val)
+                                                            		{
+                                                                    	return '<span style="color:#900">'+formatearValorRenderer(arrEtapaProcesal,val)+'</span>';
+                                                                    }
+														}
+													]
+												);
+                                                
+	var tblGrid=	new Ext.grid.GridPanel	(
+                                                        {
+                                                            id:'gIndiceEventos',
+                                                            store:alDatos,
+                                                            frame:false,
+                                                            cm: cModelo,
+                                                            stripeRows :true,
+                                                            loadMask:true,
+                                                            stripeRows :true,                                                            
+                                                            columnLines : true,
+                                                            region:'center',
+                                                            view:new Ext.grid.GroupingView({
+                                                                                                    forceFit:false,
+                                                                                                    showGroupName: false,
+                                                                                                    enableGrouping :true,
+                                                                                                    enableNoGroups:false,
+                                                                                                    enableGroupingMenu:false,
+                                                                                                    hideGroupedColumn: true,
+                                                                                                    startCollapsed:false
+                                                                                                })
+                                                        }
+                                                    );
+	
+    
+    tblGrid.getSelectionModel().on('rowselect',function(sm,nFila,registro)
+                                                {
+                                                	
+                                                    gEx('frameTimeLine').getFrameWindow().seleccionarEvento(registro.data.idEvento);
+                                                }
+                                                
+                                    )
+    return 	tblGrid;
+}
+
+
+
+function cargarEventosIncide(arrEventos)
+{
+	var objDatos={};
+    objDatos.numReg=arrEventos.length;
+    objDatos.registros=arrEventos;
+    
+	gEx('gIndiceEventos').getStore().loadData(objDatos);
+}

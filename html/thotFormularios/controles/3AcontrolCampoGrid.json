@@ -1,0 +1,7 @@
+{
+	"id":"btnAddCampoGrid",
+	"funcion":"mostrarVentanaNombreGrid(-1)",
+	"titulo":"Insertar campo grid",
+	"icono":"table.gif",
+	"script":"campoGrid.js.php?idFormulario=@idFormulario"
+}

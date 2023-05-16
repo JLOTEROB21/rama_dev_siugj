@@ -1,0 +1,7 @@
+{
+	"id":"btnAddEtiquetaBD",
+	"funcion":"crearVentanaEtiquetaBD()",
+	"titulo":"Agregar etiqueta con conexi&oacute;n a almac&eacute;n",
+	"icono":"font_go.png",
+	"script":"controlEtiquetaBD.js.php"
+}

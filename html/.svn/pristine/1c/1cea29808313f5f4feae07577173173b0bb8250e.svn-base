@@ -1,0 +1,634 @@
+<?php session_start();
+error_reporting(E_ALL);
+include("conexionBD.php");
+include("funcionesPortal.php");
+
+
+
+	if(esUsuarioLog())
+	{
+		
+		header('Location:'.$paginaInicioLogin);
+		return;
+	}
+
+	$consulta="SELECT DISTINCT archivoInclude FROM 808_configuracionEstilosMenu WHERE idConfiguracion=".$iEstiloMenu;
+	$nombreRendererMenu=$con->obtenerValor($consulta);
+	if($nombreRendererMenu!="")
+	{
+		include($nombreRendererMenu);
+
+	}
+	
+
+	$consulta="SELECT * FROM 903_variablesSistema";
+	$fVariable=$con->obtenerPrimeraFilaAsoc($consulta);
+	$tipoAutenticacion=$fVariable["tipoAutenticacion"]; //1 Sistema; 2 Servidor LDAP
+	$altoContraste=false;
+	$mostrarLupa=false;
+	if(isset($_SESSION)&& isset($_SESSION["altoContraste"]) && ($_SESSION["altoContraste"]==1))
+	{
+		$altoContraste=true;
+	}
+	
+	if(isset($_SESSION)&& isset($_SESSION["mostrarLupa"]) && ($_SESSION["mostrarLupa"]==1))
+	{
+		$mostrarLupa=true;
+	}
+	
+?>
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+
+<title><?php echo $fVariable["tituloSistema"]?></title>
+
+<meta name="format-detection" content="telephone=no"/>
+<link rel="icon" href="images/favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="../estilos/fontAwesome.min.css">
+<link rel="stylesheet" type="text/css" href="../Scripts/ext/resources/css/ext-all.css.cgz"/>
+<script type="text/javascript" src="../Scripts/ext/adapter/ext/ext-base.js.jgz"></script>
+<script type="text/javascript" src="../Scripts/ext/ext-all.js.jgz"></script>
+<script type="text/javascript" src="../Scripts/ext/idioma/ext-lang-es.js"></script>
+<link rel="stylesheet" type="text/css" href="../Scripts/ext/resources/css/xtheme-gray.css"/>
+<link rel="stylesheet" type="text/css" href="./css/estilos2016.css"/>
+<link rel="stylesheet" type="text/css" href="../css/hayas.css.php"/>
+<script type="text/javascript" src="../Scripts/base64.js"></script>
+<script type="text/javascript" src="../Scripts/funcionesAjax.js.jgz"></script>
+<script type="text/javascript" src="../Scripts/funcionesUtiles.js.php"></script>
+<script type="text/javascript" src="../Scripts/funcionesValidacion.js"></script>
+<script type="text/javascript" src="../Scripts/jquery.min.js"></script>
+<link rel="stylesheet" href="../Scripts/fancyBox/fancybox/jquery.fancybox-1.3.4.css"  type="text/css" media="screen" />
+<script type="text/javascript" src="../Scripts/fancyBox/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+<link rel="stylesheet" href="../Scripts/nivoSlider/nivo-slider.css" type="text/css" />
+<link rel="stylesheet" href="../Scripts/nivoSlider/themes/default/default.css" type="text/css" />
+<link rel="stylesheet" href="../Scripts/nivoSlider/themes/light/light.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="../Scripts/nivoSlider/themes/dark/dark.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="../Scripts/nivoSlider/themes/bar/bar.css" type="text/css" media="screen" />
+<script src="../Scripts/infiniteCarousel/jquery.infinitecarousel3Modif.js" type="text/javascript"></script>
+<script src="../Scripts/nivoSlider/jquery.nivo.slider.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../Scripts/jfMagnify-master/jfMagnify.css" type="text/css" />
+<script type="text/javascript" src="../Scripts/jquery-ui-1.13.2/jquery-ui.min.js"></script>
+<script type="text/javascript" src="../Scripts/jfMagnify-master/jquery.jfMagnify.js"></script>
+	
+<script type="text/javascript" src="../modulosEspeciales_SIUGJ/Scripts/index.js.php"></script>
+
+
+<style>
+<?php
+	generarFuentesLetras();
+
+	
+	$nConfiguracion=0;
+	$colorBoton="";
+	$tituloSistema="";
+	
+?>	
+
+
+</style>
+<link rel="stylesheet" type="text/css" href="../principalPortal/css/estilosFormulariosDinamicos.css"/>
+<link rel="stylesheet" type="text/css" href="../principalPortal/css/controlesFrameWork.css"/>
+<link rel="stylesheet" type="text/css" href="../principalPortal/css/estiloSIUGJ.css"/>
+<?php
+	if($altoContraste)
+	{
+?>
+<link rel="stylesheet" type="text/css" href="../principalPortal/css/estiloSIUGJ_0.css"/>
+<?php
+	}
+?>
+</head>
+
+<body id="bodyDocument">
+<div id="barraDiscapacitado">
+    <table>
+    <tr>
+        <td align="right">
+            <table>
+                <tbody>
+                <tr>
+                    <td><span id="btn1"></span></td>
+                    
+                </tr>
+                <tr>
+                    <td><span id="btn2"></span></td>
+                    
+                </tr>
+                <tr>
+                    <td><span id="btn3"></span></td>
+                    
+                </tr>
+            </tbody>
+            </table>
+        </td>
+    </tr>
+    </table>
+    
+  </div>
+<div id="window" class="magnify">
+	<div class="magnify_glass" id="magnify_glass" style="display:<?php echo $mostrarLupa?"":"none" ?>"></div>
+		<div class = "element_to_magnify">
+	<table width="100%"  class="tablaGlobal">
+	<tr>
+	<td align="center">
+    	<div class="rectangulo1">
+        	<img class="imagenLogoGov" src="../principalPortal/imagesSIUGJ/logo_gov.png">
+        </div>
+        <div class="rectangulo2Index">
+			<img class="imagenLogo" src="../principalPortal/imagesSIUGJ/logoRamaJudicial2.png">
+            <img class="imagenLogo2" src="../principalPortal/imagesSIUGJ/Paleta_SIUGJ_Mesa_de_trabajo_1.png">
+            <div class="tablaOpciones">
+            <table cellspacing="0" width="350" >
+                <tr>
+                	<td width="150"> <span style="text-decoration:underline;">INICIO</span></td>
+                    <td width="200">CONT&Aacute;CTENOS</td>
+                </tr>
+           </table>
+            </div>
+             <div class="tablaLogin">
+        	<table cellspacing="0" >
+                <tr>
+                    <?php
+                        if($tipoAutenticacion==2)
+                        {
+                    ?>
+                   <td width="360">
+                        
+                        
+                    </td>
+                    <td>
+                        
+                        <input type="text" class="campoFormulario" id="txtDominio" name="txtDominio" placeholder="Dominio" onKeyPress="ocultarError(event)">
+                    </td>
+                    <td width="20">&nbsp;&nbsp;&nbsp;
+                    </td>
+                    <?php
+                        }
+						else
+						{
+					?>
+                    	<td width="740">                        
+                      
+                        </td>
+                        <td width="20">&nbsp;&nbsp;&nbsp;
+                        </td>
+                    <?php
+						}
+                    ?>
+                    
+                    <td>
+                        
+                        <input type="text" class="campoFormulario" id="txtUsuario" name="txtUsuario" placeholder="Usuario" onKeyPress="ocultarError(event)">
+                    </td>
+                    <td width="20">&nbsp;&nbsp;&nbsp;
+                    </td>
+                    
+                    <td>
+                        <input type="password" class="campoFormulario" id="txtPasswd" name="txtPasswd" placeholder="Contrase&ntilde;a" onKeyPress="ocultarError(event)">
+                    </td>
+                    <td width="20">&nbsp;&nbsp;&nbsp;
+                    </td>
+                    <td>
+                        <a href="javascript:autenticar()" style="text-decoration:none"><img src="./imagesSIUGJ/goLogin.png"></a>
+                    </td>
+                   
+                </tr>
+                <tr>
+                    <td colspan="9" align="right">
+                        
+                        <span id="lblErr1"  class="letraLogin" style="display:none;color:#F00; font-weight:bold">Usuario / Contrase&ntilde;a incorrecta</span>
+                        <span id="lblErr2"  class="letraLogin" style="display:none;color:#F00; font-weight:bold">Debe ingresar el dominio del usuario</span>
+                       
+                    </td>
+                </tr>
+                <tr height="30">
+                    <td colspan="8" align="right">
+                        
+                        <table style="padding-right:30px">
+                        <tr>
+                        	<td width="120" >
+                            	<a href="javascript:mostrarPantallaPublicaciones()" class="letraLogin"><span class="">Publicaciones</span></a> 
+                            </td>
+                        	<td width="150" >
+                            	<a href="javascript:mostrarPantallaRemates()" class="letraLogin"><span class="">Remates Judiciales</span></a> 
+                            </td>
+                        	<td width="180" >
+                            	<a href="javascript:mostrarPantallaAudiencias()" class="letraLogin"><span class="">Calendario de Audiencias</span></a> 
+                            </td>
+                            <td width="180" >
+                            <a href="javascript:mostrarPantallaValidarDocumento()" class="letraLogin"><span class="">Validar un documento</span></a> 
+                            </td>
+                        <td width="200" >
+                        <a href="javascript:mostrarPantallaRecuperar()" class="letraLogin"><span class="">¿Olvidaste tu contrase&ntilde;a?</span></a> 
+                        </td>
+                        <td width="140">
+                         <a href="javascript:mostrarPantallaRegistroIndex()"  class="letraLogin"><span class="">Reg&iacute;strate ahora</span></a> 
+                       </td>
+                       <td width="140" align="right">
+                       <a href="javascript:mostrarPantallaSoporte()"  class="letraLogin"><span class="">¿Necesitas ayuda?</span></a>
+                    	</td>
+                       </tr>
+                       </table>
+                    </td>
+                </tr>
+                
+            </table>
+       		 </div>
+            
+           
+        </div>
+       
+	</td>
+	</tr>
+	</table>   
+    <div id="areaCentralTrabajo">
+    <table width="100%"   >                                                
+      <tr>
+         <td align="center"><br>
+           <table width="900" >
+              <tr >
+                  <td width="100%" valign="top" align="center">
+                  <ul id="carousel">
+                      <?php
+                          $fechaActual=strtotime(date("Y-m-d H:i:s"));
+                          $arrPublicaciones=array();
+                          $consulta="SELECT * FROM _661_tablaDinamica WHERE bannerActivo=1";
+                          $res=$con->obtenerFilas($consulta);
+                          while($fila=mysql_fetch_assoc($res))//
+                          {
+                              
+                              $publicar=true;
+                              if($fila["tipoPublicacion"]!=1)
+                              {
+                                  $fInicio=strtotime($fila["fechaInicioVigencia"]." ".$fila["horaInicioVigencia"]);
+                                  $fFin=strtotime($fila["fechaFinVigencia"]." ".$fila["horaFinVigencia"]);
+                                  
+                                  if(!(($fechaActual>=$fInicio)&&($fechaActual<=$fFin)))
+                                  {
+                                      $publicar=false;
+                                  }
+                              }
+                              
+                              if(!$publicar)
+                                  continue;
+                              array_push($arrPublicaciones,$fila);
+                              
+                          }
+                          
+                          foreach($arrPublicaciones as $fila)
+                          {
+                              $ref='href="#"';
+                              if($fila["vinculadoEnlace"]==1)
+                              {
+                                  switch($fila["tipoEnlaceWeb"])
+                                  {
+                                      case 1:
+                                          $ref='href="'.$fila["urlFuncionJava"].'"';
+                                      break;
+                                      case 2:
+                                          $ref='href="'.$fila["urlFuncionJava"].'" target="blank"';
+                                      break;																
+                                      case 3:
+                                          $ref='href="javascript:'.$fila["urlFuncionJava"].'"';
+                                      break;
+                                  }
+                              }
+                              
+                              if($fila["tipoBanner"]==2)//Imagen
+                              {
+                                  echo ' <li>
+                                          <a '.$ref.'>
+                                          <img src="../paginasFunciones/obtenerArchivos.php?id='.bE($fila["archivoBanner"]).'" >
+                                          </a>
+                                      </li>';
+                              
+                              }
+                              else
+                              {
+                                  
+                                  //if(strpos($fila["htmlBanner"],"https://www.facebook.com")===false)
+                                  {
+                                      echo ' <li>
+                                              <iframe style="width:600px; 300px;" src="../modulosEspeciales_SGJ/contenidoPagina.php?iC='.bE($fila["id__661_tablaDinamica"]).'">
+                                              </iframe>
+                                              </li>';
+                                  }
+                                  
+                                  
+                              
+                              }
+                              
+                              
+                              
+                      
+                          }
+                      ?>
+                  </ul>
+                      <input type="hidden" value="<?php echo count($arrPublicaciones)?>" id="totalPublicaciones">
+                  </td>
+              </tr>
+           </table>
+           <br>
+         </td>
+      </tr>
+      <tr>
+      	<td align="center">
+        	<?php 
+				$consulta="SELECT * FROM _1030_tablaDinamica WHERE idEstado=2 ORDER BY fechaCreacion";
+				$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+				
+				$consulta="SELECT fechaCambio FROM 941_bitacoraEtapasFormularios WHERE idFormulario=1030 AND idRegistro=".$fRegistro["id__1030_tablaDinamica"];
+				$fechaPublicacion=$con->obtenerValor($consulta);
+			?>
+            
+            <table width="950">
+            <tr>
+            <tr>
+            	<td  align="left">
+                	<span class="tituloSeccionIndex">
+                	Noticias
+                    </span>
+                    <br><br>
+                </td>
+            </tr>
+            <td align="center">
+                <table width="1200">
+                    <tr>
+                        <td width="600" valign="top">
+                            <table>
+                                <tr>
+                                    <td align="center">
+                                    <div style="width:560; height:270; ">
+                                    
+                                    <img style="border-style:solid; border-width:1px; border-color: #EAEAEA; background-color:transparent; border-radius: 10px !important;" src="../paginasFunciones/obtenerDocumentoEditorArchivos.php?id=<?php echo bE("documento_".$fRegistro["imagenPrincipal"])?>" width="560" height="270" style="padding:5px;">
+                                    </div>
+                                    <table width="100%">
+                                        <tr>
+                                            <td align="left">
+                                                <span class="letraFechaPublicacion"><?php echo convertirFechaLetra($fechaPublicacion,false,false); ?></span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="justify" style="line-height: 25px;">
+                                    <span class="letraTituloPublicacion"><?php echo $fRegistro["tituloPublicacion"]?></span><br>
+                                     <span class="letraCuerpoPublicacion"><?php echo $fRegistro["contenidoPublicacion"]?></span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td width="10">
+                        </td>
+                        <td width="590" valign="top" valign="top">
+                            <table width="100%">
+                            <tr>
+                                <td>
+                                    <table>
+                                        <tr>
+                                            <td align="center" width="200" valign="top">
+                                                <div >
+                                                <img style="border-style:solid; border-width:1px; border-color: #EAEAEA; background-color:transparent; border-radius: 10px !important;" src="../paginasFunciones/obtenerDocumentoEditorArchivos.php?id=<?php echo bE("documento_".$fRegistro["imagenPrincipal"]) ?>" width="200" height="140" style="padding:5px;">
+                                                </div>
+                                            </td>
+                                            <td width="10">
+                                            </td>
+                                             <td align="justify" width="380" valign="top" style="line-height: 25px;">
+                                            <span class="letraFechaPublicacion"><?php echo convertirFechaLetra($fechaPublicacion,false,false); ?></span><br>
+                                            <span class="letraTituloPublicacion"><?php echo $fRegistro["tituloPublicacion"]?></span><br>
+                                             <span class="letraCuerpoPublicacion"><?php echo $fRegistro["contenidoPublicacion"]?></span>
+                                            </td>
+                                        </tr>
+                                        
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <table>
+                                        <tr>
+                                            <td align="center" width="200" valign="top">
+                                                <div >
+                                                <img style="border-style:solid; border-width:1px; border-color: #EAEAEA; background-color:transparent; border-radius: 10px !important;" src="../paginasFunciones/obtenerDocumentoEditorArchivos.php?id=<?php echo bE("documento_".$fRegistro["imagenPrincipal"]) ?>" width="200" height="140" style="padding:5px;">
+                                                </div>
+                                            </td>
+                                            <td width="10">
+                                            </td>
+                                             <td align="justify" width="380" valign="top" style="line-height: 25px;">
+                                            <span class="letraFechaPublicacion"><?php echo convertirFechaLetra($fechaPublicacion,false,false); ?></span><br>
+                                            <span class="letraTituloPublicacion"><?php echo $fRegistro["tituloPublicacion"]?></span><br>
+                                             <span class="letraCuerpoPublicacion"><?php echo $fRegistro["contenidoPublicacion"]?></span>
+                                            </td>
+                                        </tr>
+                                        
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <table>
+                                        <tr>
+                                            <td align="center" width="200" valign="top">
+                                                <div >
+                                                <img style="border-style:solid; border-width:1px; border-color: #EAEAEA; background-color:transparent; border-radius: 10px !important;" src="../paginasFunciones/obtenerDocumentoEditorArchivos.php?id=<?php echo bE("documento_".$fRegistro["imagenPrincipal"]) ?>" width="200" height="140" style="padding:5px;">
+                                                </div>
+                                            </td>
+                                            <td width="10">
+                                            </td>
+                                             <td align="justify" width="380" valign="top" style="line-height: 25px;">
+                                            <span class="letraFechaPublicacion"><?php echo convertirFechaLetra($fechaPublicacion,false,false); ?></span><br>
+                                            <span class="letraTituloPublicacion"><?php echo $fRegistro["tituloPublicacion"]?></span><br>
+                                             <span class="letraCuerpoPublicacion"><?php echo $fRegistro["contenidoPublicacion"]?></span>
+                                            </td>
+                                        </tr>
+                                        
+                                    </table>
+                                </td>
+                            </tr>
+                            
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+        	</td>
+            </tr>
+            </table>
+            
+        </td>
+      </tr>
+      <tr>
+      	<td align="center">
+        	<?php 
+				$consulta="SELECT * FROM _1030_tablaDinamica WHERE idEstado=2 ORDER BY fechaCreacion";
+				$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+				
+				$consulta="SELECT fechaCambio FROM 941_bitacoraEtapasFormularios WHERE idFormulario=1030 AND idRegistro=".$fRegistro["id__1030_tablaDinamica"];
+				$fechaPublicacion=$con->obtenerValor($consulta);
+			?>
+            
+            <table width="950">
+            <tr>
+            	<td  align="left">
+                	<span class="tituloSeccionIndex">
+                	Eventos
+                    </span>
+                    <br><br>
+                </td>
+            </tr>
+            <tr>
+            	<td align="center">
+                <table width="1200">
+                    <tr>
+                        <td width="390">
+                            <table width="100%">
+                                <tr>
+                                    <td align="left"  valign="top">
+                                        <div >
+                                        <img style="border-style:solid; border-width:1px; border-color: #EAEAEA; background-color:transparent; border-radius: 10px !important;" src="../paginasFunciones/obtenerDocumentoEditorArchivos.php?id=<?php echo bE("documento_".$fRegistro["imagenPrincipal"]) ?>" width="350" height="245" style="padding:5px;">
+                                        </div>
+                                    </td>
+                                    
+                                </tr>
+                                <tr>
+                                	<td>
+                                	<span class="letraFechaPublicacion"><?php echo convertirFechaLetra($fechaPublicacion,false,false); ?></span><br>
+                                    <span class="letraTituloPublicacion"><?php echo $fRegistro["tituloPublicacion"]?></span><br>
+                                     <span class="letraCuerpoPublicacion"><?php echo $fRegistro["contenidoPublicacion"]?></span>
+                                	</td>
+                                </tr>
+                                
+                            </table>
+                        </td>
+                        <td width="10">
+                        </td>
+                        <td width="390">
+                            <table width="100%">
+                                <tr>
+                                    <td align="left"  valign="top">
+                                        <div >
+                                        <img style="border-style:solid; border-width:1px; border-color: #EAEAEA; background-color:transparent; border-radius: 10px !important;" src="../paginasFunciones/obtenerDocumentoEditorArchivos.php?id=<?php echo bE("documento_".$fRegistro["imagenPrincipal"]) ?>" width="350" height="245" style="padding:5px;">
+                                        </div>
+                                    </td>
+                                    
+                                </tr>
+                                <tr>
+                                	<td>
+                                	<span class="letraFechaPublicacion"><?php echo convertirFechaLetra($fechaPublicacion,false,false); ?></span><br>
+                                    <span class="letraTituloPublicacion"><?php echo $fRegistro["tituloPublicacion"]?></span><br>
+                                     <span class="letraCuerpoPublicacion"><?php echo $fRegistro["contenidoPublicacion"]?></span>
+                                	</td>
+                                </tr>
+                                
+                            </table>
+                        </td>
+                        <td width="10">
+                        </td>
+                        <td width="390">
+                            <table width="100%">
+
+                                <tr>
+                                    <td align="left"  valign="top">
+                                        <div >
+                                        <img style="border-style:solid; border-width:1px; border-color: #EAEAEA; background-color:transparent; border-radius: 10px !important;" src="../paginasFunciones/obtenerDocumentoEditorArchivos.php?id=<?php echo bE("documento_".$fRegistro["imagenPrincipal"]) ?>" width="350" height="245" style="padding:5px;">
+                                        </div>
+                                    </td>
+                                    
+                                </tr>
+                                <tr>
+                                	<td>
+                                	<span class="letraFechaPublicacion"><?php echo convertirFechaLetra($fechaPublicacion,false,false); ?></span><br>
+                                    <span class="letraTituloPublicacion"><?php echo $fRegistro["tituloPublicacion"]?></span><br>
+                                     <span class="letraCuerpoPublicacion"><?php echo $fRegistro["contenidoPublicacion"]?></span>
+                                	</td>
+                                </tr>
+                                
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+        	</td>
+            </tr>
+            </table>
+            
+        </td>
+      </tr>
+      </table>
+    
+    
+    </div>
+    <br><br><br><br><br><br><br><br><br>
+    <div class="rectangulo4">
+			<br>
+			<table width="100%">
+            <tr>
+            	<td align="center">
+                <br>
+                	<table>
+                    	<tr>
+                        	<td width="350" align="left" class="celdaInferior"><span class="letraBarraInferior">Cuentas de correo para Notificaciones Judiciales</span></td>
+                            <td width="351" align="center" class="celdaInferior"><span class="letraBarraInferior">Pol&iacute;ticas de Privacidad y Condiciones de Uso</span></td>
+                            <td width="155" align="center" class="celdaInferior"><span class="letraBarraInferior">Correo Institucional</span></td>
+                            <td width="268" align="center" class="celdaInferiorUltima"><span class="letraBarraInferior">Directorio de Correos electr&oacute;nicos</span></td>
+                        </tr>
+                        <tr>
+                        	<td colspan="2" align="left"><br><br>
+                            <span class="letraBarraInferior2">
+                            Calle 12 No. 7 - 65, Palacio de Justicia Alfonso Reyes Echandía, Bogotá Colombia<br>
+                            Horario de Atención Lunes a Viernes<br>
+                            8:00 a.m. a 1:00 p.m. - 2:00 p.m. a 5:00 p.m.
+                            </span>
+
+                            </td>
+                            <td colspan="2"><br><br><br>
+                            <span class="letraBarraInferior2">
+                            PBX: (571) 565 8500 - E-mail: info@cendoj.ramajudicial.gov.co<br>
+                            Acceder a los Canales de Atención<br>
+                            Mapa del sitio
+                            </span>
+
+                            </td>
+                            
+                        </tr>
+                        <tr>
+                        	<td colspan="4" align="center">
+                            <br><br>
+                            	<table>
+                                	<tr>
+                                    	<td align="center" width="120">
+                                        	<img src="../principalPortal/imagesSIUGJ/logoFace.png">
+                                        </td>
+                                        <td align="center" width="120">
+                                        	<img src="../principalPortal/imagesSIUGJ/logoTwitter.png">
+                                        </td>
+                                        <td align="center" width="120">
+                                        	<img src="../principalPortal/imagesSIUGJ/logoInstagram.png">
+                                        </td>
+                                        <td align="center" width="120">
+                                        	<img src="../principalPortal/imagesSIUGJ/logoYoutube.png">
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            
+            </table>
+        </div>  
+        
+         
+        <input type="hidden" id="altoContraste" value="<?php echo $altoContraste?1:0 ?>" />
+        <input type="hidden" id="mostrarLupa" value="<?php echo $mostrarLupa?1:0 ?>" />
+        <form method="post"	action="" id='frmEnvioDatos'>
+          <input type="hidden" name="confReferencia" value="<?php echo $nConfiguracion ?>" />
+      	</form>
+</div> 
+</div> 
+</div>      	        
+</body>
+</html>

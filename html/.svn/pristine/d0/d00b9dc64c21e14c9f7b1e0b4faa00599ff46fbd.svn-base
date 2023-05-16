@@ -1,0 +1,301 @@
+<?php
+	
+	include("conexionBD.php");
+	include_once("nusoap/nusoap.php");
+	include_once("latisErrorHandler.php");
+
+	ini_set('default_socket_timeout', 160000);
+	ini_set('post_max_size', '1024M');
+	ini_set('upload_max_filesize', '1024M');
+	
+	function autenticateUser($urlAutentication,$token)
+	{
+		global $urlSitio;
+		global $versionLatis;
+		global $con;
+		$urlToken=str_replace("https://www.","",$urlSitio);
+		$urlToken=str_replace("https://","",$urlToken);
+		$urlToken=str_replace("http://www.","",$urlToken);
+		$urlToken=str_replace("http://","",$urlToken);
+		$urlToken=str_replace("/","",$urlToken);
+		try
+		{
+			$urlAutentication=decryptString($urlAutentication,$urlToken);
+			$arrAutentication=explode("_@@_",$urlAutentication);
+			
+			if(count($arrAutentication)!=3)
+			{
+				return '{"result":"0","msgErr":"La cadena de autenticación recibida NO es válida"}';
+			}
+			
+			$user=$arrAutentication[0];
+			$passwd=$arrAutentication[1];
+			$macAddres=$arrAutentication[2];
+			
+			
+			
+			if(mb_strtoupper($token)!=mb_strtoupper($macAddres))
+			{
+				return '{"result":"0","msgErr":"El stringTokenAccess/token enviado NO es valido"}';
+			}
+			
+			$consulta="Select u.idUsuario,u.login,u.Nombre,a.Institucion,a.codigoUnidad,u.status,u.cambiarDatosUsr,cuentaActiva,fechaCambioContrasena,fechaLimiteCambioContrasena from 800_usuarios u,
+						801_adscripcion a where a.idUsuario=u.idUsuario and u.Login='".cv($user)."' and u.Password=HEX(AES_ENCRYPT('".$passwd."', '".bD($versionLatis)."'))
+						and cuentaActiva in(1,2,100)"; 
+						
+			$fila=$con->obtenerPrimeraFilaAsoc($consulta);			
+						
+			if(!$fila)
+			{
+				return '{"result":"2","msgErr":"Usuario/contraseña incorrecta"}';
+			}
+			else
+			{
+				switch($fila["cuentaActiva"])
+				{
+					case 1:
+						$tokenAccess="idUsuario_".$fila["idUsuario"]."_".$macAddres;
+						$consulta="select HEX(AES_ENCRYPT('".$tokenAccess."', '".bD($versionLatis)."'))";
+						$tokenAccess=$con->obtenerValor($consulta);
+						return '{"result":"1","msgErr":"","tokenAccess":"'.cv($tokenAccess).'"}';
+					break;
+					case 2:
+						return '{"result":"3","msgErr":"La cuenta esta inactiva"}';
+					break;
+					case 100:
+						return '{"result":"4","msgErr":"La cuenta esta bloqueada"}';
+					break;
+				}
+			}
+			
+			
+		}
+		catch(Exception $e)
+		{
+			return '{"result":"0","msgErr":"'.cv($e->getMessage()).'"}';
+		}
+	}
+
+	function usersTask($stringTokenAccess,$token,$taskStatus)
+	{
+		global $urlSitio;
+		global $versionLatis;
+		global $con;
+		
+		try
+		{
+			
+			$consulta="select AES_DECRYPT(UNHEX('".$stringTokenAccess."'), '".bD($versionLatis)."')";
+
+			$tokenAccess=$con->obtenerValor($consulta);
+			$arrToken=explode("_",$tokenAccess);
+			if(count($arrToken)!=3)
+			{
+				return '{"result":"0","msgErr":"El stringTokenAccess es incorrecto"}';
+			}
+			
+			$idUsuario=$arrToken[1];
+			$macAddress=$arrToken[2];
+			if(mb_strtoupper($token)!=mb_strtoupper($macAddress))
+			{
+				return '{"result":"0","msgErr":"El stringTokenAccess/token enviado NO es valido"}';
+			}
+			
+			
+			$consulta="SELECT idRegistro,fechaAsignacion,fechaLimiteAtencion,tipoNotificacion,usuarioRemitente,usuarioDestinatario,
+						contenidoMensaje,fechaVisualizacion,numeroCarpetaAdministrativa AS codigoUnicoProceso,
+						(SELECT unidad FROM 817_organigrama o WHERE o.codigoUnidad= t.codigoUnidad) AS despacho,folioProceso,demandante,demandado 
+						FROM 9060_tableroControl_4 t WHERE idUsuarioDestinatario=".$idUsuario;
+			if($taskStatus!=0)						
+				$consulta.=" AND idEstado=".$taskStatus;
+			
+			
+			$arrRegistros=utf8_encode($con->obtenerFilasJSON($consulta));
+			
+			return '{"result":"1","msgErr":"","numTasks":"'.$con->filasAfectadas.'","tasks":'.$arrRegistros.'}';
+			
+		}
+		catch(Exception $e)
+		{
+			return '{"result":"0","msgErr":"'.cv($e->getMessage()).'"}';
+		}
+	}
+	
+	
+	function usersAudiences($stringTokenAccess,$token,$start,$end,$statusAudiences)
+	{
+		global $urlSitio;
+		global $versionLatis;
+		global $con;
+		
+		try
+		{
+			
+			$consulta="select AES_DECRYPT(UNHEX('".$stringTokenAccess."'), '".bD($versionLatis)."')";
+
+			$tokenAccess=$con->obtenerValor($consulta);
+			$arrToken=explode("_",$tokenAccess);
+			if(count($arrToken)!=3)
+			{
+				return '{"result":"0","msgErr":"El stringTokenAccess es incorrecto"}';
+			}
+			
+			$idUsuario=$arrToken[1];
+			$macAddress=$arrToken[2];
+			if(mb_strtoupper($token)!=mb_strtoupper($macAddress))
+			{
+				return '{"result":"0","msgErr":"El stringTokenAccess/token enviado NO es valido"}';
+			}
+			
+			$consulta="SELECT DISTINCT idParticipante FROM 7005_relacionFigurasJuridicasSolicitud WHERE idCuentaAcceso=".$idUsuario;
+			$idPersona=$con->obtenerValor($consulta);
+			if($idPersona=="")
+				$idPersona=-1;
+			$consulta="SELECT DISTINCT e.idRegistroEvento AS idEvento,fechaEvento,horaInicioEvento AS horaInicial,horaFinEvento AS horaFinal,
+						e.situacion,e.descripcionEvento AS  comentariosAdicionales,
+						(SELECT tipoAudiencia FROM _4_tablaDinamica WHERE id__4_tablaDinamica= e.tipoAudiencia) AS tipoAudiencia,
+						s.nombreSala AS sala,
+						(SELECT nombreUnidad FROM _17_tablaDinamica WHERE id__17_tablaDinamica= e.idCentroGestion) AS despacho,
+						(SELECT nombreInmueble FROM _1_tablaDinamica WHERE id__1_tablaDinamica= e.idEdificio) AS edificio,
+						(SELECT GROUP_CONCAT(u.Nombre)  FROM 7001_eventoAudienciaJuez eJ,800_usuarios u WHERE eJ.idRegistroEvento= 
+						e.idRegistroEvento AND u.idUsuario=eJ.idJuez) AS juez,con.carpetaAdministrativa AS codigoUnicoProceso,urlReunion AS urlVideoConferencia,
+						IF(s.perfilSala=4,1,0) AS esVirtual,
+						(SELECT COUNT(*) FROM 7000_participantesEventoAudiencia WHERE idRegistroEvento=e.idRegistroEvento) AS totalParticipantes
+											
+						FROM 7000_eventosAudiencia e,7007_contenidosCarpetaAdministrativa con,7000_participantesEventoAudiencia p,_15_tablaDinamica s
+						WHERE	con.tipoContenido=3 AND con.idRegistroContenidoReferencia=e.idRegistroEvento AND p.idRegistroEvento=e.idRegistroEvento
+						AND p.idPersona in(".$idPersona.") AND s.id__15_tablaDinamica=e.idSala";
+			
+			if($start!="")						
+				$consulta.=" AND fechaEvento>='".$start."'";
+				
+			if($end!="")						
+				$consulta.=" AND fechaEvento<='".$end."'";	
+			
+			if($statusAudiences!=0)						
+				$consulta.=" AND situacion=".$statusAudiences;
+			
+			$consulta.=" ORDER BY horaInicioEvento";
+			
+			$arrRegistros=($con->obtenerFilasJSON($consulta));
+			
+			return '{"result":"1","msgErr":"","numAudiences":"'.$con->filasAfectadas.'","audiences":'.$arrRegistros.'}';
+			
+		}
+		catch(Exception $e)
+		{
+			return '{"result":"0","msgErr":"'.cv($e->getMessage()).'"}';
+		}
+	}
+	
+	function usersGetCourts($stringTokenAccess,$token,$state,$typeCout)
+	{
+		global $urlSitio;
+		global $versionLatis;
+		global $con;
+		
+		try
+		{
+			
+			$consulta="select AES_DECRYPT(UNHEX('".$stringTokenAccess."'), '".bD($versionLatis)."')";
+
+			$tokenAccess=$con->obtenerValor($consulta);
+			$arrToken=explode("_",$tokenAccess);
+			if(count($arrToken)!=3)
+			{
+				return '{"result":"0","msgErr":"El stringTokenAccess es incorrecto"}';
+			}
+			
+			$idUsuario=$arrToken[1];
+			$macAddress=$arrToken[2];
+			if(mb_strtoupper($token)!=mb_strtoupper($macAddress))
+			{
+				return '{"result":"0","msgErr":"El stringTokenAccess/token enviado NO es valido"}';
+			}
+			
+			switch($typeCout)
+			{
+				case 0:
+					$consulta="select * from(SELECT d.nombreUnidad AS nombreDespacho,d.claveUnidad AS IDDespacho,d.claveRegistro AS claveDespacho,dom.calle AS domicilio,
+								(SELECT estado FROM 820_estados WHERE cveEstado=dom.departamentos) AS departamento, 
+								(SELECT municipio FROM 821_municipios WHERE cveMunicipio=dom.municipio) AS municipio,dom.latitud,dom.longitud,
+								(SELECT GROUP_CONCAT(CONCAT(numero,' Ext. ',extension)) FROM _638_gridTelefono t WHERE t.idReferencia=dom.id__638_tablaDinamica) AS telefonos,
+								(SELECT GROUP_CONCAT(email) FROM _638_gridCorreo t WHERE t.idReferencia=dom.id__638_tablaDinamica) AS correos,
+								'DESPAHO' AS tipoRegistro
+								 FROM _17_tablaDinamica d,_638_tablaDinamica dom WHERE dom.idReferencia=d.id__17_tablaDinamica
+								 ".($state!=""?" and dom.municipio='".cv($state)."'":"")."
+								 UNION
+								 
+								 SELECT d.nombreInmueble AS nombreDespacho,d.claveUnidad AS nombreDespacho,d.cveInmueble AS nombreDespacho,
+								 dom.calleSede AS domicilio, 
+								(SELECT estado FROM 820_estados WHERE cveEstado=dom.departamento) AS departamento, 
+								(SELECT municipio FROM 821_municipios WHERE cveMunicipio=dom.municipio) AS municipio,dom.latitud,dom.longitud,
+								(SELECT GROUP_CONCAT(CONCAT(numero,' Ext. ',extension)) FROM _640_telefonoSede t WHERE t.idReferencia=dom.id__640_tablaDinamica) AS telefonos,
+								(SELECT GROUP_CONCAT(correoElectronico) FROM _640_email t WHERE t.idReferencia=dom.id__640_tablaDinamica) AS correos,
+								'SEDE' AS tipoRegistro
+								 FROM _1_tablaDinamica d,_640_tablaDinamica dom WHERE dom.idReferencia=d.id__1_tablaDinamica
+								 ".($state!=""?" and dom.municipio='".cv($state)."'":"")."
+								 ) as tmp order  by nombreDespacho";
+				break;
+				case 1://Despachos
+					$consulta="SELECT d.nombreUnidad AS nombreDespacho,d.claveUnidad AS IDDespacho,d.claveRegistro AS claveDespacho,dom.calle AS domicilio,
+								(SELECT estado FROM 820_estados WHERE cveEstado=dom.departamentos) AS departamento, 
+								(SELECT municipio FROM 821_municipios WHERE cveMunicipio=dom.municipio) AS municipio,dom.latitud,dom.longitud,
+								(SELECT GROUP_CONCAT(CONCAT(numero,' Ext. ',extension)) FROM _638_gridTelefono t WHERE t.idReferencia=dom.id__638_tablaDinamica) AS telefonos,
+								(SELECT GROUP_CONCAT(email) FROM _638_gridCorreo t WHERE t.idReferencia=dom.id__638_tablaDinamica) AS correos,
+								'DESPAHO' AS tipoRegistro
+								 FROM _17_tablaDinamica d,_638_tablaDinamica dom WHERE dom.idReferencia=d.id__17_tablaDinamica
+								 ".($state!=""?" and dom.municipio='".cv($state)."'":"")."
+								  order  by nombreUnidad";
+				break;
+				case 2://Sedes
+					$consulta=" SELECT d.nombreInmueble AS nombreDespacho,d.claveUnidad AS nombreDespacho,d.cveInmueble AS nombreDespacho,
+								 dom.calleSede AS domicilio, 
+								(SELECT estado FROM 820_estados WHERE cveEstado=dom.departamento) AS departamento, 
+								(SELECT municipio FROM 821_municipios WHERE cveMunicipio=dom.municipio) AS municipio,dom.latitud,dom.longitud,
+								(SELECT GROUP_CONCAT(CONCAT(numero,' Ext. ',extension)) FROM _640_telefonoSede t WHERE t.idReferencia=dom.id__640_tablaDinamica) AS telefonos,
+								(SELECT GROUP_CONCAT(correoElectronico) FROM _640_email t WHERE t.idReferencia=dom.id__640_tablaDinamica) AS correos,
+								'SEDE' AS tipoRegistro
+								 FROM _1_tablaDinamica d,_640_tablaDinamica dom WHERE dom.idReferencia=d.id__1_tablaDinamica 
+								 ".($state!=""?" and dom.municipio='".cv($state)."'":"")."
+								 order  by nombreInmueble";
+				break;
+			}
+			
+			
+			$arrRegistros=($con->obtenerFilasJSON($consulta));
+			
+			return '{"result":"1","msgErr":"","numCourts":"'.$con->filasAfectadas.'","courts":'.$arrRegistros.'}';
+			
+		}
+		catch(Exception $e)
+		{
+			return '{"result":"0","msgErr":"'.cv($e->getMessage()).'"}';
+		}
+	}
+
+	
+
+	$arrParam=array();
+	$server = new soap_server;
+	$ns=$urlSitio."/webServices";
+	$server->configurewsdl('ApplicationServices',$ns);
+	$server->wsdl->schematargetnamespace=$ns;
+	$server->register('autenticateUser',array('urlAutentication'=>'xsd:string','token'=>'xsd:string'),array('return' => 'xsd:string'),$ns,false,'rpc','encoded','');
+	$server->register('usersTask',array('stringTokenAccess'=>'xsd:string','token'=>'xsd:string','taskStatus'=>'xsd:string'),array('return' => 'xsd:string'),$ns,false,'rpc','encoded','');
+	$server->register('usersAudiences',array('stringTokenAccess'=>'xsd:string','token'=>'xsd:string','start'=>'xsd:string','end'=>'xsd:string','statusAudiences'=>'xsd:string'),array('return' => 'xsd:string'),$ns,false,'rpc','encoded','');
+	$server->register('usersGetCourts',array('stringTokenAccess'=>'xsd:string','token'=>'xsd:string','state'=>'xsd:string','typeCout'=>'xsd:string'),array('return' => 'xsd:string'),$ns,false,'rpc','encoded','');
+
+	if (isset($HTTP_RAW_POST_DATA)) 
+	{
+		$input = $HTTP_RAW_POST_DATA;
+	}
+	else 
+	{
+		$input = implode("rn", file('php://input'));
+	}
+	
+	
+	$server->service($input);
+
+?>

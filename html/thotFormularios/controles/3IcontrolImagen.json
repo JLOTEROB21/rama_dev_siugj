@@ -1,0 +1,7 @@
+{
+	"id":"btnAddImagen",
+	"funcion":"mostrarVentanaImagenes()",
+	"titulo":"Insertar imagen",
+	"icono":"image.png",
+	"script":"imagen.js.php"
+}

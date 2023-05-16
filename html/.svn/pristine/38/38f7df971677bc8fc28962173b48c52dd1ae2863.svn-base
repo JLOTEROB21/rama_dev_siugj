@@ -1,0 +1,317 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+
+	$consulta="select concat(idRol,'_',extensionRol),nombreGrupo from 8001_roles where idIdioma=".$_SESSION["leng"]." and situacion=1 order by nombreGrupo";
+	$arrRoles=uEJ($con->obtenerFilasArreglo($consulta));
+?>
+
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	new Ext.Button (
+                                {
+                                    cls:'btnSIUGJ',
+                                    text:'Guardar',
+                                    width:150,
+                                    height:50,
+                                    id:'btnGuardarForm',
+                                    renderTo:'contenedor1',
+                                    handler:function()
+                                            {
+                                                validarFrm()
+                                            }
+                                }
+                            )
+	
+    
+    new Ext.Button (
+                                {
+                                    cls:'btnSIUGJCancel',
+                                    text:'Cancelar',
+                                    width:150,
+                                    height:50,
+                                    id:'btnCancelarForm',
+                                    renderTo:'contenedor2',
+                                    handler:function()
+                                            {
+                                            	function  resp(btn)
+                                                {
+                                                	if(btn=='yes')
+                                                    {
+                                                    	location.href='../procesos/tblCategoriasCamposFormularios.php';
+                                                    }
+                                                }
+                                                msgConfirm('Est&aacute; seguro de querer cancelar la operaci&oacute;n?',resp)
+                                            }
+                                }
+                            )
+	crearGridRoles();
+}
+
+function validarFrm()
+{
+	if(validarFormularios('frmEnvio'))
+    {
+    	
+    	var objArr='';
+        
+        var x=0;
+        var gRoles=gEx('gRoles');
+        var fila;
+        var o;
+        for(x=0;x<gRoles.getStore().getCount();x++)
+        {
+        	fila=gRoles.getStore().getAt(x);
+            o='{"idRol":"'+fila.data.idRol+'"}';
+            
+            if(objArr=='')
+            	objArr=o;
+            else
+            	objArr+=','+o;
+            
+            
+        }
+        objArr='['+objArr+']';
+    	if(gE('idFuncion').value=='-1')
+        {
+        	gE('funcPHPEjecutarNuevo').value=bE('asociarRolesRendererControl(@idRegPadre,\''+bE(objArr)+'\')');
+        }
+        else
+        {
+        	gE('funcPHPEjecutarModif').value=bE('asociarRolesRendererControl('+gE('idFuncion').value+',\''+bE(objArr)+'\')');
+        }
+        gE('frmEnvio').submit();
+        
+    }
+}
+
+
+
+function crearGridRoles()
+{
+	var dsDatos=eval(bD(gE('arrRoles').value));
+    var alDatos=	new Ext.data.SimpleStore	(
+                                                    {
+                                                        fields:	[
+                                                                    {name: 'idRol'},
+                                                                    {name: 'etiqueraRol'}
+                                                                ]
+                                                    }
+                                                );
+
+    alDatos.loadData(dsDatos);
+	
+	var cModelo= new Ext.grid.ColumnModel   	(
+												 	[
+													 	
+														{
+															header:'Rol',
+															width:350,
+															sortable:true,
+															dataIndex:'etiqueraRol'
+														}
+													]
+												);
+                                                
+	var tblGrid=	new Ext.grid.GridPanel	(
+                                                        {
+                                                            id:'gRoles',
+                                                            store:alDatos,
+                                                            frame:false,
+                                                            cm: cModelo,
+                                                            stripeRows :true,
+                                                            loadMask:true,
+                                                            stripeRows :true,
+                                                            columnLines : true,
+                                                            height:220,
+                                                            width:450,
+                                                            renderTo:'tblRoles',
+                                                            tbar:	[
+                                                            			{
+                                                                        	icon:'../images/add.png',
+                                                                            cls:'x-btn-text-icon',
+                                                                            text:'Agregar Rol',
+                                                                            handler:function()
+                                                                            		{
+                                                                                    	agregarRol()
+                                                                                    }
+                                                                            
+                                                                        },'-',
+                                                                        {
+                                                                        	icon:'../images/delete.png',
+                                                                            cls:'x-btn-text-icon',
+                                                                            text:'Remover Rol',
+                                                                            handler:function()
+                                                                            		{
+                                                                                    	
+                                                                                    	var fila=tblGrid.getSelectionModel().getSelected();
+                                                                                        if(!fila)
+                                                                                        {
+                                                                                        	msgBox('Debe seleccioanr el rol que desea remover');
+                                                                                        	return;
+                                                                                        }
+                                                                                        
+                                                                                        tblGrid.getStore().remove(fila);
+                                                                                        
+                                                                                    }
+                                                                            
+                                                                        }
+                                                                        
+                                                            		]
+                                                        }
+                                                    );
+	return 	tblGrid;	
+}
+
+function agregarRol()
+{
+	
+    var arrRoles=<?php echo $arrRoles;?>;
+    var cmbExtensiones=crearComboExt('cmbExtensiones',[],100,35,250);
+	cmbExtensiones.hide();
+	var cmbRoles=crearComboExt('cmbRoles',arrRoles,100,5,250);
+    function rolSeleccionado(combo,registro,indice)
+    {
+    	cmbExtensiones.reset();
+    	var idRegistro=registro.get('id');
+        var arrId=idRegistro.split('_');
+        if(arrId[1]!=0)
+        {
+        	function funcAjax()
+            {
+                var resp=peticion_http.responseText;
+                arrResp=resp.split('|');
+                if(arrResp[0]=='1')
+                {
+					var arrExtensiones=eval(arrResp[1]);
+                    cmbExtensiones.getStore().loadData(arrExtensiones);                
+                	cmbExtensiones.show();
+		            Ext.getCmp('lblExtension').show();
+                }
+                else
+                {
+                    msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+                }
+            }
+            obtenerDatosWeb('../paginasFunciones/funcionesUsuarios.php',funcAjax, 'POST','funcion=20&extension='+arrId[1],true);
+        }
+        else
+        {
+        	cmbExtensiones.hide();
+            Ext.getCmp('lblExtension').hide();
+        }
+    }
+    cmbRoles.on('select',rolSeleccionado);
+	var form=new Ext.form.FormPanel(
+										{
+											baseCls: 'x-plain',
+											layout:'absolute',
+											disabled:false,
+											items:
+													[
+													 	{
+                                                        	id:'lblRol',
+                                                            x:10,
+                                                            y:10,
+                                                            xtype:'label',
+                                                            html:'Rol:'
+                                                        },
+                                                        cmbRoles,
+                                                        {
+                                                        	id:'lblExtension',
+                                                        	x:10,
+                                                            y:40,
+                                                            xtype:'label',
+                                                            html:'Extensi&oacute;n:',
+                                                            hidden:true
+                                                        },
+                                                        cmbExtensiones
+													]
+										}
+									)
+	var ventana=new Ext.Window(
+							   		{
+										title:'Agregar rol',
+										width:380,
+										height:150,
+										layout:'fit',
+										buttonAlign:'center',
+										items:[form],
+										modal:true,
+										plain:true,
+										listeners:
+											{
+												show:
+												{
+													buffer:10,fn:function()
+															{
+															}
+												}
+											},
+										buttons:
+												[
+												 	{
+														text:'Aceptar',
+														handler:function ()
+															{
+                                                            	var rol=cmbRoles.getValue();
+                                                                var arrId=rol.split('_');
+                                                                var extension='0';
+                                                                if(arrId[1]!=0)
+                                                                	extension=cmbExtensiones.getValue();	
+                                                                if(extension=='')
+                                                                {
+                                                                	function resp()
+                                                                    {
+                                                                    	cmbExtensiones.focus();
+                                                                    }
+                                                                	msgBox('Debe seleccionar una extensi&oacute;n del rol',resp);
+                                                                    return;
+                                                                }
+                                                               
+                                                                var codigoRol=arrId[0]+'_'+extension;
+                                                                var pos=obtenerPosFila(gEx('gRoles').getStore(),'idRol',codigoRol);
+                                                                if(pos==-1)
+                                                                {
+                                                                
+                                                                	var reg=crearRegistro(	[
+                                                                    							{name: 'idRol'},
+							                                                                    {name: 'etiqueraRol'}
+                                                                                             ]
+                                                                                          );
+                                                                    
+                                                                    
+                                                                    var txtExtension=cmbRoles.getRawValue();
+                                                                    if(extension!='0')
+                                                                    {
+                                                                    	txtExtension=' ('+cmbExtensiones.getRawValue()+')';
+                                                                    }
+                                                                    var r=new reg	(
+                                                                    					{
+                                                                                            idRol:codigoRol,
+                                                                                            etiqueraRol:txtExtension
+                                                                                        }
+                                                                    				)                            
+                                                                	gEx('gRoles').getStore().add(r);
+                                                                
+                                                                	
+                                                                }
+                                                               
+                                                                ventana.close();
+															}
+													},
+													{
+														text:'Cancelar',
+														handler:function ()
+															{
+																ventana.close();
+															}
+													}
+												 ]
+									}
+							   )
+	ventana.show();
+}

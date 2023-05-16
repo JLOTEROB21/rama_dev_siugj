@@ -1,0 +1,8 @@
+{
+	"id":"btnDelAyuda",
+	"funcion":"eliminarAyuda()",
+	"titulo":"Remover mensaje de ayuda",
+	"icono":"delInterro.png",
+	"script":"ayuda.js.php",
+	"deshabilitado":"1"
+}

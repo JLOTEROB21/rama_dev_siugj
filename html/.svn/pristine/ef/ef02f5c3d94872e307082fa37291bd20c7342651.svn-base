@@ -1,0 +1,1067 @@
+<?php session_start();
+	
+	include("conexionBD.php");
+	include_once("nusoap/nusoap.php");
+	include_once("latisErrorHandler.php");
+	include_once("SIUGJ/libreriaFuncionesIntegraciones.php");
+
+	ini_set('default_socket_timeout', 160000);
+	ini_set('post_max_size', '4096M');
+	ini_set('upload_max_filesize', '4096M');
+	
+	
+	function registroProcesoJudicialSIUGJ($solicitudRadicacion,$token)
+	{
+		global $con;
+		global $baseDir;
+		global $urlSitio;
+		
+		$aResultado=validarTokenServicio($token,(__FUNCTION__),basename((__FILE__)));
+		
+		if($aResultado[0]==0)
+		{
+			$oResp=json_decode($aResultado[1]);
+			
+			$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>'.$oResp->error.'</datosComplementarios></datosResultado>';
+			return $resultado;
+		}
+		try
+		{
+			aperturarSesionUsuario(2);
+			$cXML=simplexml_load_string($solicitudRadicacion);	
+		
+			$arrFigurasRegistraduria[0]=1;
+			$arrFigurasRegistraduria[2]=1;
+			$arrFigurasRegistraduria[6]=1;
+			$arrFigurasRegistraduria[7]=1;
+			$arrFigurasRegistraduria[11]=1;
+			$arrFigurasRegistraduria[16]=1;
+					
+			$consulta="SELECT * FROM _1242_tablaDinamica WHERE codigo='00001/2022'";
+			$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+			$habilitarBusquedaSirnaBase=$fRegistro["servicioHabilitado"]==1;
+			
+			$consulta="SELECT * FROM _1242_tablaDinamica WHERE codigo='00003/2022'";
+			$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+			$habilitarBusquedaRuesBase=$fRegistro["servicioHabilitado"]==1;
+					
+			$consulta="SELECT * FROM _1242_tablaDinamica WHERE codigo='00004/2022'";
+			$fRegistroRegistraduria=$con->obtenerPrimeraFilaAsoc($consulta);
+			$habilitarBusquedaRegistraduriaBase=false;
+			
+			$general=$cXML->general[0];
+			
+			$tipoRadicacion=(string)$general->tipoRadicacion[0];
+			if(($tipoRadicacion!=1)&&($tipoRadicacion!=2))
+			{
+				$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El tipo de radicaci&oacute;n registrado NO es v&aacute;lido</datosComplementarios></datosResultado>';
+				return $resultado;
+			}
+			
+			$departamentoRadicacion=(string)$general->departamentoRadicacion[0];
+			
+			
+			$consulta="SELECT COUNT(*) FROM 820_estados WHERE cveEstado='".$departamentoRadicacion."'";
+			$nReg=$con->obtenerValor($consulta);
+			
+			if($nReg==0)
+			{
+				$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El departamento radicaci&oacute;n NO es v&aacute;lido</datosComplementarios></datosResultado>';
+				return $resultado;
+			
+			}
+			
+			$ciudadRadicacion=(string)$general->ciudadRadicacion[0];
+			$consulta="SELECT COUNT(*) FROM 821_municipios WHERE cveMunicipio='".$ciudadRadicacion."'";
+			$nReg=$con->obtenerValor($consulta);
+			
+			if($nReg==0)
+			{
+				$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>La ciudad de radicaci&oacute;n NO es v&aacute;lido</datosComplementarios></datosResultado>';
+				return $resultado;
+			
+			}
+			
+			$campoFechaRecepcion="";
+			$campoHoraRecepcion="";
+			$urlAcuse="";
+			$etapaCambio=1;
+			switch($tipoRadicacion)
+			{
+				case 1://Ordinario
+				
+					$consulta="SELECT COUNT(*) FROM 817_vistasEstadosMunicipio WHERE cveEstado='".$departamentoRadicacion."' AND cveMunicipio='".$ciudadRadicacion."'";
+					$nReg=$con->obtenerValor($consulta);
+				
+					if($nReg==0)
+					{
+						$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>La relaci&oacute;n departameto - ciudad no es correcta o no se encuentra habilitado la radicaci&oacute;n en la ciudad indicada</datosComplementarios></datosResultado>';
+						return $resultado;
+					}
+				
+				
+					$urlAcuse="generarAcuseRadicacion";
+					$campoFechaRecepcion="fechadeRecepcion";
+					$campoHoraRecepcion="horadeRecepcion";
+					$solicitaMedidaCautelar=(string)$general->solicitaMedidaCautelar[0];
+					$etapaCambio=3.5;
+					
+					if(($solicitaMedidaCautelar!="1")&&($solicitaMedidaCautelar!="0"))
+					{
+						$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>Debe indicar si existe solicitud de medida cautelar</datosComplementarios></datosResultado>';
+						return $resultado;
+					}
+					
+					$tipoProceso=(string)$general->tipoProceso[0];
+	
+					$consulta="SELECT * FROM _625_tablaDinamica WHERE id__625_tablaDinamica=".($tipoProceso!=""?$tipoProceso:-1);
+					$nReg=$con->obtenerValor($consulta);
+					if($nReg==0)
+					{
+						$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El tipo de proceso indicado NO es v&aacute;lido</datosComplementarios></datosResultado>';
+						return $resultado;
+					
+					}
+					
+					$temaProceso=(string)$general->temaProceso[0];
+	
+					$consulta="SELECT * FROM _628_tablaDinamica WHERE id__628_tablaDinamica=".($temaProceso!=""?$temaProceso:-1);
+					$nReg=$con->obtenerValor($consulta);
+					if($nReg==0)
+					{
+						$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El tema de proceso indicado NO es v&aacute;lido</datosComplementarios></datosResultado>';
+						return $resultado;
+					
+					}
+					
+					$subTemaProceso=(string)$general->subTemaProceso[0];
+	
+					$consulta="SELECT * FROM _629_tablaDinamica WHERE id__629_tablaDinamica=".($subTemaProceso!=""?$subTemaProceso:-1);
+					$nReg=$con->obtenerValor($consulta);
+					if($nReg==0)
+					{
+						$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El subtema de proceso indicado NO es v&aacute;lido</datosComplementarios></datosResultado>';
+						return $resultado;
+					
+					}
+					
+					$cuantiaProceso=(string)$general->cuantiaProceso[0];
+	
+					if($cuantiaProceso=="")
+					{
+						$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>Debe indicar la cuant&iacute;a del proceso</datosComplementarios></datosResultado>';
+						return $resultado;
+					}
+					
+					
+					$salarioMinimo=obtenerSalarioMinimo_SIUGJ(date("Y-m-d"));
+
+					
+					
+					switch($tipoProceso)
+					{
+						case 1:
+							$limite=20*	$salarioMinimo;	
+							if($cuantiaProceso<=$limite)
+							{
+								$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>Los procesos ordinarios laborales de primera instancia, son aquellos que exceden de 20 SMMLV ($ '.number_format($limite,2).')</datosComplementarios></datosResultado>';
+								return $resultado;
+							}
+						break;
+						case 20:
+							$limite=20*	$salarioMinimo;	
+							if($cuantiaProceso>$limite)
+							{
+								$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>Los procesos ordinarios laborales de &uacute;nica instancia, son aquellos que no exceden de 20 SMMLV ($ '.number_format($limite,2).')</datosComplementarios></datosResultado>';
+								return $resultado;
+							}
+						break;
+					}
+					
+					
+					$departamentoDomicilioDemandado=(string)$general->departamentoDomicilioDemandado[0];
+			
+			
+					$consulta="SELECT COUNT(*) FROM 820_estados WHERE cveEstado='".$departamentoDomicilioDemandado."'";
+					$nReg=$con->obtenerValor($consulta);
+					
+					if($nReg==0)
+					{
+						$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El departamento del domicilio del demandado NO es v&aacute;lido</datosComplementarios></datosResultado>';
+						return $resultado;
+					
+					}
+					
+					$ciudadDomicilioDemandado=(string)$general->ciudadDomicilioDemandado[0];
+					$consulta="SELECT COUNT(*) FROM 821_municipios WHERE cveMunicipio='".$ciudadDomicilioDemandado."'";
+					$nReg=$con->obtenerValor($consulta);
+					
+					if($nReg==0)
+					{
+						$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>La ciudad del domicilio del demandado NO es v&aacute;lido</datosComplementarios></datosResultado>';
+						return $resultado;
+					
+					}
+				break;
+				case 2://Tutela
+					$etapaCambio=3.5;
+					$urlAcuse="generarAcuseRadicacionTutela";
+					$campoFechaRecepcion="fechaRecepcionRegistroTutela";
+					$campoHoraRecepcion="horaRecepcionRegistroTutela";
+					$existeMedidaProvisional=(string)$general->existeMedidaProvisional[0];
+					if(($existeMedidaProvisional!=1)&&($existeMedidaProvisional!=0))
+					{
+						$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>Debe indicar si existe medida provisional</datosComplementarios></datosResultado>';
+						return $resultado;
+					}
+					
+					
+					$arrDerechosVulnera=$general->derechosVulnera[0];
+					if(!$arrDerechosVulnera)
+					{
+						$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>Debe indicar los derechos vulnerados</datosComplementarios></datosResultado>';
+						return $resultado;
+					}
+					foreach($arrDerechosVulnera as $v)
+					{
+						$derecho=trim((string)$v);
+						if($derecho=="")
+						{
+							$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>Almenos un nodo de tipo derecho vulnerado se encuentra vac&iacute;o</datosComplementarios></datosResultado>';
+							return $resultado;
+						}
+					}
+					
+				break;
+			}
+			
+			$sujetosProcesales=$cXML->sujetosProcesales[0];
+			if(!$sujetosProcesales)
+			{
+				$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>Debe indicar los sujetos procesales que forman parte del proceso judicial</datosComplementarios></datosResultado>';
+				return $resultado;
+			} 
+			
+			
+			foreach($sujetosProcesales as $s)
+			{
+	
+				$tipoPersona=(string)$s->tipoPersona;
+				$tipoSujetoProcesal=(string)$s->tipoSujetoProcesal;
+				$consulta="SELECT COUNT(*) FROM _5_tablaDinamica WHERE id__5_tablaDinamica=".($tipoSujetoProcesal==""?-1:$tipoSujetoProcesal);
+				$nReg=$con->obtenerValor($consulta);
+				if($nReg==0)
+				{
+					$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El tipo de sujero procesal \''.($tipoSujetoProcesal==""?"Vac&iacute;o":$tipoSujetoProcesal).'\' NO es v&aacute;lido</datosComplementarios></datosResultado>';
+					return $resultado;
+				}
+				
+				
+				if(($tipoPersona!="1")&&($tipoPersona!="2"))
+				{
+					$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El tipo de persona NO es v&aacute;lido</datosComplementarios></datosResultado>';
+					return $resultado;
+				}			
+				
+				$habilitarBusquedaRues=$habilitarBusquedaRuesBase;
+				$habilitarBusquedaSirna=$habilitarBusquedaSirnaBase;
+				$habilitarBusquedaRegistraduria=$habilitarBusquedaRegistraduriaBase;		
+				
+				
+				if(($tipoSujetoProcesal!=5)&&($tipoSujetoProcesal!=17))
+				{
+					$habilitarBusquedaSirna=false;
+				}
+				
+				if(isset($arrFigurasRegistraduria[$tipoPersona])&&($fRegistroRegistraduria["servicioHabilitado"]==1))
+				{
+					$habilitarBusquedaRegistraduria=true;
+				}
+				
+				
+
+				
+				if($tipoPersona==1)//Natural
+				{
+					$primerNombre=trim((string)$s->primerNombre);
+					
+					if($primerNombre=="")
+					{
+						$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>Los nodos de tipo \'primerNombre\' no pueden estar vac&iacute;os</datosComplementarios></datosResultado>';
+						return $resultado;
+					}
+					
+					$segundoNombre=trim((string)$s->segundoNombre);
+					
+					$primerApellido=trim((string)$s->primerApellido);
+					if($primerApellido=="")
+					{
+						$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>Los nodos de tipo \'primerApellido\' no pueden estar vac&iacute;os</datosComplementarios></datosResultado>';
+						return $resultado;
+					}
+					
+					$segundoApellido=(string)$s->segundoApellido;
+					
+					$nombreCompleto=trim($primerNombre);
+					if($segundoNombre!="")
+					{
+						$nombreCompleto.=" ".$segundoNombre;
+					}
+					
+					if($primerApellido!="")
+					{
+						$nombreCompleto.=" ".$primerApellido;
+					}
+					
+					if($segundoApellido!="")
+					{
+						$nombreCompleto.=" ".$segundoApellido;
+					}
+					
+					$tipoIdentificacion=trim((string)$s->tipoIdentificacion);
+					$noIdentificacion=trim((string)$s->noIdentificacion);
+					if($tipoIdentificacion!="")
+					{
+						$consulta="SELECT COUNT(*) FROM _32_tablaDinamica WHERE id__32_tablaDinamica=".$tipoIdentificacion;
+						$nReg=$con->obtenerValor($consulta);
+						if($nReg==0)
+						{
+							$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El tipo de identificaci&oacute;n de la persona \''.cv($nombreCompleto).'\' NO es v&aacute;lido</datosComplementarios></datosResultado>';
+							return $resultado;
+						}
+						
+						
+						if($noIdentificacion!="")
+						{
+							if((($tipoIdentificacion==4)||($tipoIdentificacion==7))&&($habilitarBusquedaSirna))
+							{
+								
+								$arrResultados=buscarInformacionSirna($noIdentificacion,$tipoIdentificacion==4?1:2);
+								switch($arrResultados["Respuesta"])
+								{
+									case 1:
+										if($arrResultados["Estado"]!="Vigente")
+										{
+											$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El n&uacute;mero de c&eacute;dula profesional de la persona \''.cv($nombreCompleto).
+														'\' NO existe en el registro nacional de abogados</datosComplementarios></datosResultado>';
+											return $resultado;
+										}
+									break;
+									
+									case 2:
+										$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El n&uacute;mero de c&eacute;dula profesional de la persona \''.cv($nombreCompleto).
+													'\' NO est&aacute; vigente</datosComplementarios></datosResultado>';
+										return $resultado;
+									break;
+									
+								}
+								
+								
+							}
+							
+							
+							if(($tipoIdentificacion==4)&&($habilitarBusquedaRegistraduria))
+							{
+								$fechaExpedicion=trim((string)$s->fechaExpedicion);
+								$arrResultados=buscarInformacionRegistraduria($noIdentificacion);
+
+								switch($arrResultados["Respuesta"])
+								{
+									case 1:
+										if($fechaExpedicion!=$arrResultados["fechaExpedicion"])
+										{
+											$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>La fecha de expedición del documento no coincide con registradur&iacute;a (\''.cv($nombreCompleto).'\')</datosComplementarios></datosResultado>';
+											return $resultado;
+										}
+										
+										$fechaLimiteNacimiento=strtotime("-18 years",strtotime($arrResultados["fechaExpedicion"]));
+										
+										$socioDemograficos=$s->socioDemograficos[0];
+										$fechaNacimiento=$socioDemograficos->fechaNacimiento[0];
+										if($fechaNacimiento=="")
+										{
+											$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>Debe ingresar la fecha de nacimiento de la persona \''.cv($nombreCompleto).'\'</datosComplementarios></datosResultado>';
+											return $resultado;
+										}
+										
+										if(strtotime($fechaNacimiento)>$fechaLimiteNacimiento)
+										{
+											$leyenda='La fecha de nacimiento no puede ser mayor a '.date("d/m/Y",$fechaLimiteNacimiento)." (".$nombreCompleto.")";
+											$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>Debe ingresar la fecha de nacimiento de la persona \''.cv($nombreCompleto).'\'</datosComplementarios></datosResultado>';
+											return $resultado;
+										}
+										
+									break;
+									case 2:
+										$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El n&uacute;mero de documento de la persona \''.cv($nombreCompleto).
+													'\' NO es v&aacute;lido</datosComplementarios></datosResultado>';
+										return $resultado;
+									break;
+									
+									case 4:
+										
+									break;
+									default:
+									
+										if(($arrResultados["Respuesta"]!=-1001)&&($arrResultados["Respuesta"]!=0)&&($arrResultados["Respuesta"]!=1)&&($arrResultados["Respuesta"]!=12)&&($arrResultados["Respuesta"]!=14))
+										{								
+											$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El n&uacute;mero de c&eacute;dula profesional de la persona \''.cv($nombreCompleto).
+													'\' NO est&aacute; vigente</datosComplementarios></datosResultado>';
+										}
+									break;
+									
+								}
+							}
+							
+						}
+						
+						
+						
+					}
+					
+					
+					$socioDemograficos=$s->socioDemograficos[0];
+					$genero="";
+					$fechaNacimiento="";
+					$grupoEtnico="";
+					$discapacidad="";
+					
+					if($socioDemograficos)
+					{
+						$genero=$socioDemograficos->genero[0];					
+						$consulta="SELECT COUNT(*) FROM 1005_generoUsuario WHERE idGenero=".($genero==""?-1:$genero);
+						$nReg=$con->obtenerValor($consulta);
+						if($nReg==0)
+						{
+							$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El g&eacute;nero de la persona \''.($nombreCompleto).'\' NO es v&aacute;lido</datosComplementarios></datosResultado>';
+							return $resultado;
+						
+						}
+											
+						$fechaNacimiento=$socioDemograficos->fechaNacimiento[0];
+						
+						$grupoEtnico=$socioDemograficos->grupoEtnico[0];
+						$consulta="SELECT COUNT(*) FROM _857_tablaDinamica WHERE id__857_tablaDinamica=".($grupoEtnico==""?-1:$grupoEtnico);
+						$nReg=$con->obtenerValor($consulta);
+						if($nReg==0)
+						{
+							$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El grupo &eacute;tnico de la persona \''.($nombreCompleto).'\' NO es v&aacute;lido</datosComplementarios></datosResultado>';
+							return $resultado;					
+						}
+						
+						$discapacidad=$socioDemograficos->discapacidad[0];
+						$consulta="SELECT COUNT(*) FROM _857_tablaDinamica WHERE id__857_tablaDinamica=".($discapacidad==""?-1:$discapacidad);
+						$nReg=$con->obtenerValor($consulta);
+						if($nReg==0)
+						{
+							$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El tipo de discapacidad de la persona \''.($nombreCompleto).'\' NO es v&aacute;lida</datosComplementarios></datosResultado>';
+							return $resultado;					
+						}
+						
+						
+					}
+					
+					
+					$datosContacto=$s->datosContacto[0];
+					if($datosContacto)
+					{
+						$direccion=(string)$datosContacto->direccion[0];
+						$departamento=(string)$datosContacto->departamento[0];
+						$ciudad=(string)$datosContacto->ciudad[0];
+						
+						$consulta="SELECT COUNT(*) FROM 820_estados WHERE cveEstado='".$departamento."'";
+						$nReg=$con->obtenerValor($consulta);
+						
+						if($nReg==0)
+						{
+							$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El departamento del domicilio de la persona \''.($nombreCompleto).'\' NO es v&aacute;lido</datosComplementarios></datosResultado>';
+							return $resultado;
+						
+						}
+						
+						$consulta="SELECT COUNT(*) FROM 821_municipios WHERE cveMunicipio='".$ciudad."'";
+						$nReg=$con->obtenerValor($consulta);
+						
+						if($nReg==0)
+						{
+							$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>La ciudad del domicilio de la persona \''.($nombreCompleto).'\' NO es v&aacute;lida</datosComplementarios></datosResultado>';
+							return $resultado;
+						
+						}
+						
+						$telefonosContacto=$datosContacto->telefonosContacto[0];
+						
+						if($telefonosContacto!="")
+						{
+	
+							foreach($telefonosContacto->telefono as $t)
+							{
+								$tipo=(string) $t->tipo;
+								if(($tipo!=1)&&($tipo!=2))
+								{
+									$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El tipo de tel&eacute;fono de la persona \''.($nombreCompleto).'\' NO es v&aacute;lido</datosComplementarios></datosResultado>';
+									return $resultado;
+								}
+								
+								$pais=(string) $t->pais;
+								if($pais=="")
+									$pais=-1;
+								$consulta="SELECT COUNT(*) FROM 238_paises WHERE idPais=".$pais;
+								$nReg=$con->obtenerValor($consulta);
+						
+								if($nReg==0)
+								{
+									$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El pa&iacute;s del tel&eacute;fono de la persona \''.($nombreCompleto).'\' NO es v&aacute;lido</datosComplementarios></datosResultado>';
+									return $resultado;
+								
+								}
+								
+								
+								$telefono=(string) $t->telefono;
+								
+								if(strlen($telefono)!=10)
+								{
+									$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El n&uacute;mero del tel&eacute;fono de la persona \''.($nombreCompleto).'\' NO es v&aacute;lido (10 d&iacute;gitos)</datosComplementarios></datosResultado>';
+									return $resultado;
+								}
+								
+								
+								
+							}
+						}
+						
+						$correosElectronicos=$datosContacto->correosElectronicos[0];
+						if($correosElectronicos)
+						{
+							foreach($correosElectronicos->mail as $m)
+							{
+								$m=(string)$m;
+								if(!validarCorreo($m))
+								{
+									$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>La direcci&oacute;n de correo \''.$m.'\' de la persona \''.($nombreCompleto).'\' NO es v&aacute;lida</datosComplementarios></datosResultado>';
+									return $resultado;
+								}
+								
+							}
+						}
+					}
+				}
+				
+				if($tipoPersona==2)//Juridica
+				{
+					
+					$tipoEntidad=trim((string)$s->tipoEntidad);
+					$nit=trim((string)$s->nit);
+					$razonSocial=(string)$s->razonSocial;
+					
+					if($razonSocial=="")
+					{
+						$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>Debe ingresar la raz&oacute;n social de la entidad</datosComplementarios></datosResultado>';
+						return $resultado;
+					}
+					
+					if($nit=="")
+					{
+						$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El \'NIT\' ingresado de la entidad \''.$tipoEntidad.'\' NO es v&aacute;lido</datosComplementarios></datosResultado>';
+						return $resultado;
+					}
+					
+					
+					switch($tipoEntidad)
+					{
+						case 1:
+						case 2:
+						case 3:
+						case 4:
+						break;
+						default:
+							$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El \'tipo de entidad\' ingresado de la entidad \''.$tipoEntidad.'\' NO es v&aacute;lido</datosComplementarios></datosResultado>';
+							return $resultado;
+						break;
+					}
+					
+					
+					if($tipoEntidad!=2)
+					{
+						$habilitarBusquedaRues=false;
+					}
+					
+					
+					if($habilitarBusquedaRues)
+					{
+						
+						//$arrResultados=buscarInformacionRues($nit);
+					}
+					
+					
+				}
+				
+			}
+			
+			$documentosProceso=$cXML->documentosProceso[0];
+			if(!$documentosProceso)
+			{
+				$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>Debe ingresar los documentos adjuntos asociados a su solicitud</datosComplementarios></datosResultado>';
+				return $resultado;
+			}
+			foreach($documentosProceso->documento as $d)
+			{
+				$tipoDocumento=(string)$d->tipoDocumento[0];
+				$cuerpoDocumento=(string)$d->cuerpoDocumento[0];
+				$nombreDocumento=(string)$d->nombreDocumento[0];
+				
+				if($tipoDocumento=="")
+					$tipoDocumento=-1;
+				
+				
+				
+				if($nombreDocumento=="")
+				{
+					$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>Los nodos de tipo \'nombreDocumento\' NO pueden ser vac&iacute;os</datosComplementarios></datosResultado>';
+					return $resultado;
+				}
+				
+				if($cuerpoDocumento=="")
+				{
+					$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>Debe ingresar el documento en base 64 del documento \''.cv($nombreDocumento).'\'</datosComplementarios></datosResultado>';
+					return $resultado;
+				}
+				
+				
+				$consulta="SELECT COUNT(*) FROM 908_categoriasDocumentos WHERE idCategoria=".$tipoDocumento;
+				$nReg=$con->obtenerValor($consulta);
+				if($nReg==0)
+				{
+					$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>El \'tipo de documento\' del documento \''.cv($nombreDocumento).'\' NO es v&aacute;lido</datosComplementarios></datosResultado>';
+					return $resultado;
+				}
+				
+				
+				
+				
+				
+			}
+			
+			
+			$idActividad=-1;
+		
+			$idActividad=generarIDActividad(0);
+			$idFormulario="";
+			$arrValores=array();
+			
+			switch($tipoRadicacion)
+			{
+				case 1://Ordinario
+					$idFormulario=698;
+					$solicitaMedidaCautelar=(string)$general->solicitaMedidaCautelar[0];
+					$tipoProceso=(string)$general->tipoProceso[0];
+					$temaProceso=(string)$general->temaProceso[0];
+					$subTemaProceso=(string)$general->subTemaProceso[0];
+					$cuantiaProceso=(string)$general->cuantiaProceso[0];
+					$departamentoDomicilioDemandado=(string)$general->departamentoDomicilioDemandado[0];
+					$ciudadDomicilioDemandado=(string)$general->ciudadDomicilioDemandado[0];
+					$relacionHechos=(string)$general->relacionHechos[0];
+					$departamentoRadicacion=(string)$general->departamentoRadicacion[0];
+					$ciudadRadicacion=(string)$general->ciudadRadicacion[0];
+					
+					$arrValores["fechadeRecepcion"]=date("Y-m-d");
+					$arrValores["horadeRecepcion"]=date("H:i:s");
+					$arrValores["jurisdiccion"]=4;
+					$arrValores["especialidad"]=2;
+					$arrValores["tipoProceso"]=$tipoProceso;
+					$arrValores["temaProceso"]=$temaProceso;
+					$arrValores["subtemaProceso"]=$subTemaProceso;
+					$arrValores["resumenHechosDemanda"]=$relacionHechos;
+					$arrValores["medidaProvisional"]=$solicitaMedidaCautelar;
+					$arrValores["cuantiaProceso"]=$cuantiaProceso==""?0:$cuantiaProceso;
+					$arrValores["departamentoRadicacion"]=$departamentoRadicacion;
+					$arrValores["municipioRadicacion"]=$ciudadRadicacion;
+					$arrValores["departamentos"]=$departamentoDomicilioDemandado;
+					$arrValores["municipio"]=$ciudadDomicilioDemandado;
+					$arrValores["idActividad"]=$idActividad;
+				break;
+				case 2://Tutela
+					$idFormulario=717;
+					$departamentoRadicacion=(string)$general->departamentoRadicacion[0];
+					$ciudadRadicacion=(string)$general->ciudadRadicacion[0];
+					$existeMedidaProvisional=(string)$general->existeMedidaProvisional[0];
+					$arrDerechosVulnera=$general->derechosVulnera[0];
+					
+					
+					$arrValores["departamentosRegistroTutela"]=$departamentoRadicacion;
+					$arrValores["ciudadRegistroTutela"]=$ciudadRadicacion;
+					$arrValores["medidaProvisional"]=$existeMedidaProvisional;
+					
+					$arrValores["fechaRecepcionRegistroTutela"]=date("Y-m-d");
+					$arrValores["horaRecepcionRegistroTutela"]=date("H:i:s");
+					$arrValores["idActividad"]=$idActividad;
+					
+					
+					
+					
+					
+					
+					
+					
+					
+				break;
+			}
+			$arrDocumentosReferencia=array();
+			
+			$idRegistroRadicacion=crearInstanciaRegistroFormulario($idFormulario,-1,1,$arrValores,$arrDocumentosReferencia,-1,0,"");
+			
+			
+			
+			
+			switch($tipoRadicacion)
+			{	
+				case 2:	
+					$x=0;
+					$query=array();
+					$query[$x]="begin";
+					$x++;
+					foreach($arrDerechosVulnera as $v)
+					{
+						$derecho=trim((string)$v);
+						
+						$query[$x]="INSERT INTO _717_gridDerechoVulnerableRegistroTutela(idReferencia,derechoVulnerableRegistroTutela) 
+									values(".$idRegistroRadicacion.",".$derecho.")";
+						$x++;	
+					}
+					$query[$x]="commit";
+					$x++;
+					$con->ejecutarBloque($query);
+				break;
+			
+			}
+			
+			foreach($sujetosProcesales as $s)
+			{
+				$tipoPersona=(string)$s->tipoPersona;
+				$tipoSujetoProcesal=(string)$s->tipoSujetoProcesal;
+				$aceptaNotificacionEmail=trim((string)$s->aceptaNotificacionEmail);
+				$aceptaNotificacionEmail=$aceptaNotificacionEmail==""?1:0;
+				$idRegistroPersona=-1;
+				if($tipoSujetoProcesal==1)//Natural
+				{
+					$primerNombre=trim((string)$s->primerNombre);
+					$segundoNombre=trim((string)$s->segundoNombre);
+					$primerApellido=trim((string)$s->primerApellido);
+					$segundoApellido=(string)$s->segundoApellido;
+					$fechaExpedicion=(string)$s->fechaExpedicion;
+					$tipoIdentificacion=trim((string)$s->tipoIdentificacion);
+					$noIdentificacion=trim((string)$s->noIdentificacion);
+					$socioDemograficos=$s->socioDemograficos[0];
+					$genero="";
+					$fechaNacimiento="";
+					$grupoEtnico="";
+					$discapacidad="";
+					if($socioDemograficos)
+					{
+						$genero=$socioDemograficos->genero[0];					
+						$fechaNacimiento=$socioDemograficos->fechaNacimiento[0];
+						$grupoEtnico=$socioDemograficos->grupoEtnico[0];
+						$discapacidad=$socioDemograficos->discapacidad[0];
+					}
+					
+					$arrDocumentosReferencia=array();
+					$arrDatosPersona=array();
+					$arrDatosPersona["tipoPersona"]=$tipoSujetoProcesal;
+					$arrDatosPersona["nombre"]=$primerNombre." ".$segundoNombre;
+					$arrDatosPersona["apellidoPaterno"]=$primerApellido;
+					$arrDatosPersona["apellidoMaterno"]=$segundoApellido;
+					$arrDatosPersona["genero"]=$genero;
+					if($fechaNacimiento!="")
+						$arrDatosPersona["edad"]=obtenerEdad($fechaNacimiento);
+					$arrDatosPersona["fechaNacimiento"]=$fechaNacimiento;
+					$arrDatosPersona["tipoIdentificacion"]=$tipoIdentificacion;
+					$arrDatosPersona["folioIdentificacion"]=$noIdentificacion;
+					$arrDatosPersona["figuraJuridica"]=$tipoPersona;
+					$arrDatosPersona["grupoEtnico"]=$grupoEtnico;
+					$arrDatosPersona["discapacidad"]=$discapacidad;
+					$arrDatosPersona["fechaIdentificacion"]=$fechaExpedicion;
+					$arrDatosPersona["aceptaNotificacionMail"]=$aceptaNotificacionEmail;
+					$arrDatosPersona["idActividad"]=$idActividad;
+					$idRegistroPersona=crearInstanciaRegistroFormulario(47,-1,1,$arrDatosPersona,$arrDocumentosReferencia,-1,0,"");
+	
+					
+					
+				}
+				
+				if($tipoSujetoProcesal==2)//Juridica
+				{
+					
+					$tipoEntidad=trim((string)$s->tipoEntidad);
+					$nit=trim((string)$s->nit);
+					$razonSocial=(string)$s->razonSocial;
+					
+					$arrDocumentosReferencia=array();
+					$arrDatosPersona=array();
+					$arrDatosPersona["tipoPersona"]=$tipoSujetoProcesal;
+					$arrDatosPersona["tipoEntidad"]=$tipoEntidad;
+					$arrDatosPersona["tipoIdentificacion"]=14;
+					$arrDatosPersona["folioIdentificacion"]=$nit;
+					$arrDatosPersona["rfcEmpresa"]=$nit;
+					$arrDatosPersona["idActividad"]=$idActividad;
+					$arrDatosPersona["nombre"]=$razonSocial;
+					$arrDatosPersona["aceptaNotificacionMail"]=$aceptaNotificacionEmail;
+					
+					$idRegistroPersona=crearInstanciaRegistroFormulario(47,-1,1,$arrDatosPersona,$arrDocumentosReferencia,-1,0,"");
+					
+					
+				}
+				
+				
+				
+	
+				$x=0;
+				$query[$x]="begin";
+				$x++;
+				$idCuentaAcceso=-1;
+				$query[$x]="INSERT INTO 7005_relacionFigurasJuridicasSolicitud(idActividad,idParticipante,idFiguraJuridica,situacion,
+							idCuentaAcceso,etapaProcesal,situacionProcesal,detalleSituacion,cuentaAccesoGenerica)
+							VALUES(".$idActividad.",".$idRegistroPersona.",".$tipoPersona.",1,".$idCuentaAcceso.",1,1,NULL,0)";
+				$x++;
+				$datosContacto=$s->datosContacto[0];
+	
+				if($datosContacto)
+				{
+					$direccion=(string)$datosContacto->direccion[0];
+					$departamento=(string)$datosContacto->departamento[0];
+					$ciudad=(string)$datosContacto->ciudad[0];
+					
+					
+					$query[$x]="INSERT INTO 7025_datosContactoParticipante(idFormulario,idReferencia,idParticipante,fechaCreacion,calle,entidadFederativa,municipio)
+								values(-47,-1,".$idRegistroPersona.",'".date("Y-m-d H:i:s")."','".cv($direccion)."',".$departamento.",".$ciudad.")";
+					$x++;
+					$query[$x]="set @idRegistroDatoContacto:=(select last_insert_id())";
+					$x++;
+					
+					
+					$telefonosContacto=$datosContacto->telefonosContacto[0];
+					
+					foreach($telefonosContacto->telefono as $t)
+					{
+						$tipo=(string) $t->tipo;
+						$pais=(string) $t->pais;
+						if($pais=="")
+							$pais=-1;
+						$telefono=(string) $t->telefono;
+						$extension=(string) $t->extension;
+						$query[$x]="INSERT INTO 7025_telefonos(idReferencia,tipoTelefono,lada,numero,extension,idPais,verificado)
+								values(@idRegistroDatoContacto,".$tipo.",'','".$t->telefono."',".($extension==""?"NULL":$extension).",".$pais.",0)";
+						$x++;
+						
+						
+					}
+					
+					
+					$correosElectronicos=$datosContacto->correosElectronicos[0];
+					if($correosElectronicos)
+					{
+						foreach($correosElectronicos->mail as $m)
+						{
+							$m=(string)$m;
+							$query[$x]="INSERT INTO 7025_correosElectronico(idReferencia,correo)
+								values(@idRegistroDatoContacto,'".cv($m)."')";
+							$x++;
+							
+						}
+					}
+					
+					
+				}
+	
+	
+				
+				$query[$x]="commit";
+				$x++;
+				$con->ejecutarBloque($query);
+				
+			}
+			
+			$x=0;
+			$query[$x]="begin";
+			$x++;
+			foreach($documentosProceso->documento as $d)
+			{
+				$tipoDocumento=(string)$d->tipoDocumento[0];
+				$cuerpoDocumento=(string)$d->cuerpoDocumento[0];
+				$nombreDocumento=(string)$d->nombreDocumento[0];
+				
+				if($tipoDocumento=="")
+					$tipoDocumento=-1;
+				
+				
+				
+				$nombreArchivoTemporal=generarNombreArchivoTemporal();
+				$archivoDestino=$baseDir."/archivosTemporales/".$nombreArchivoTemporal;
+	
+				escribirContenidoArchivo($archivoDestino,bD($cuerpoDocumento));
+				
+				$idDocumento=registrarDocumentoServidorRepositorio($nombreArchivoTemporal,$nombreDocumento,$tipoDocumento,"");
+				$query[$x]="INSERT INTO 9503_documentosRegistradosProceso(idActividad,idTipoDocumento,idDocumento,presentaDocumento,idFormulario,idReferencia)
+							values(".$idActividad.",".$tipoDocumento.",".$idDocumento.",1,".$idFormulario.",".$idRegistroRadicacion.")";
+				$x++;	
+			}
+	
+			$query[$x]="commit";
+			$x++;
+			$con->ejecutarBloque($query);
+			
+			
+			
+			
+			
+	
+			switch($tipoRadicacion)
+			{
+				case 1:
+					cambiarEtapaFormulario($idFormulario,$idRegistroRadicacion,3.5,"",-1,"NULL","NULL",0);
+					//cambiarEtapaFormulario($idFormulario,$idRegistroRadicacion,4,"",-1,"NULL","NULL",0);
+				break;
+				case 2:
+					cambiarEtapaFormulario($idFormulario,$idRegistroRadicacion,4,"",-1,"NULL","NULL",0);
+				break;
+			}
+			
+			$consulta="SELECT * FROM _".$idFormulario."_tablaDinamica WHERE id__".$idFormulario."_tablaDinamica=".$idRegistroRadicacion;
+			$fRadicacion=$con->obtenerPrimeraFilaAsoc($consulta);
+			$folioRegistro=$fRadicacion["codigo"];
+	
+			$fechaRecepcion="";
+			
+			if($campoFechaRecepcion==$campoHoraRecepcion)
+			{
+				$fechaRecepcion=$fRadicacion[$campoFechaRecepcion];
+			}
+			else
+			{
+				$fechaRecepcion=$fRadicacion[$campoFechaRecepcion]." ".$fRadicacion[$campoHoraRecepcion];
+			}
+			
+			$consulta="select unidad FROM 817_organigrama WHERE codigoUnidad='".$fRadicacion["despachoAsignado"]."'";
+			$despachoAsignado=$con->obtenerValor($consulta);
+			
+			$arrParametros=array();
+			$arrParametros["idRegistro"]=$idRegistroRadicacion;
+			$resultado=realizarEjecucionPagina($urlSitio."modulosEspeciales_SIUGJ/".$urlAcuse.".php",$arrParametros,"POST");
+
+
+			
+			
+			$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>1</resultado><iDRadicacion>'.$idRegistroRadicacion.'</iDRadicacion><folioRadicacion>'.$folioRegistro.
+					'</folioRadicacion><fechaRegistro>'.$fRadicacion["fechaCreacion"].'</fechaRegistro><fechaRecepcion>'.$fechaRecepcion.
+					'</fechaRecepcion><cup>'.$fRadicacion["carpetaAdministrativa"].'</cup><despachoAsignado>'.cv($despachoAsignado).
+					'</despachoAsignado><documentoAcuse>'.bE($resultado).'</documentoAcuse><datosComplementarios></datosComplementarios></datosResultado>';
+			return $resultado;
+		}
+		catch(Exception $e)
+		{
+			$resultado='<?xml version="1.0" encoding="ISO-8859-1"?><datosResultado><resultado>0</resultado><datosComplementarios>'.cv($e->getMessage()).'</datosComplementarios></datosResultado>';
+			return $resultado;
+		}
+	}
+	
+	
+	function validarCorreo($mail)
+	{
+		$valor=$mail;
+			
+		$filter="/^[A-Za-z0-9\._\-]+@[A-Za-z0-9_\-]+(\.[A-Za-z]+){1,5}$/";
+		if ($mail == "" ) 
+			return false;
+		if (preg_match($filter,$mail)==1)
+			return true;
+		return false;
+	}
+	
+	
+
+	class soap_serverAuditoria extends nusoap_server 
+	{
+		function parseRequest($headers, $data) 
+		{
+			
+			
+			$this->debug('Entering parseRequest() for data of length ' . strlen($data) . ' headers:');
+			$this->appendDebug($this->varDump($headers));
+			if (!isset($headers['content-type'])) {
+				$this->setError('Request not of type text/xml (no content-type header)');
+				return false;
+			}
+			if (!strstr($headers['content-type'], 'text/xml')) {
+				$this->setError('Request not of type text/xml');
+				return false;
+			}
+			if (strpos($headers['content-type'], '=')) {
+				$enc = str_replace('"', '', substr(strstr($headers["content-type"], '='), 1));
+				$this->debug('Got response encoding: ' . $enc);
+				if(preg_match('/^(ISO-8859-1|US-ASCII|UTF-8)$/i',$enc)){
+					$this->xml_encoding = strtoupper($enc);
+				} else {
+					$this->xml_encoding = 'US-ASCII';
+				}
+			} else {
+				// should be US-ASCII for HTTP 1.0 or ISO-8859-1 for HTTP 1.1
+				$this->xml_encoding = 'ISO-8859-1';
+			}
+			$this->debug('Use encoding: ' . $this->xml_encoding . ' when creating nusoap_parser');
+			// parse response, get soap parser obj
+			$parser = new nusoap_parser(utf8_encode($data),$this->xml_encoding,'',$this->decode_utf8);
+			// parser debug
+			$this->debug("parser debug: \n".$parser->getDebug());
+			// if fault occurred during message parsing
+			if($err = $parser->getError())
+			{
+				$this->result = 'fault: error in msg parsing: '.$err;
+				$this->fault('SOAP-ENV:Client',"error in msg parsing:\n".$err);
+			// else successfully parsed request into soapval object
+			} 
+			else 
+			{
+				// get/set methodname
+				$this->methodURI = $parser->root_struct_namespace;
+				$this->methodname = $parser->root_struct_name;
+				$this->debug('methodname: '.$this->methodname.' methodURI: '.$this->methodURI);
+				$this->debug('calling parser->get_soapbody()');
+				$this->methodparams = $parser->get_soapbody();
+				// get SOAP headers
+				$this->requestHeaders = $parser->getHeaders();
+				// get SOAP Header
+				$this->requestHeader = $parser->get_soapheader();
+				// add document for doclit support
+				$this->document = $parser->document;
+				
+				$url="../webServices/".basename((__FILE__));
+				$objParams=json_encode($this->methodparams);
+				
+				//aperturarSesionUsuario(2);
+					
+				//guardarRegistroBitacoraSistema($url,$objParams,18,("Nombre del procedimento: ".$this->methodname));
+				//session_destroy();
+				
+			}
+		 }
+	}
+
+	$arrParam=array();
+	$server = new soap_serverAuditoria;
+	$ns=$urlSitio."/webServices";
+	$server->configurewsdl('ApplicationServices',$ns);
+	$server->wsdl->schematargetnamespace=$ns;
+	$server->register('registroProcesoJudicialSIUGJ',array('solicitudRadicacion'=>'xsd:string','token'=>'xsd:string'),array('return' => 'xsd:string'),$ns,false,'rpc','encoded','');
+	
+
+	if (isset($HTTP_RAW_POST_DATA)) 
+	{
+		$input = $HTTP_RAW_POST_DATA;
+	}
+	else 
+	{
+		$input = implode("rn", file('php://input'));
+	}
+	
+	
+	$server->service($input);
+?>	

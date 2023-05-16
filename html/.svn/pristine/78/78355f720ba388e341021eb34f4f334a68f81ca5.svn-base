@@ -1,0 +1,806 @@
+﻿<?php session_start();
+	include_once("conexionBD.php");
+	include_once("utiles.php");
+	include_once("sgjp/libreriaFunciones.php");
+	include_once("sgjp/libreriaFuncionesPGJ.php");
+	include_once("sgjp/funcionesInterconexionSGJ.php");
+	include_once("PDFMerger.php");
+	
+
+	
+
+	
+	if(isset($_POST["parametros"]))
+		$parametros=$_POST["parametros"];
+	if(isset($_POST["funcion"]))
+		$funcion=$_POST["funcion"];
+	$lenguaje=$_SESSION["leng"];
+
+	switch($funcion)
+	{
+		case 1:
+			obtenerDocumentosRespuestaPromocion();
+		break;
+		case 2:
+			agregarDocumentosRespuestaPromocion();
+		break;
+		case 3:
+			removerDocumentosRespuestaPromocion();
+		break;
+		case 4:
+			registrarDocumentoAdjuntoCarpetaAdministrativaRespuestaPromocion();
+		break;
+		case 5:
+			registrarRespuestaPromocion();
+		break;
+		case 6:
+			enviarRespuestaPromocionPGJ();
+		break;
+		case 7:
+			obtenerReporteSituacionSolicitudesRequierenRespuesta();
+		break;
+
+		case 8:
+			marcarRegistroNotificado();
+		break;
+		case 9:
+			obtenerReporteSituacionSolicitudesAmparoRequierenRespuesta();
+		break;
+		case 10:
+			obtenerCorreosDestinatarios();
+		break;
+		case 11:
+			registrarCorreosDestinatarios();
+		break;
+		case 12:
+			removerCorreoDestinatario();
+		break;
+		case 13:
+			registrarComentarioMediatico();
+		break;
+		case 14:
+			removerComentarioMediatico();
+		break;
+		case 15:
+			obtenerComentariosMediaticos();
+		break;
+		case 16:
+			obtenerReporteExhortosTurnados();
+		break;
+		case 17:
+			obtenerRegistrosDocumentosPendientesFirma();
+		break;
+		case 18:
+			generarDocumentoImpresionUnico();
+		break;
+		case 19:
+			obtenerResultadoBusquedaPersonaCarpetaJudicial();
+		break;
+		case 20:
+			obtenerResumenActuaciones();
+		break;
+		
+		
+	}
+	
+	function obtenerDocumentosRespuestaPromocion()
+	{
+		global $con;
+		$idFormulario=$_POST["idFormulario"];
+		$idRegistro=$_POST["idRegistro"];
+		
+		$nRegistros=0;
+		$arrRegistros="";
+		
+		$consulta="select idDocumento FROM 3301_documentosAsociadosRespuestaSolicitudPromocion WHERE 
+					iFormulario=".$idFormulario." AND iRegistro=".$idRegistro;
+		
+		$resDocumentos=$con->obtenerFilas($consulta);
+		while($fDocumento=mysql_fetch_row($resDocumentos))
+		{
+			$consulta="SELECT nomArchivoOriginal,tamano,fechaCreacion FROM 908_archivos WHERE idArchivo=".$fDocumento[0];
+			$fArchivo=$con->obtenerPrimeraFila($consulta);
+			if(!$fArchivo)
+				continue;
+			$arrDatosArchivo=explode(".",$fArchivo[0]);
+			$consulta="SELECT * FROM 9049_visoresDocumentos WHERE extension='".$arrDatosArchivo[sizeof($arrDatosArchivo)-1]."'";
+			$fConfiguracionVisor=$con->obtenerPrimeraFila($consulta);
+			
+			if(strlen($arrDatosArchivo[0])>18)		
+				$nombreDocumentoCorto=mb_substr($arrDatosArchivo[0],0,12)."...(".$arrDatosArchivo[1].")";
+			else
+				$nombreDocumentoCorto=$arrDatosArchivo[0]." (".$arrDatosArchivo[1].")";
+			
+			
+			
+			$o='{"idDocumento":"'.$fDocumento[0].'","nombreDocumento":"'.cv(($fArchivo[0])).'","nombreDocumentoCorto":"'.cv(($nombreDocumentoCorto)).'","tamanoDocumento":"'.bytesToSize($fArchivo[1],0).'","fechaDocumento":"'.date("d/m/Y H:i",strtotime($fArchivo[2])).' hrs.","extension":"'.strtolower($arrDatosArchivo[1]).'"}';
+			
+			
+			if($arrRegistros=="")
+				$arrRegistros=$o;
+			else
+				$arrRegistros.=",".$o;
+			$nRegistros++;
+		}
+		
+		
+		echo '{"numReg":"'.$nRegistros.'","registros":['.$arrRegistros.']}';
+	}
+
+	function agregarDocumentosRespuestaPromocion()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		$x=0;
+		$consulta[$x]="begin";
+		$x++;
+		$arrDocumentos=explode(",",$obj->listaDocumentos);
+		foreach($arrDocumentos as $d)
+		{
+			$query="SELECT count(*) FROM 3301_documentosAsociadosRespuestaSolicitudPromocion WHERE iFormulario=".
+					$obj->idFormulario." and iRegistro=".$obj->idRegistro." AND idDocumento=".$d;
+			$nReg=$con->obtenerValor($query);
+			if($nReg==0)
+			{
+				$consulta[$x]="INSERT INTO 3301_documentosAsociadosRespuestaSolicitudPromocion(idDocumento,iFormulario,iRegistro) 
+							VALUES(".$d.",".$obj->idFormulario.",".$obj->idRegistro.")";
+				$x++;
+			}
+		}
+		$consulta[$x]="commit";
+		$x++;
+		eB($consulta);
+		
+		
+	}
+	
+	function  removerDocumentosRespuestaPromocion()
+	{
+		global $con;
+		$idFormulario=$_POST["iF"];
+		$idRegistro=$_POST["iR"];
+		$iD=$_POST["iD"];
+		$consulta="DELETE FROM 3301_documentosAsociadosRespuestaSolicitudPromocion WHERE iFormulario=".$idFormulario." AND iRegistro=".$idRegistro." and idDocumento=".$iD;
+		eC($consulta);
+	}
+	
+	function registrarDocumentoAdjuntoCarpetaAdministrativaRespuestaPromocion()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+	
+		$idDocumento=registrarDocumentoServidorRepositorio($obj->idArchivo,$obj->nombreArchivo,$obj->tipoDocumento,$obj->descripcion);
+	
+		if($idDocumento!=-1)
+		{
+			if(registrarDocumentoCarpetaAdministrativa($obj->carpetaAdministrativa,$idDocumento))
+			{
+				$consulta="INSERT INTO 3301_documentosAsociadosRespuestaSolicitudPromocion(iFormulario,iRegistro,idDocumento) 
+						VALUES(".$obj->idFormulario.",".$obj->idRegistro.",".$idDocumento.")";
+				$con->ejecutarConsulta($consulta);
+				
+				echo "1|".$idDocumento."|".$obj->nombreArchivo;
+			}
+		}
+		else
+		{
+			echo "0|No se pudo guardar el documento";
+		}
+		
+		
+		
+	}
+	
+	function registrarRespuestaPromocion()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		
+		$consulta="SELECT idRegistro FROM 3300_respuestasSolicitudPromocion WHERE idFormulario=".$obj->idFormulario.
+					" AND idReferencia=".$obj->idRegistro;
+		$idRegistro=$con->obtenerValor($consulta);					
+		if($idRegistro=="")
+		{
+			$consulta="INSERT INTO 3300_respuestasSolicitudPromocion(idFormulario,idReferencia,procede,notificadoPGJ,
+						comentariosAdicionales)
+						VALUES(".$obj->idFormulario.",".$obj->idRegistro.",".$obj->respuestaSolicitud.",0,'".cv($obj->comentariosAdicionales)."')";
+		}
+		else
+		{
+			$consulta="update 3300_respuestasSolicitudPromocion set procede=".$obj->respuestaSolicitud.
+					",comentariosAdicionales='".cv($obj->comentariosAdicionales)."' where idRegistro=".$idRegistro;
+						
+		}
+
+		eC($consulta);
+		
+	}
+	
+	function enviarRespuestaPromocionPGJ()
+	{
+		global $con;
+		$idFormulario=$_POST["idFormulario"];
+		$idRegistro=$_POST["idRegistro"];
+		if(notificaAcuerdoProcedePromocion($idFormulario,$idRegistro))
+		{
+			echo "1|1";
+		}
+		else
+		{
+			echo "1|0";
+		}
+	}
+	
+	function obtenerReporteSituacionSolicitudesRequierenRespuesta()
+	{
+		global $con;
+		$situacionSolicitud=$_POST["situacionSolicitud"];
+		
+
+		$fechaInicio=$_POST["fechaInicio"];
+		$fechaFin=$_POST["fechaFin"];
+		$unidadGestion=$_POST["unidadGestion"];
+
+		$situacionSolicitud=$_POST["situacionSolicitud"];
+		$numReg=0;
+		$arrRegistros="";
+		
+		
+		
+		$consulta="SELECT cveTipoSolicitud FROM _285_tablaDinamica WHERE requiereRespuesta";
+		$listaClavesRespuesta=$con->obtenerListaValores($consulta);
+		
+		if($listaClavesRespuesta=="")
+			$listaClavesRespuesta=-1;
+		$consultaComp="";
+		if($situacionSolicitud!=4)
+		{
+			switch($situacionSolicitud)
+			{
+				case 1:
+					$consultaComp=" and id__96_tablaDinamica in(SELECT idReferencia FROM 3300_respuestasSolicitudPromocion WHERE  notificadoPGJ=1)";
+				break;
+				case 0:
+					$consultaComp=" and (id__96_tablaDinamica in(SELECT idReferencia FROM 3300_respuestasSolicitudPromocion WHERE  notificadoPGJ=2)
+									or id__96_tablaDinamica not in (SELECT idReferencia FROM 3300_respuestasSolicitudPromocion WHERE  notificadoPGJ<>2)
+									)";
+				break;
+				
+			}
+		}
+		
+		if($unidadGestion==0)
+		{
+			$consulta=" 
+						select * from (
+						SELECT '96' AS iFormulario,id__96_tablaDinamica AS iRegistro,carpetaAdministrativa,s.fechaCreacion AS fechaRegistro,
+						s.cveSolicitud AS  tipoSolicitud,s.idEstado AS etapaActual,s.codigo,'' as asuntoPromocion FROM _96_tablaDinamica s 
+						WHERE  s.fechaCreacion>='".$fechaInicio. "' AND s.fechaCreacion<='".$fechaFin." 23:59:59'  
+						and s.idEstado>=1.4 and s.cveSolicitud  in(".$listaClavesRespuesta.") ".$consultaComp." ) as tmp						
+						ORDER BY fechaRegistro DESC";
+			
+			
+		}
+		else
+		{
+			$consulta=" 
+						select * from (
+						
+						SELECT '96' AS iFormulario,id__96_tablaDinamica AS iRegistro,s.carpetaAdministrativa,s.fechaCreacion AS fechaRegistro,
+						s.cveSolicitud AS  tipoSolicitud,s.idEstado AS etapaActual,s.codigo,'' as asuntoPromocion FROM _96_tablaDinamica s,
+						7006_carpetasAdministrativas c WHERE  s.fechaCreacion>='".$fechaInicio.
+						"' AND s.fechaCreacion<='".$fechaFin." 23:59:59'  AND  s.idEstado>=1.4 and s.cveSolicitud  in(".$listaClavesRespuesta.")
+						and c.carpetaAdministrativa=s.carpetaAdministrativa and c.unidadGestion='".$unidadGestion."' ".$consultaComp.") as tmp
+						
+						ORDER BY fechaRegistro DESC";
+			
+			
+		}
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			
+			$consulta="SELECT unidadGestion FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$fila["carpetaAdministrativa"]."'";
+			$unidadGestion=$con->obtenerValor($consulta);
+			
+			$consulta="SELECT COUNT(*) FROM 9060_tableroControl_4 WHERE numeroCarpetaAdministrativa='".$fila["carpetaAdministrativa"].
+					"' AND iFormulario=".$fila["iFormulario"]." AND iRegistro=".$fila["iRegistro"]." 
+					and idUsuarioDestinatario<>1";
+			$totalTareasEmitidas=$con->obtenerValor($consulta);
+			
+			$consulta="SELECT COUNT(*) FROM 9060_tableroControl_4 WHERE numeroCarpetaAdministrativa='".$fila["carpetaAdministrativa"].
+					"' AND iFormulario=".$fila["iFormulario"]." AND iRegistro=".$fila["iRegistro"]." 
+					and fechaVisualizacion is not null and idUsuarioDestinatario<>1";
+			$totalTareasVisualizada=$con->obtenerValor($consulta);
+			
+			$situacionRespuesta=0;
+			$consulta="SELECT notificadoPGJ FROM 3300_respuestasSolicitudPromocion WHERE idFormulario=96 AND idReferencia=".$fila["iRegistro"];
+			$situacionRespuesta=$con->obtenerValor($consulta);
+			if($situacionRespuesta=="")
+				$situacionRespuesta=0;
+			$o='{"iRegistro":"'.$fila["iRegistro"].'","iFormulario":"'.$fila["iFormulario"].'","carpetaAdministrativa":"'.$fila["carpetaAdministrativa"].
+				'","fechaRegistro":"'.$fila["fechaRegistro"].'","unidadGestion":"'.$unidadGestion.'",
+				"tipoSolicitud":"'.$fila["tipoSolicitud"].'","totalTareasEmitidas":"'.$totalTareasEmitidas.
+				'","totalTareasVisualizadas":"'.$totalTareasVisualizada.'","folioRegistro":"'.
+				(($fila["iFormulario"]==46?"(I) ":"(P) ").$fila["codigo"]).'","situacionRespuesta":"'.$situacionRespuesta.'"}';
+				
+			if($arrRegistros=="")
+				$arrRegistros=$o;
+			else
+				$arrRegistros.=",".$o;
+			$numReg++;
+		}
+		
+		
+		
+		
+		echo '{"numReg":"'.$numReg.'","registros":['.$arrRegistros.']}';
+		
+	}
+	
+	function marcarRegistroNotificado()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		
+		$consulta="SELECT idRegistro FROM 3300_respuestasSolicitudPromocion WHERE idFormulario=".$obj->idFormulario.
+					" AND idReferencia=".$obj->idRegistro;
+		$idRegistro=$con->obtenerValor($consulta);					
+		if($idRegistro=="")
+		{
+			$consulta="INSERT INTO 3300_respuestasSolicitudPromocion(idFormulario,idReferencia,notificadoPGJ,fechaMarcaNotificado,idResposableMarcaNotificado)
+						VALUES(".$obj->idFormulario.",".$obj->idRegistro.",3,'".date("Y-m-d H:i:s")."',".$_SESSION["idUsr"].")";
+		}
+		else
+		{
+			$consulta="update 3300_respuestasSolicitudPromocion set notificadoPGJ=4,fechaMarcaNotificado='".date("Y-m-d H:i:s").
+					"',idResposableMarcaNotificado=".$_SESSION["idUsr"]." where idRegistro=".$idRegistro;
+
+		}
+		
+		eC($consulta);		
+	}
+	
+	
+	function obtenerReporteSituacionSolicitudesAmparoRequierenRespuesta()
+	{
+		global $con;
+
+		$fechaInicio=$_POST["fechaInicio"];
+		$fechaFin=$_POST["fechaFin"];
+		$unidadGestion=$_POST["unidadGestion"];
+
+		$situacionSolicitud=$_POST["situacionSolicitud"];
+		$numReg=0;
+		$arrRegistros="";
+		
+		
+		
+		
+		
+		$consulta="SELECT id__346_tablaDinamica AS iRegistro,346 AS iFormulario,fechaCreacion,idEstado,carpetaAmparo,codigoInstitucion,
+				(SELECT tipoPromocion FROM _460_tablaDinamica WHERE idReferencia=t.id__346_tablaDinamica and datosCJF IS  NULL
+				ORDER BY id__460_tablaDinamica LIMIT 0,1) AS tipoPromocion,
+				(SELECT id__460_tablaDinamica FROM _460_tablaDinamica WHERE idReferencia=t.id__346_tablaDinamica and datosCJF IS  NULL
+				ORDER BY id__460_tablaDinamica LIMIT 0,1) AS iPromocion,codigo  
+				FROM _346_tablaDinamica t WHERE fechaCreacion>='".$fechaInicio."' AND fechaCreacion<='".$fechaFin." 23:59:59' AND
+				folioEnvioCJF IS NOT NULL AND folioEnvioCJF<>'N/E' and idEstado>0
+				UNION
+				SELECT id__460_tablaDinamica AS iRegistro,460 AS iFormulario,fechaCreacion,idEstado,carpetaAdministrativa AS carpetaAmparo,codigoInstitucion,
+				tipoPromocion,id__460_tablaDinamica as iPromocion,codigo FROM _460_tablaDinamica WHERE fechaCreacion>='".$fechaInicio.
+				"' AND fechaCreacion<='".$fechaFin." 23:59:59' AND datosCJF IS NOT NULL and datosCJF<>'N/E' and idEstado>0";
+
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			
+			$consulta="SELECT COUNT(*) FROM 9060_tableroControl_4 WHERE  iFormulario=".$fila["iFormulario"]." AND iRegistro=".$fila["iRegistro"]." 
+					and idUsuarioDestinatario<>1";
+			$totalTareasEmitidas=$con->obtenerValor($consulta);
+			
+			$consulta="SELECT COUNT(*) FROM 9060_tableroControl_4 WHERE  iFormulario=".$fila["iFormulario"]." AND iRegistro=".$fila["iRegistro"]." 
+					and fechaVisualizacion is not null and idUsuarioDestinatario<>1";
+			$totalTareasVisualizada=$con->obtenerValor($consulta);
+			
+			$situacionRespuesta=0;
+			$consulta="SELECT situacion FROM 7041_notificacionesCJF WHERE idFormulario=460 AND idReferencia=".($fila["iPromocion"]==""?-1:$fila["iPromocion"]);
+			$situacionRespuesta=$con->obtenerValor($consulta);
+			if($situacionRespuesta=="")
+				$situacionRespuesta=0;
+			
+			$agregarRegistro=true;	
+			if($situacionSolicitud<>4)
+			{
+
+				switch($situacionSolicitud)
+				{
+					case 0:
+						if($situacionRespuesta==1)
+							$agregarRegistro=false;
+					break;
+					case 1:
+						
+						if($situacionRespuesta!=1)
+							$agregarRegistro=false;
+					break;
+				}
+			}
+			if($agregarRegistro)
+			{	
+				$o='{"iRegistro":"'.$fila["iRegistro"].'","iFormulario":"'.$fila["iFormulario"].'","carpetaAdministrativa":"'.$fila["carpetaAmparo"].
+					'","fechaRegistro":"'.$fila["fechaCreacion"].'","unidadGestion":"'.$fila["codigoInstitucion"].'",
+					"tipoSolicitud":"'.$fila["tipoPromocion"].'","totalTareasEmitidas":"'.$totalTareasEmitidas.
+					'","totalTareasVisualizadas":"'.$totalTareasVisualizada.'","folioRegistro":"'.
+					(($fila["iFormulario"]==346?"(I) ":"(P) ").$fila["codigo"]).'","situacionRespuesta":"'.$situacionRespuesta.'"}';
+					
+				if($arrRegistros=="")
+					$arrRegistros=$o;
+				else
+					$arrRegistros.=",".$o;
+				$numReg++;
+			}
+		}
+		
+		
+		
+		
+		echo '{"numReg":"'.$numReg.'","registros":['.$arrRegistros.']}';
+		
+	}
+	
+	
+	function obtenerCorreosDestinatarios()
+	{
+		global $con;
+		$idRegistro=$_POST["idRegistro"];
+		$consulta="SELECT -1 as idRegistro,-1 as idReferencia,nombreDestinatario as nombre ,email 
+				FROM 586_emailNotificacionRegistro where email not in(SELECT email FROM _586_gNotificacionCorreo WHERE idReferencia=".$idRegistro.")";
+		$arrRegistros=utf8_encode($con->obtenerFilasJSON($consulta));
+		echo '{"numReg":"'.$con->filasAfectadas.'","registros":'.$arrRegistros.'}';
+	}
+	
+	
+	function registrarCorreosDestinatarios()
+	{
+		global $con;
+		$d=$_POST["d"];
+		$m=$_POST["m"];
+		
+		$consulta="SELECT COUNT(*) FROM 586_emailNotificacionRegistro WHERE email='".cv($m)."'";
+		$nReg=$con->obtenerValor($consulta);
+		if($nReg>0)
+		{
+			echo "<br>La direcci&oacute;n de correo electr&oacute;nico ingresada ya ha sido agrega previamente";
+			return;
+		}
+		
+		$consulta="INSERT INTO 586_emailNotificacionRegistro(nombreDestinatario,email) VALUES('".cv($d)."','".cv($m)."')";
+		eC($consulta);
+		
+	}
+	
+	
+	function removerCorreoDestinatario()
+	{
+		global $con;
+		
+		$m=$_POST["m"];
+		$consulta="delete from 586_emailNotificacionRegistro where email='".cv($m)."'";
+		eC($consulta);
+		
+	}
+	
+	function registrarComentarioMediatico()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		$x=0;
+		$consulta[$x]="begin";
+		$x++;
+		$consulta[$x]="INSERT INTO _586_comentariosAsuntoMediatico(carpetaAdministrativa,fechaComentario,respComentario,comentario) 
+					VALUES('".$obj->carpetaAdministrativa."','".date("Y-m-d H:i:s")."',".$_SESSION["idUsr"].",'".cv($obj->comentario)."')";
+		$x++;
+		
+		$consulta[$x]="set @idRegistro:=(select last_insert_id())";
+		$x++;
+		
+		foreach($obj->arrRecursos as $r)
+		{
+			if($r->tipoRecurso==5)
+			{
+				$arrDocumento=explode("|",$r->recurso);
+				$r->recurso=registrarDocumentoServidorRepositorio($arrDocumento[0],$arrDocumento[1]);
+			}
+			
+			
+			
+			$consulta[$x]=" INSERT INTO  _586_adjuntosDocumentosMediaticos(recurso,idComentarioAsunto,comentariosAdicionales,tipoRecurso) VALUES('".
+						cv($r->recurso)."',@idRegistro,'".cv($r->descripcion)."',".$r->tipoRecurso.")";
+			$x++;
+		}
+		$consulta[$x]="commit";
+		$x++;
+		if($con->ejecutarBloque($consulta))
+		{
+			$query="select @idRegistro";
+			$idNota=$con->obtenerValor($query);
+			@notificarSeguimientoComentarioNota($idNota);
+			echo "1|";
+		}
+	}
+	
+	function removerComentarioMediatico()
+	{
+		global $con;
+		$iR=$_POST["iR"];
+		$x=0;
+		$consulta[$x]="begin";
+		$x++;
+		$consulta[$x]="DELETE FROM _586_comentariosAsuntoMediatico WHERE idRegistro=".$iR;
+		$x++;
+		$consulta[$x]="DELETE FROM _586_adjuntosDocumentosMediaticos WHERE idComentarioAsunto=".$iR;
+		$x++;
+		$consulta[$x]="commit";
+		$x++;
+		eB($consulta);
+
+		
+	}
+	
+	function obtenerComentariosMediaticos()
+	{
+		global $con;
+		$arrRegistros="";
+		$o='';
+		$numReg=0;
+		$carpetaAdministrativa=$_POST["carpetaAdministrativa"];
+		$consulta="SELECT idRegistro,fechaComentario,respComentario,comentario FROM _586_comentariosAsuntoMediatico 
+					WHERE carpetaAdministrativa='".$carpetaAdministrativa."' ORDER BY fechaComentario DESC";
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			$consulta="SELECT if(tipoRecurso<>5,recurso,concat(recurso,'|',(SELECT nomArchivoOriginal FROM 908_archivos WHERE idArchivo=a.recurso))) as recurso,tipoRecurso,comentariosAdicionales FROM _586_adjuntosDocumentosMediaticos a WHERE idComentarioAsunto=".$fila["idRegistro"];
+			$arrRecursos=$con->obtenerFilasArreglo($consulta);
+			$o='{"idRegistro":"'.$fila["idRegistro"].'","fechaRegistro":"'.cv($fila["fechaComentario"]).'","responsableRegistro":"'.
+					cv(obtenerNombreUsuario($fila["respComentario"])).'","comentarios":"'.cv($fila["comentario"]).'","recursos":'.$arrRecursos.'}';
+			if($arrRegistros=="")
+				$arrRegistros=$o;
+			else
+				$arrRegistros.=",".$o;
+			$numReg++;
+		}
+		
+		echo '{"numReg":"'.$numReg.'","registros":['.$arrRegistros.']}';
+	}
+	
+	function obtenerReporteExhortosTurnados()
+	{
+		global $con;
+		global $con;
+		$fechaInicio=$_POST["fechaInicio"];
+		$fechaFin=$_POST["fechaFin"];
+		$unidadGestion=$_POST["unidadGestion"];
+		
+		$consulta="SELECT e.*,c.fechaCreacion as fechaRegistro,c.unidadGestion FROM _524_tablaDinamica e,7006_carpetasAdministrativas c WHERE e.carpetaExhorto=c.carpetaAdministrativa
+					AND c.fechaCreacion>='".$fechaInicio."' AND c.fechaCreacion<='".$fechaFin." 23:59:59' order by c.fechaCreacion"; 
+		if($unidadGestion!="0")
+		{
+			$consulta="SELECT e.*,c.fechaCreacion as fechaRegistro,c.unidadGestion FROM _524_tablaDinamica e,7006_carpetasAdministrativas c WHERE e.carpetaExhorto=c.carpetaAdministrativa
+					AND c.fechaCreacion>='".$fechaInicio."' AND c.fechaCreacion<='".$fechaFin." 23:59:59' and unidadGestion='".$unidadGestion."'
+					order by c.fechaCreacion"; 	
+		}
+
+		$arrRegistros="";
+		$numReg=0;
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			$consulta="SELECT * FROM _92_tablaDinamica WHERE iFormulario=524 AND iRegistro=".$fila["id__524_tablaDinamica"]." order by id__92_tablaDinamica desc";
+			$fExhortoUGA=$con->obtenerPrimeraFilaAsoc($consulta);
+			
+			$consulta="SELECT COUNT(*) FROM 9060_tableroControl_4 WHERE iFormulario=92 AND iRegistro=".$fExhortoUGA["id__92_tablaDinamica"];
+			$totalTareasEmitidas=$con->obtenerValor($consulta);
+						
+			$consulta="SELECT COUNT(*) FROM 9060_tableroControl_4 WHERE iFormulario=92 AND iRegistro=".$fExhortoUGA["id__92_tablaDinamica"].
+						" and fechaVisualizacion is not null";
+			$totalTareasVisualizadas=$con->obtenerValor($consulta);
+						
+			$consulta="SELECT * FROM _370_tablaDinamica WHERE idReferencia=".$fExhortoUGA["id__92_tablaDinamica"];
+			$fRespuesta=$con->obtenerPrimeraFilaAsoc($consulta);
+			
+			$objDoc='{"iRegistroOPP":"'.$fila["id__524_tablaDinamica"].'","iFormularioOPP":"524","iRegistroUGJ":"'.$fExhortoUGA["id__92_tablaDinamica"].
+						'","iFormularioUGJ":"92","carpetaJudicial":"'.$fila["carpetaExhorto"].'","unidadGestion":"'.$fila["unidadGestion"].
+						'","situacionRespuesta":"'.($fRespuesta?"1":"0").'","totalTareasEmitidas":"'.$totalTareasEmitidas.'","totalTareasVisualizadas":"'.$totalTareasVisualizadas.
+						'","folioRegistroOPP":"'.$fila["codigo"].'","folioRegistroUGJ":"'.$fExhortoUGA["codigo"].'","fechaRegistro":"'.
+						$fila["fechaRegistro"].'","fechaRespuesta":"'.$fRespuesta["fechaAtencion"].'","resultadoExhorto":"'.$fRespuesta["dictamenFinal"].
+						'"}';
+			if($arrRegistros=="")
+				$arrRegistros=$objDoc;
+			else	
+				$arrRegistros.=",".$objDoc;
+			$numReg++;
+		}
+		
+		echo '{"numReg":"'.$numReg.'","registros":['.$arrRegistros.']}';
+	}
+	
+	function obtenerRegistrosDocumentosPendientesFirma()
+	{
+		global $con;
+		$periodoInicio=$_POST["periodoInicio"];
+		$periodoFin=$_POST["periodoFin"];
+		$tipoDocumentos=$_POST["tipoDocumentos"];
+		$numReg=0;
+		$arrRegistros="";
+		
+		$consulta="SELECT a.*,i.tituloDocumento,i.carpetaAdministrativa,i.idFormulario,i.idReferencia,f.tipoFormato,f.fechaFirma,f.idDocumento, 
+				date_format(a.fechaAsignacion,'%d/%m/%Y') as fecha,
+				(SELECT nombreUnidad FROM _17_tablaDinamica j,7006_carpetasAdministrativas c WHERE c.idCarpeta=a.idCarpetaAdministrativa 
+				AND j.claveUnidad=c.unidadGestion) as juzgado,f.firmado,f.documentoBloqueado,f.idDocumento FROM 3000_documentosAsignadosAtencion a,
+				3000_formatosRegistrados f,
+				7035_informacionDocumentos i WHERE a.idResponsableAtencion=".$_SESSION["idUsr"].
+				" and a.situacionActual in(".$tipoDocumentos.") and f.idRegistroFormato=a.idDocumentoFormato and i.idRegistro=a.idInformacionDocumento
+				and a.fechaAsignacion>='".$periodoInicio."' and a.fechaAsignacion<='".$periodoFin." 23:49:59'
+				";
+
+		$resDocumentos=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($resDocumentos))
+		{
+			$permisos='""';
+			$objConfirma='""';
+			$objDocumento='{"tipoDocumento":"'.$fila["tipoFormato"].'","idFormulario":"'.$fila["idFormulario"].'","idRegistro":"'.$fila["idReferencia"].
+						'","idRegistroFormato":"'.$fila["idDocumentoFormato"].'","actorAccesoProceso":"'.$fila["actor"].
+						'","idRegistroInformacionDocumento":"'.$fila["idInformacionDocumento"].'","idTablero":"'.$fila["idTableroTarea"].
+						'","idTarea":"'.$fila["idTareaAsociada"].'"}';
+			if($fila["idFormulario"]<0)
+			{			
+				$permisos=obtenerPermisosActor($fila["actor"],$fila["idDocumentoFormato"],$fila["tipoFormato"],$fila["idFormulario"],$fila["idReferencia"]);
+			}
+			else
+			{
+				$consulta="SELECT complementario2 FROM 947_actoresProcesosEtapasVSAcciones WHERE idActorProcesoEtapa=".$fila["actor"];
+				$objConfirma=$con->obtenerValor($consulta);	
+			}
+			$o='{"idDocumento":"'.$fila["idDocumentoFormato"].'","nombreDocumento":"'.cv($fila["tituloDocumento"]).'","situacionActual":"'.
+					$fila["situacionActual"].'","fechaAsignacion":"'.$fila["fechaAsignacion"].'","carpetaAdministrativa":"'.
+					cv($fila["carpetaAdministrativa"]).'","actor":"'.$fila["actor"].'",
+					"juzgado":"'.cv($fila["juzgado"]).'","iFormulario":"'.$fila["idFormulario"].'","iRegistro":"'.$fila["idReferencia"].
+					'","tipoDocumento":"'.$fila["tipoFormato"].'","fechaFirma":"'.$fila["fechaFirma"].'","fecha":"'.$fila["fecha"].
+					'","documentoFirmado":"'.$fila["firmado"].'","documentoBloqueado":"'.$fila["documentoBloqueado"].
+					'","fechaAtencion":"'.$fila["fechaAtencion"].'","comentariosAdicionales":"'.cv($fila["comentariosAdicionales"]).
+					'","idDocumentoPDF":"'.$fila["idDocumento"].'","idRegistroAtencion":"'.$fila["idRegistro"].
+					'","objConfirma":'.$permisos.',"objDocumento":'.$objDocumento.',"objConfirmaProceso":'.$objConfirma.'}';
+			if($arrRegistros=="")
+				$arrRegistros=$o;
+			else
+				$arrRegistros.=",".$o;
+			$numReg++;
+		}
+		
+		echo '{"numReg":"'.$numReg.'","registros":['.$arrRegistros.']}';
+	}
+	
+	function generarDocumentoImpresionUnico()
+	{
+		global $con;
+		global $baseDir;
+		
+		$arrDocumentosGenerados=array();
+		$listaDocumento=$_POST["listaDocumento"];
+		$nArchivoFinal=generarNombreArchivoTemporal();
+		$nombreArchivoFinal=$baseDir."/archivosTmpPDF/".$nArchivoFinal.".pdf";
+		$merge = new PDFMerger();
+		$arrDocumentos=explode(",",$listaDocumento);
+		foreach($arrDocumentos as $d)
+		{
+			$cuerpoDocumento=obtenerCuerpoDocumentoB64($d);
+			$nombreArchivoTmp=$baseDir."/archivosTmpPDF/".generarNombreArchivoTemporal();
+			if(escribirContenidoArchivo($nombreArchivoTmp,bD($cuerpoDocumento)))
+			{
+				array_push($arrDocumentosGenerados,$nombreArchivoTmp);
+			}
+		}
+		
+		foreach($arrDocumentosGenerados as $d)
+		{
+			$merge->addPDF($d);
+			
+		}
+		
+		$merge->merge("file",$nombreArchivoFinal);
+		
+		foreach($arrDocumentosGenerados as $d)
+		{
+			
+			unlink($d);
+		}
+		echo "1|".$nArchivoFinal;
+	}
+	
+	function obtenerResultadoBusquedaPersonaCarpetaJudicial()
+	{
+		global $con;
+		set_time_limit(999000);
+		$consulta="";
+		
+		$tipoFigura=$_POST["tipoFigura"];
+		$tipoCriterio=$_POST["tipoCriterio"];
+		$valor=$_POST["valor"];
+		$porcentaje=$_POST["porcentaje"];
+		$unidadGestion=$_POST["unidadGestion"];
+		$tipoCarpeta=$_POST["tipoCarpeta"];
+		
+		if(existeRol("'1_0'"))
+		{
+			$unidadGestion="";
+		}
+	
+		$arrValoresBusqueda=explode(" ",trim($valor));
+		for($x=0;$x<sizeof($arrValoresBusqueda);$x++)
+		{
+			$arrValoresBusqueda[$x]=normalizaToken($arrValoresBusqueda[$x]);
+		}
+		$resultado=buscarCoincidenciasCriterio($tipoCriterio,$valor,60,$tipoFigura);
+		
+		$arrResultados=$resultado[2];
+		$arrRegistros="";
+		$numReg=0;
+
+		foreach($arrResultados as $idActividad=>$resto)
+		{
+			
+			
+		}
+		
+		echo '{"numReg":"'.$numReg.'","registros":['.$arrRegistros.']}';
+		
+	}
+	
+	
+	function obtenerResumenActuaciones()
+	{
+		global $con;
+		$numReg=0;
+		$cAdministrativa=$_POST["cAdministrativa"];
+		$arrRegistros="";
+		$consulta="SELECT * FROM 00013_registrosMacroProceso WHERE carpetaAdministrativa='".$cAdministrativa."' AND tipoRegistro IN(4) AND cveElemento IN('500','800','2000','900')";
+
+		
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			$consulta="SELECT * FROM 00014_registrosCreadosElementosMacroProceso WHERE idRegistroElemento=".$fila["idRegistro"]." AND tiempoEjecucion=1";
+			$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+			
+			$iFormulario=-1;
+			$iRegistro=-1;
+			if($fRegistro)
+			{
+				$iFormulario=$fRegistro["iFormulario"];
+				$iRegistro=$fRegistro["iRegistro"];
+			}
+			
+			$o='{"idRegistro":"'.$fila["idRegistro"].'","lblEtiquetaRegistro":"'.cv($fila["lblEtiquetaRegistro"]).'","fechaInicio":"'.$fila["fechaInicio"].
+				'","fechaMaximaAtencion":"'.$fila["fechaMaximaAtencion"].'","situacionActual":"'.$fila["situacionActual"].
+				'","responsableAtencion":"'.cv(obtenerNombreUsuario($fila["idUsuarioAsignacion"]==""?-1:$fila["idUsuarioAsignacion"])).
+				'","iFormulario":"'.$iFormulario.'","iRegistro":"'.$iRegistro.'","fechaAtencion":"'.$fila["fechaCambioSituacion"].'"}';
+			if($arrRegistros=="")
+				$arrRegistros=$o;
+			else
+				$arrRegistros.=",".$o;
+			
+			$numReg++;
+			
+		}
+		
+		
+		echo '{"numReg":"'.$numReg.'","registros":['.$arrRegistros.']}';
+		
+		
+	}
+?>

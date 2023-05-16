@@ -1,0 +1,11 @@
+<?php session_start();
+ini_set("memory_limit","3000M");
+set_time_limit(999000);
+error_reporting(E_ALL);
+include("conexionBD.php");
+
+
+
+cambiarEtapaFormulario(696,1434,5,"",-1,"NULL","NULL",0);
+return;
+?>

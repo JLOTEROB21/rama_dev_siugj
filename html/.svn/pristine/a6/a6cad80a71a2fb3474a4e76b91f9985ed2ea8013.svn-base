@@ -1,0 +1,654 @@
+<?php
+session_start();
+include("configurarIdiomaJS.php");
+include("conexionBD.php");
+$consulta="select idParametroGrupo,parametro,valor from 2005_parametrosMensajes where tipoParametro=1 and idIdioma=".$_SESSION["leng"]." order by parametro";
+$arrParamMan=uEJ($con->obtenerFilasArreglo($consulta));
+$consulta="select idParametroGrupo,parametro,valor from 2005_parametrosMensajes where tipoParametro=2 and idIdioma=".$_SESSION["leng"]." order by parametro";
+$arrParamAuto=$con->obtenerFilasArreglo($consulta);
+$consulta="select idParametroGrupo,parametro,valor from 2005_parametrosMensajes where tipoParametro=4 and idIdioma=".$_SESSION["leng"]." order by parametro";
+$arrParamNuevoUsr=uEJ($con->obtenerFilasArreglo($consulta));
+$arrAccionesEnv=uEJ($con->obtenerFilasArreglo($consulta));
+$arrPermisos="";
+$obj;
+$consulta="select idRol,nombreGrupo from 8001_roles where idIdioma=".$_SESSION["leng"]." and idRol>0 order by idRol";
+$res=$con->obtenerFilas($consulta);
+$ctRoles=1;
+while($fila=$con->fetchRow($res))
+{
+	$obj="	{
+				id:'chk_".$ctRoles."',
+				hideLabel:true,
+				boxLabel:'".uEJ($fila[1])."',
+				xtype:'checkbox',
+				name:'".$fila[0]."' 
+			}";
+	if($arrPermisos=="")
+		$arrPermisos=$obj;
+	else
+		$arrPermisos.=",".$obj;
+	$ctRoles++;
+}
+$ctRoles--;
+
+$consulta="select idParametros,parametro  from 2005_parametrosMensajes where tipoParametro=3 and idIdioma=".$_SESSION["leng"]." order by parametro";
+$arrTiposDest=$con->obtenerFilasArreglo($consulta);
+
+?>
+var numRoles=<?php echo $ctRoles?>;
+
+Ext.onReady(inicializar);
+var numIdiomasRestantes;
+var editorActivo='txtCuerpo_1';
+var tabActual=0;
+var tab;
+var tabLeng;
+var msgEspere;
+function inicializar()
+{
+	var panel;
+	var arrPanel=new Array();
+    msgEspere=Ext.MessageBox.wait('Por favor espere...','<?php echo $etj["lblAplicacion"]?>');
+    
+	<?php
+	$ct=0;
+	echo "arrPanel[0]=new  Ext.form.FormPanel	(
+													{
+														id:'p_0',
+														title:'idioma',
+														items:[{xtype:'hidden'}]
+													}
+												);";
+								
+	$consulta="select idIdioma,idioma from 8002_idiomas order by idioma desc";
+	$res=$con->obtenerFilas($consulta);
+	while($fila=$con->fetchRow($res))
+	{
+		echo "panel=crearPanel('".($ct+1)."','".uEJ($fila[1])."','".$fila[0]."');
+			 arrPanel[".($ct+1)."]=panel;";
+			$ct++;
+		
+	}
+	?>
+	gE('numIdiomas').value='<?php echo $ct ?>';
+    numIdiomasRestantes=gE('numIdiomas').value;
+	tab = new Ext.TabPanel	(
+                                  {
+                                      id:'panelPrincipal',
+                                      renderTo:'divTabs',
+                                      activeTab: 0,
+                                      width:860,
+                                      height:700,
+                                      plain:true,
+                                      defaults:{autoScroll: true},
+                                      items:	arrPanel,
+                                      buttons:	[
+                                                      {
+                                                          text:'Aceptar',
+                                                          handler:function()
+                                                                  {
+                                                                      if(vCirculares())
+                                                                      {
+                                                                          guardarDatos();
+                                                                      }
+                                                                  }
+                                                      }
+                                                  ]
+                                  }
+                            );
+	
+	tab.remove('p_0');
+    Ext.getCmp('txtAsunto_1').focus(true,10);
+}
+
+function inicializarContenido()
+{
+	var idProceso=gE('idProceso').value;
+	var idCircular=gE('idCircular').value;
+	if(idCircular!='')
+	{
+		function funcAjax()
+		{
+			var objResp=eval(peticion_http.responseText);
+			var resp=objResp[0].plantillas;
+			var permisos=objResp[0].permisos;
+			var arrPermisos=permisos.split(",");
+			var x;
+			var nPagina;
+			var asunto;
+			var cuerpo;
+			var desc;
+			for(x=0;x<resp.length;x++)
+			{
+				nPagina=buscarIdioma(resp[x].idIdioma);
+				if(nPagina!='-1')
+				{				
+					asunto=Ext.getCmp('txtAsunto_'+nPagina);
+					cuerpo=Ext.getCmp('txtCuerpo_'+nPagina);
+					desc=Ext.getCmp('txtDescripcion_'+nPagina);
+                    remitente=gEx('txtRemitente_'+nPagina);
+					asunto.setValue(resp[x].asunto);
+					cuerpo.setValue(resp[x].cuerpo);
+					desc.setValue(resp[x].descripcion);
+                    remitente.setValue(resp[x].remitente);
+				}
+			}
+		}
+		obtenerDatosWeb('../paginasFunciones/funcionesPortal.php',funcAjax, 'POST','funcion=2&idCircular='+idCircular+'&idProceso='+idProceso,true);
+	}	
+}
+
+function crearPanel(idLenguaje,idioma,idIdioma)
+{
+	
+
+	var dsParametros= new Ext.data.SimpleStore	(
+													{
+														fields:	[
+																	{name:'id'},
+																	{name:'parametro'},
+																	{name:'valor'}
+																]
+													}
+												)
+												
+	var dsParametrosDest= new Ext.data.SimpleStore	(
+                                                        {
+                                                            fields:	[
+                                                                        {name:'id'},
+                                                                        {name:'parametro'},
+                                                                        {name:'valor'}
+                                                                    ]
+                                                        }
+                                                    )
+
+
+	 var mce=crearMCE('txtCuerpo_'+idLenguaje);
+	 var cmbParametros=document.createElement('select');
+	 
+	 
+	 var Panel=new Ext.form.FormPanel	(
+                                        {
+                                            id:'panel_'+idLenguaje,
+                                            title:idioma,
+                                            defaultType:'label',
+                                            layout: 'absolute',
+                                            region: 'center',
+                                            width:900,
+                                            autoShow : true,
+                                            items:	[
+                                                        {
+                                                            x:10,
+                                                            y:20,
+                                                            text:'Asunto:'
+                                                        },
+                                                        
+                                                        {
+                                                            x:95,
+                                                            y:15,
+                                                            width:300,
+                                                            id:'txtAsunto_'+idLenguaje,
+                                                            xtype:'textfield',
+                                                            value:''
+                                                        },
+                                                        {
+                                                            x:10,
+                                                            y:50,
+                                                            text:'Remitente:'
+                                                        },
+                                                         {
+                                                            x:95,
+                                                            y:45,
+                                                            width:300,
+                                                            id:'txtRemitente_'+idLenguaje,
+                                                            xtype:'textfield',
+                                                            value:''
+                                                        },
+                                                        {
+                                                            x:10,
+                                                            y:80,
+                                                            text:'Descripci\u00F3n:'
+                                                        },
+                                                        {
+                                                            x:95,
+                                                            y:75,
+                                                            width:600,
+                                                            id:'txtDescripcion_'+idLenguaje,
+                                                            xtype:'textfield',
+                                                            value:'',
+                                                            maxLength:100
+                                                        },
+                                                        mce,
+                                                        {
+                                                            xtype:'hidden',
+                                                            id:'h_'+idLenguaje,
+                                                            value:idIdioma
+                                                        }
+                                                        
+                                                    ],
+                                        	listeners:
+                                                        {
+                                                            'show':function()
+                                                            {
+                                                                editorActivo='txtCuerpo_'+idLenguaje;
+                                                            }
+                                                        }        
+                                        }
+                                    )
+	                    
+	 return Panel;
+}
+
+function agregarDest(txtDestinatario)
+{
+	mostrarVDestinatario();
+}
+
+function crearMCE(idMce)
+{
+	FCKeditor.BasePath = '../Scripts/fckeditor/' ;
+    var mce= new Ext.ux.FCKeditor	(
+    									{
+                                        	Name : idMce,
+                                            ToolbarSet : 'Default',
+                                            Width:850,
+                                            Height:500,
+                                            y:120,
+                                            config:'../fckconfig3.js'
+
+                                        }
+    								)
+    
+     mce.on('editorRender',function(textEditor)
+     						{
+                            	numIdiomasRestantes--;
+                                if(numIdiomasRestantes==0)
+                                {
+                                	msgEspere.hide();
+                                	tab.setActiveTab(0);
+                                	inicializarContenido()
+                                }
+                                else
+                                {
+                                	tabActual++;
+                                	tab.setActiveTab(tabActual);
+                                }
+                            }
+     		)                               
+    return mce;
+}
+
+function pAutomatico_click()
+{
+	mostrarVParametro('1');
+}
+
+function pManual_click()
+{
+	mostrarVParametro('2');	
+}
+
+function vCirculares()
+{
+	var res=validarCirculares();
+	switch(res)
+	{
+		case 0:
+			return true;
+		break;
+		case 11:
+			function funcAceptar()
+			{
+				Ext.getCmp('panelPrincipal').activate('panel_'+tabLeng);
+				Ext.getCmp('txtAsunto_'+tabLeng).focus(10,true);
+				return false;
+			}
+			Ext.Msg.alert('<?php echo $etj["lblAplicacion"] ?>','Debe ingresar el asunto del mensaje a enviar',funcAceptar);
+			
+		break;
+		case 21:
+			function funcAceptar()
+			{
+				Ext.getCmp('panelPrincipal').activate('panel_'+tabLeng);
+				Ext.getCmp('txtCuerpo_'+tabLeng).focus(10,true);
+				return false;
+			}
+			Ext.Msg.alert('<?php echo $etj["lblAplicacion"] ?>','El cuerpo del mensaje no puede estar vac&iacute;o',funcAceptar);
+			
+		break;
+		
+		case 12:
+			function funcConfirmacion(btn)
+			{
+				if(btn=='yes')
+				{
+					rellenarValoresCircular();
+					guardarCirculares();
+					return true;
+				}
+				else
+					return false;
+			}
+			Ext.MessageBox.confirm('<?php echo $etj["lblAplicacion"] ?>', 'El asunto no ha sido especificado en todos los idiomas, desea continuar', funcConfirmacion);
+		
+		break;
+		case 22:
+			function funcConfirmacion(btn)
+			{
+				if(btn=='yes')
+				{
+					rellenarValoresCircular();
+					guardarCirculares();
+					return true;
+				}
+				else
+					return false;
+			}
+			Ext.MessageBox.confirm('<?php echo $etj["lblAplicacion"] ?>', 'El asunto no ha sido especificado en todos los idiomas, desea continuar', funcConfirmacion);
+		break;
+		
+		
+	}
+}
+
+function rellenarValoresCircular()
+{
+	var x;
+	var asuntoO=Ext.getCmp('txtAsunto_1').getValue();
+	var cuerpoO=Ext.getCmp('txtCuerpo_1').getValue();
+	var descO=Ext.getCmp('txtDescripcion_1').getValue();
+    var remitente=Ext.getCmp('txtRemitente_'+1).getValue();
+	var asuntoD;
+	var cuerpoD;
+	var vCuerpo;
+	var descD;
+	for (x=2;x<=gE('numIdiomas').value;x++)
+	{
+		asuntoD=Ext.getCmp('txtAsunto_'+x);
+		cuerpoD=Ext.getCmp('txtCuerpo_'+x);
+		descD=Ext.getCmp('txtDescripcion_'+x);
+        if(Ext.getCmp('txtDescripcion_'+x).getValue()=='')
+			Ext.getCmp('txtDescripcion_'+x).setValue(remitente);
+		if(asuntoD.getValue()=='')
+			asuntoD.setValue('['+asuntoO+']');
+
+		if(descD.getValue()=='')
+			descD.setValue('['+descO+']');
+
+		if(cuerpoD.getValue()=='')
+		{
+			vCuerpo=cuerpoO.replace(String.fromCharCode(10), "<br>");
+			vCuerpo=vCuerpo.replace(String.fromCharCode(13), "<br>");
+			cuerpoD.setValue(vCuerpo);
+		}
+
+	}
+}
+
+function validarCirculares()
+{
+	var nIdiomas=gE('numIdiomas').value;
+	var x;
+	var asunto;
+	var cuerpo;
+	var idIdioma;
+	var idiomaPagina=gE('hLeng').value;
+	for(x=0;x<nIdiomas;x++)
+	{
+		asunto=Ext.getCmp('txtAsunto_'+(x+1)).getValue();
+		cuerpo=Ext.getCmp('txtCuerpo_'+(x+1)).getValue();
+		idIdioma=Ext.getCmp('h_'+(x+1)).getValue();
+		if(asunto=='')
+		{
+			tabLeng=x+1;
+			if(idIdioma==idiomaPagina)
+				return 11;
+			else
+				return 12;
+		}
+		
+		if(cuerpo=='')
+		{
+			tabLeng=x+1;
+			if(idIdioma==idiomaPagina)
+				return 21;
+			else
+				return 22;
+		}
+		/*if(descripcion=='')
+		{
+			tabLeng=x+1;
+			if(idIdioma==idiomaPagina)
+				return 31;
+			else
+				return 32;
+		}*/
+	}
+	return 0;
+}
+
+function guardarDatos()
+{
+	var obj="";
+	var arrObj="";
+	var nIdiomas=gE('numIdiomas').value;
+	var idIdioma;
+	var asunto;
+	var cuerpo;
+	var desc;
+    var remitente;
+	var idCircular=gE('idCircular').value;
+	for(x=1;x<=nIdiomas;x++)
+	{
+		asunto=Ext.getCmp('txtAsunto_'+x).getValue();
+		cuerpo=Ext.getCmp('txtCuerpo_'+x).getValue();
+		desc=Ext.getCmp('txtDescripcion_'+x).getValue();
+        remitente=gEx('txtRemitente_'+x).getValue();
+        if(!validarCorreo(remitente))
+        {
+        	function respErr()
+            {
+            	gEx('panelPrincipal').activate('panel_'+x);
+            	gEx('txtRemitente_'+x).focus(true,500);
+            }
+        	msgBox('La direcci&oacute;n del correo electr&oacute;nico del remitente no es v&aacute;lida',respErr)
+        	return;
+        }
+		idIdioma=Ext.getCmp('h_'+x).getValue();
+		obj='{"idIdioma":"'+idIdioma+'","asunto":"'+cv(asunto)+'","cuerpo":"'+cv(cuerpo)+'","desc":"'+cv(desc)+'","remitente":"'+remitente+'"}';
+		if(arrObj=='')
+			arrObj=obj;
+		else
+			arrObj+=","+obj;
+	}
+	arrObj=arrObj;
+	var listPermisos='';
+	var x;
+	var chk;
+	var idProceso=gE('idProceso').value;
+    var numEtapa=gE('numEtapa').value;
+	
+	var objFinal='{"idProceso":"'+idProceso+'","numEtapa":"'+numEtapa+'","idCircular":"'+idCircular+'","circulares":['+arrObj+']}';
+	function funcAjax()
+	{
+		var resp=peticion_http.responseText;
+		var arrResp=resp.split('|');
+		if(arrResp[0]=='1')
+		{
+			gE('idCircular').value=arrResp[1];
+			function respMsg()
+			{
+				
+			}
+			
+			Ext.MessageBox.alert('<?php echo $etj["lblAplicacion"] ?>','La operaci&oacute;n ha sido realizada correctamente',respMsg);
+		}
+		else
+			msgBox('<?php $etj["errOperacion"].' '?>'+peticion_http.responseText);
+	}
+	obtenerDatosWeb('../paginasFunciones/funcionesPortal.php',funcAjax, 'POST','funcion=5&param='+objFinal,true);
+}
+
+function buscarIdioma(idIdioma)
+{
+	var x;
+	var h;
+	for(x=1;x<=gE('numIdiomas').value;x++)
+	{
+		h=Ext.getCmp('h_'+x);
+		if(h.getValue()==idIdioma)
+			return x;
+	}
+	return -1;
+}
+
+function mostrarVParametro(tParametro)
+{
+	var titulo;
+	var paramA;
+	if(tParametro=='1') //Parametro automatico
+		titulo='Par\u00E1metro autom\u00E1tico';
+	else
+		titulo='Par\u00E1metro manual';
+	
+	var comboParametros=crearComboExt('comboParametros',[],80,5);
+	
+	var form = new Ext.form.FormPanel(	
+										 	{
+												baseCls: 'x-plain',
+												layout:'absolute',
+												defaultType: 'textfield',
+												items: 	[
+														 	new Ext.form.Label	(
+																				 	{
+																						x:5,
+																						y:10,
+																						text:'Par\u00E1metro:'
+																					}
+																				)
+															,
+															comboParametros
+														]
+											}
+										);
+	
+	var ventanaPar = new Ext.Window	(
+									{
+										title: titulo,
+										width: 350,
+										height:130,
+										minWidth: 280,
+										minHeight: 100,
+										layout: 'fit',
+										plain:true,
+										bodyStyle:'padding:5px;',
+										buttonAlign:'center',
+										items: form,
+										modal:true,
+										buttons:	[
+														{
+															text: 'Aceptar',
+															handler:function()
+																	{
+																		if(comboParametros.getValue()!="")
+																		{
+																			var parametro=comboParametros.getValue();
+                                                                            cuerpo=Ext.getCmp(editorActivo);
+                                                                            cuerpo.insertValue(parametro+' ');
+																			ventanaPar.close();
+																		}
+																		else
+																		{
+																			msgBox('Debe elegir el par\u00E1metro a insertar');
+																			comboParametros.focus(true);
+																		}
+																	}
+														},
+														{
+															text: 'Cancelar',
+															handler:function()
+																	{
+																		ventanaPar.close();
+																	}
+														}
+													]
+    								}
+								);
+                                
+                                
+    obtenerParametrosDisponibles(ventanaPar);                          
+
+}
+//comboParametros
+function obtenerParametrosDisponibles(ventana)
+{
+	var idProceso=gE('idProceso').value;
+	function funcAjax()
+    {
+        var resp=peticion_http.responseText;
+        arrResp=resp.split('|');
+        if(arrResp[0]=='1')
+        {
+        	Ext.getCmp('comboParametros').getStore().loadData(eval(arrResp[1]));
+            ventana.show();
+        }
+        else
+        {
+            msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+        }
+    }
+    obtenerDatosWeb('../paginasFunciones/funcionesProyectos.php',funcAjax, 'POST','funcion=195&idProceso='+idProceso,true);
+	
+
+}
+
+
+RegistroAutor =Ext.data.Record.create	(
+											[
+												{name: 'idDest'},
+												{name: 'destinatario'}
+											]
+										)
+
+
+function crearGridDestinatario()
+{
+
+	var dsDestinatario=new Ext.data.SimpleStore(
+													{
+														fields:	[
+																	{name: 'id'},
+																	{name: 'destinatario'}
+																]
+													}
+												);
+
+	var cmDest= new Ext.grid.ColumnModel   	(
+												 	[
+													 	new  Ext.grid.RowNumberer({header:'#',width:37}),
+														new Ext.grid.CheckboxSelectionModel({}),
+														{
+															header:'Destinatario',
+															width:300,
+															sortable:true,
+															dataIndex:'destinatario'
+
+														}
+														
+													]
+												);
+												
+	tblDest=	new Ext.grid.EditorGridPanel	(
+                                                    {
+														x:30,
+														y:65,
+                                                        store:dsDestinatario,
+                                                        frame:true,
+                                                        cm: cmDest,
+                                                        height:200,
+                                                        width:400
+                                                    }
+					
+    );
+	return tblDest;
+}

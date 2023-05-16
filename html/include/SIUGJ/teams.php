@@ -1,0 +1,280 @@
+<?php 
+include_once("conexionBD.php");
+include_once("utiles.php");
+include_once("nusoap/nusoap.php");
+
+function notificarEventoAudienciaTeams($objConf)
+{
+	global $con;
+	
+	$esRegistroNuevoEventoAudiencia=esRegistroNuevoEventoAudienciaTeams($objConf["idEvento"]);
+
+	
+	//Registro/Modificación audiencia
+	if($esRegistroNuevoEventoAudiencia)
+	{
+		return registrarEventoAudienciaTeams($objConf);
+	}
+	else
+	{
+		return modificarEventoAudienciaTeams($objConf);
+	}
+		
+}
+
+function notificarCancelacionEventoAudienciaTeams($objConf)
+{
+	global $con;
+	$tipoNotificacion=12;
+	$idRegistroBitacora=registrarBitacoraConsumoServicioConexiones($tipoNotificacion,$objConf["idEvento"]);
+	$xmlSolicitud=bE(json_encode($objConf));
+	$urlWebServices="";
+	try
+	{
+		$fInfoEventoAudiencia=obtenerInfoEventoAudienciaTeams($objConf["idEvento"]);
+
+		$infoComp["idConexion"]=$fInfoEventoAudiencia["idConexion"];
+		$idEventoTeams=$fInfoEventoAudiencia["idEventoAudiencia"];
+		
+		
+		$urlWebServices="ID Conexión: ".$infoComp["idConexion"];
+
+		$cCalendario=new cMicrosoftCalendarOffice365("","","","",$infoComp);	
+
+		$objEvento=$cCalendario->cancelEventoTeams($idEventoTeams,$objConf["motivoCancelacion"]);
+		
+		if($objEvento)
+		{
+
+			registrarSituacionAccionEventoAudienciaOperador($objConf["idEvento"],$tipoNotificacion,1,$objConf["carpetaAdministrativa"],$objConf["unidadGestion"],$infoComp["idConexion"]);
+		}
+		else
+		{
+
+			registrarSituacionAccionEventoAudienciaOperador($objConf["idEvento"],$tipoNotificacion,0,$objConf["carpetaAdministrativa"],$objConf["unidadGestion"],$infoComp["idConexion"]);
+			@actualizarBitacoraConsumoServicioConexiones($idRegistroBitacora,$xmlSolicitud,"-1001","No se pudo cancelar",$urlWebServices);
+		}
+	}
+	catch(Exception $e)
+	{
+
+		@actualizarBitacoraConsumoServicioConexiones($idRegistroBitacora,$xmlSolicitud,"-1001",$e->getMessage(),$urlWebServices);
+
+	}
+		
+}
+
+function registrarEventoAudienciaTeams($objConf)
+{
+	global $con;
+	
+	
+	$tipoNotificacion=10;
+	$idRegistroBitacora=registrarBitacoraConsumoServicioConexiones($tipoNotificacion,$objConf["idEvento"]);
+	$xmlSolicitud=bE(json_encode($objConf));
+	$urlWebServices="";
+	try
+	{
+		$arrDestinatarios=array();
+		$consulta="SELECT nombrePersona,mail FROM 7000_participantesEventoAudiencia WHERE idRegistroEvento=".$objConf["idEvento"];
+		$res=$con->obtenerFilas($consulta);
+		while($filaMail=mysql_fetch_assoc($res))
+		{
+			if($filaMail["mail"]!="")
+			{
+				array_push($arrDestinatarios,array	(
+													  "emailAddress"=>  array("address"=>$filaMail["mail"],"name"=>$filaMail["nombrePersona"])
+													)
+						);
+			}
+		}
+		
+		
+		$consulta="SELECT idJuez FROM 7001_eventoAudienciaJuez WHERE idRegistroEvento=".$objConf["idEvento"];
+		$res=$con->obtenerFilas($consulta);
+		while($filaJuez=mysql_fetch_assoc($res))
+		{
+			$consulta="SELECT Mail FROM 805_mails WHERE idUsuario=".$filaJuez["idJuez"];
+			$res=$con->obtenerFilas($consulta);
+			while($filaMail=mysql_fetch_assoc($res))
+			{
+				if($filaMail["Mail"]!="")
+				{
+					array_push($arrDestinatarios,array	(
+														  "emailAddress"=>  array("address"=>$filaMail["Mail"],"name"=>obtenerNombreUsuario($filaJuez["idJuez"]))
+														)
+							);
+			
+				}
+			}
+		}
+		
+		
+		$infoComp["idConexion"]=obtenerPerfilConfiguracionServiciosNubeDespacho($objConf["unidadGestion"],2);
+		if($infoComp["idConexion"]=="")
+		{
+			registrarSituacionAccionEventoAudienciaOperador($objConf["idEvento"],$tipoNotificacion,0,$objConf["carpetaAdministrativa"],$objConf["unidadGestion"],"","No existe cuenta de servicio a nube configurado para la agenda de audiencia");
+			return;
+		}
+		
+		$urlWebServices="ID Conexión: ".$infoComp["idConexion"];
+		
+		$cCalendario=new cMicrosoftCalendarOffice365("","","","",$infoComp);	
+		
+		$prefijoSitio=$prefijoSitio=obtenerPrefijoSitio();
+		$proveedor="teamsForBusiness";
+		$consulta="SELECT tipoAudiencia FROM _4_tablaDinamica WHERE id__4_tablaDinamica=".$objConf["tipoAudiencia"];
+		$lblAudiencia=$con->obtenerValor($consulta);
+		
+		$cup=obtenerCarpetaAdministrativaProceso($objConf["idFormulario"],$objConf["idRegistro"]);
+		$asunto="[".$objConf["idEvento"]."_".$prefijoSitio."] SIUGJ - (".$cup.") ".$lblAudiencia;
+		
+		$cuerpoMail="Se ha programado un evento de audiencia referente al código de proceso judicial <b>".$cup."</b>";
+		
+		$objEvento=$cCalendario->crearEventoTeams($objConf["horaInicioEvento"],$objConf["horaFinEvento"],$arrDestinatarios,$asunto,$proveedor,$cuerpoMail);
+
+		if(isset($objEvento) && isset($objEvento->id))
+		{
+			$urlReunion=(isset($objEvento->onlineMeeting)?$objEvento->onlineMeeting->joinUrl:$objEvento->joinUrl);
+			registrarSituacionAccionEventoAudienciaOperador($objConf["idEvento"],$tipoNotificacion,1,$objConf["carpetaAdministrativa"],$objConf["unidadGestion"],$infoComp["idConexion"],$objEvento->id,$urlReunion);
+//			$consulta="UPDATE 7000_eventosAudiencia SET idEventoMeet='".$objEvento->id."',idConectorMeet=".$infoComp["idConexion"]." WHERE idRegistroEvento=".$idEventoAgenda;
+//			$con->ejecutarConsulta($consulta);
+			$consulta="UPDATE 7000_participantesEventoAudiencia SET urlReunion='".$urlReunion."' WHERE idRegistroEvento=".$objConf["idEvento"];
+			$con->ejecutarConsulta($consulta);
+		}
+		else
+		{
+			if($objEvento)
+			{
+				registrarSituacionAccionEventoAudienciaOperador($objConf["idEvento"],$tipoNotificacion,0,$objConf["carpetaAdministrativa"],$objConf["unidadGestion"],$infoComp["idConexion"],bE(json_encode($objEvento)));
+				@actualizarBitacoraConsumoServicioConexiones($idRegistroBitacora,$xmlSolicitud,"-1001",bE(json_encode($objEvento)),$urlWebServices);
+			}
+			else
+			{
+				registrarSituacionAccionEventoAudienciaOperador($objConf["idEvento"],$tipoNotificacion,0,$objConf["carpetaAdministrativa"],$objConf["unidadGestion"],$infoComp["idConexion"],"Sin respuesta del servicio");
+				@actualizarBitacoraConsumoServicioConexiones($idRegistroBitacora,$xmlSolicitud,"-1000","Sin respuesta del servicio",$urlWebServices);
+			}
+		}
+	}
+	catch(Exception $e)
+	{
+		echo $e->getMessage();
+		@actualizarBitacoraConsumoServicioConexiones($idRegistroBitacora,$xmlSolicitud,"-1001",$e->getMessage(),$urlWebServices);
+
+	}
+}
+
+
+function modificarEventoAudienciaTeams($objConf)
+{
+	global $con;
+	
+	
+	$tipoNotificacion=11;
+	$idRegistroBitacora=registrarBitacoraConsumoServicioConexiones($tipoNotificacion,$objConf["idEvento"]);
+	$xmlSolicitud=bE(json_encode($objConf));
+	$urlWebServices="";
+	try
+	{
+		$arrDestinatarios=array();
+		$consulta="SELECT nombrePersona,mail FROM 7000_participantesEventoAudiencia WHERE idRegistroEvento=".$objConf["idEvento"];
+		$res=$con->obtenerFilas($consulta);
+		while($filaMail=mysql_fetch_assoc($res))
+		{
+			if($filaMail["mail"]!="")
+			{
+				array_push($arrDestinatarios,array	(
+													  "emailAddress"=>  array("address"=>$filaMail["mail"],"name"=>$filaMail["nombrePersona"])
+													)
+						);
+			}
+		}
+		
+		
+		$consulta="SELECT idJuez FROM 7001_eventoAudienciaJuez WHERE idRegistroEvento=".$objConf["idEvento"];
+		$res=$con->obtenerFilas($consulta);
+		while($filaJuez=mysql_fetch_assoc($res))
+		{
+			$consulta="SELECT Mail FROM 805_mails WHERE idUsuario=".$filaJuez["idJuez"];
+			$res=$con->obtenerFilas($consulta);
+			while($filaMail=mysql_fetch_assoc($res))
+			{
+				if($filaMail["Mail"]!="")
+				{
+					array_push($arrDestinatarios,array	(
+														  "emailAddress"=>  array("address"=>$filaMail["Mail"],"name"=>obtenerNombreUsuario($filaJuez["idJuez"]))
+														)
+							);
+			
+				}
+			}
+		}
+		
+		$fInfoEventoAudiencia=obtenerInfoEventoAudienciaTeams($objConf["idEvento"]);
+
+		$infoComp["idConexion"]=$fInfoEventoAudiencia["idConexion"];
+		$idEventoTeams=$fInfoEventoAudiencia["idEventoAudiencia"];
+		
+		
+		$urlWebServices="ID Conexión: ".$infoComp["idConexion"];
+		
+		$cCalendario=new cMicrosoftCalendarOffice365("","","","",$infoComp);	
+		$consulta="SELECT tipoAudiencia FROM _4_tablaDinamica WHERE id__4_tablaDinamica=".$objConf["tipoAudiencia"];
+		$lblAudiencia=$con->obtenerValor($consulta);
+		$prefijoSitio=$prefijoSitio=obtenerPrefijoSitio();
+		$cup=obtenerCarpetaAdministrativaProceso($objConf["idFormulario"],$objConf["idRegistro"]);
+		$asunto="[".$objConf["idEvento"]."_".$prefijoSitio."] SIUGJ - (".$cup.") ".$lblAudiencia;
+		$cuerpoMail="Se ha modificado la programación de un evento de audiencia referente al c&oacute;digo de proceso judicial <b>".$cup."</b>";
+		$proveedor="teamsForBusiness";
+		
+		
+		$objEvento=$cCalendario->modificarEventoTeams($idEventoTeams,$objConf["horaInicioEvento"],$objConf["horaFinEvento"],$arrDestinatarios,$asunto,$proveedor,$cuerpoMail);
+		if(isset($objEvento) && isset($objEvento->id))
+		{
+			//$urlReunion=(isset($objEvento->onlineMeeting)?$objEvento->onlineMeeting->joinUrl:$objEvento->joinUrl);
+			registrarSituacionAccionEventoAudienciaOperador($objConf["idEvento"],$tipoNotificacion,1,$objConf["carpetaAdministrativa"],$objConf["unidadGestion"],$infoComp["idConexion"],$objEvento->id);
+		}
+		else
+		{
+			if($objEvento)
+			{
+				registrarSituacionAccionEventoAudienciaOperador($objConf["idEvento"],$tipoNotificacion,0,$objConf["carpetaAdministrativa"],$objConf["unidadGestion"],$infoComp["idConexion"],bE(json_encode($objEvento)));
+				@actualizarBitacoraConsumoServicioConexiones($idRegistroBitacora,$xmlSolicitud,"-1001",bE(json_encode($objEvento)),$urlWebServices);
+			}
+			else
+			{
+				registrarSituacionAccionEventoAudienciaOperador($objConf["idEvento"],$tipoNotificacion,0,$objConf["carpetaAdministrativa"],$objConf["unidadGestion"],$infoComp["idConexion"],"Sin respuesta del servicio");
+				@actualizarBitacoraConsumoServicioConexiones($idRegistroBitacora,$xmlSolicitud,"-1000","Sin respuesta del servicio",$urlWebServices);
+			}
+		}
+	}
+	catch(Exception $e)
+	{
+		echo $e->getMessage();
+		@actualizarBitacoraConsumoServicioConexiones($idRegistroBitacora,$xmlSolicitud,"-1001",$e->getMessage(),$urlWebServices);
+
+	}
+}
+
+
+function esRegistroNuevoEventoAudienciaTeams($idEventoAudiencia)
+{
+	global $con;
+	$consulta="SELECT COUNT(*) FROM 7000_notificacionesEventosOperadoresServicios WHERE idRegistroEvento=".$idEventoAudiencia." AND tipoAccion=10 AND notificado=1";
+	$numReg=$con->obtenerValor($consulta);
+	return $numReg==0;
+}
+
+function obtenerInfoEventoAudienciaTeams($idEventoAudiencia)
+{
+	global $con;
+	$consulta="SELECT valorComplementario1 as idConexion,valorComplementario2 as idEventoAudiencia,valorComplementario3 as urlConexion FROM 7000_notificacionesEventosOperadoresServicios WHERE idRegistroEvento='".$idEventoAudiencia.
+			"' AND tipoAccion=10 AND notificado=1";
+	$fInfoEventoAudiencia=$con->obtenerPrimeraFilaAsoc($consulta);
+	return $fInfoEventoAudiencia;
+}
+
+
+
+
+?>

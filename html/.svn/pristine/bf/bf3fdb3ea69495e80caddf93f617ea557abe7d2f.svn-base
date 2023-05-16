@@ -1,0 +1,570 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+	
+	$consulta="SELECT claveUnidad,nombreUnidad FROM _17_tablaDinamica WHERE categoriaDespacho in(2,3,4) and idEstado=2 ORDER BY nombreUnidad";
+	$arrDespachos=$con->obtenerFilasArreglo($consulta);
+	
+	$arrEspecialidades="";
+	$consulta="SELECT id__637_tablaDinamica,nombreEspecialidadDespacho FROM _637_tablaDinamica ORDER by nombreEspecialidadDespacho";
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_row($res))
+	{
+		$consulta="SELECT id__625_tablaDinamica,nombreTipoProceso FROM _625_tablaDinamica WHERE especialidad=".$fila[0]." ORDER BY nombreTipoProceso";
+		$arrTiposProceso=$con->obtenerFilasArreglo($consulta);
+		$o="['".$fila[0]."','".cv($fila[1])."',".$arrTiposProceso."]";
+		if($arrEspecialidades=="")
+			$arrEspecialidades=$o;
+		else
+			$arrEspecialidades.=",".$o;
+	}
+	
+	$consulta="SELECT idTipoCarpeta,nombreTipoCarpeta FROM 7020_tipoCarpetaAdministrativa";
+	$arrTipoCarpeta=$con->obtenerFilasArreglo($consulta);	
+	
+	$consulta="SELECT id__625_tablaDinamica,nombreTipoProceso FROM _625_tablaDinamica ORDER BY nombreTipoProceso";
+	$arrTiposProcesoGlobal=$con->obtenerFilasArreglo($consulta);
+	
+	$consulta="SELECT cveEstado,estado FROM 820_estados ORDER BY estado";
+	$arrEstados=$con->obtenerFilasArreglo($consulta);	
+	
+	
+	$consulta="SELECT id__5_tablaDinamica,nombreTipo FROM _5_tablaDinamica";
+	$arrTipoFigura=$con->obtenerFilasArreglo($consulta);
+
+	$consulta="SELECT id__32_tablaDinamica,UPPER(tipoIdentificacion) FROM _32_tablaDinamica WHERE id__32_tablaDinamica NOT IN(19,9999,13,17) ORDER BY tipoIdentificacion";
+	$arrTipoIdentificacion=$con->obtenerFilasArreglo($consulta);
+
+?>
+var arrTipoIdentificacion=<?php echo $arrTipoIdentificacion?>;
+var arrTiposProcesoGlobal=<?php echo $arrTiposProcesoGlobal?>;
+var arrTipoCarpeta=<?php echo $arrTipoCarpeta?>;
+var arrEstadoProceso=[['1','Abierto'],['3','Cerrado']];
+var arrEspecialidades=[<?php echo $arrEspecialidades?>];
+var arrDespachos=<?php echo $arrDespachos?>;
+var arrEstadoProcesoGlobal=[['0','No Iniciado'],['1','Abierto'],['3','Cerrado']];
+var arrEstados=<?php echo $arrEstados?>;
+var arrTipoFigura=<?php echo $arrTipoFigura?>;
+
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	var arrFiltroFecha=[['>=','>='],['>','>'],['=','='],['<','<'],['<=','<=']];
+    var cmbDespachos=crearComboExt('cmbDespachos',arrDespachos,130,5,300);
+    var cmbEspecialidad=crearComboExt('cmbEspecialidad',arrEspecialidades,540,5,300);
+    cmbEspecialidad.on('select',function(cmb,registro)
+                                {
+                                    gEx('cmbTipoProceso').setValue('');
+                                    gEx('cmbTipoProceso').getStore().loadData(registro.data.valorComp);
+                                }
+                        )
+    var cmbTipoProceso=crearComboExt('cmbTipoProceso',[],130,35,300);
+    var cmbEstadoProceso=crearComboExt('cmbEstadoProceso',arrEstadoProceso,590,35,250);
+    var cmbInicioFiltro=crearComboExt('cmbInicioFiltro',arrFiltroFecha,130,65,90);
+    var cmbFinFiltro=crearComboExt('cmbFinFiltro',arrFiltroFecha,380,65,90);    
+	var cmbTipoFigura=crearComboExt('cmbTipoFigura',arrTipoFigura,680,125,180);  														
+    var cmbTipoDocumento=crearComboExt('cmbTipoDocumento',arrTipoIdentificacion,450,155,180);  
+    
+    
+	new Ext.Viewport(	{
+                                layout: 'border',
+                                items: [
+                                            {
+                                                xtype:'panel',
+                                                region:'north',
+                                                height:200,
+                                                layout:'absolute',
+                                                defaultType: 'label',
+                                                items:	[
+                                                           
+                                                            {
+                                                                x:10,
+                                                                y:10,
+                                                                html:'Despacho:'
+                                                            },
+                                                            cmbDespachos,
+                                                            {
+                                                                x:460,
+                                                                y:10,
+                                                                html:'Especialidad:'
+                                                            },
+                                                            cmbEspecialidad,
+                                                            {
+                                                                x:10,
+                                                                y:40,
+                                                                html:'Tipo de Proceso:'
+                                                            },
+                                                            
+                                                            cmbTipoProceso,
+                                                            {
+                                                                x:460,
+                                                                y:40,
+                                                                html:'Estado del Proceso:'
+                                                            },
+                                                            cmbEstadoProceso,
+                                                            {
+                                                                x:10,
+                                                                y:70,
+                                                                html:'Fecha de Registro:'
+                                                            },
+                                                            cmbInicioFiltro,
+                                                            {
+                                                                x:230,
+                                                                y:65,
+                                                                xtype:'datefield',
+                                                                id:'fInicioFiltro'
+                                                            },
+                                                            {
+                                                                x:360,
+                                                                y:70,
+                                                                html:'Y'
+                                                            },
+                                                            cmbFinFiltro,
+                                                             {
+                                                                x:480,
+                                                                y:65,
+                                                                xtype:'datefield',
+                                                                id:'fFinFiltro'
+                                                            },
+                                                             {
+                                                                x:10,
+                                                                y:100,
+                                                                html:'Folio de Radicaci&oacute;n:'
+                                                            },
+                                                            {
+                                                            	xtype:'textfield',
+                                                                width:150,
+                                                                x:140,
+                                                                y:95,
+                                                                id:'txtFolioRadicacion'
+                                                            },
+                                                            {
+                                                                x:370,
+                                                                y:100,
+                                                                html:'Proceso Judicial:'
+                                                            },
+                                                            {
+                                                            	xtype:'textfield',
+                                                                width:150,
+                                                                x:480,
+                                                                y:95,
+                                                                id:'txtProcesoJudicial'
+                                                            },
+                                                            {
+                                                            	x:10,
+                                                                y:130,
+                                                            	xtype:'label',
+                                                                html:'Ingrese el nombre que desea buscar:'
+                                                            },
+                                                            {
+                                                            	x:230,
+                                                                y:125,
+                                                            	xtype:'textfield',
+                                                                width:300,
+                                                                enableKeyEvents:true,
+                                                                id:'txtCriterio',
+                                                                listeners:	{
+                                                                				specialkey:function(field, e)
+                                                                                			{
+                                                                                            	 if ((e.getKey() == e.ENTER)||(e.getKey() == e.TAB))
+                                                                                                 {
+                                                                                                 	realizarBusqueda();
+                                                                                                 }
+                                                                                            }
+                                                                				
+                                                                			}
+                                                            },
+                                                            {
+                                                            	xtype:'label',
+                                                                x:550,
+                                                                y:130,
+                                                                html:'Tipo de Participaci&oacute;n:'
+                                                            },
+                                                            cmbTipoFigura,
+                                                             {
+                                                            	xtype:'label',
+                                                                x:10,
+                                                                y:160,
+                                                                html:'No. de Documento:'
+                                                            },
+                                                            {
+                                                            	x:130,
+                                                                y:155,
+                                                            	xtype:'textfield',
+                                                                width:150,
+                                                                allowDecimals:true,
+                                                                allowNegative:false,
+                                                                id:'noDocumento'
+                                                            },
+                                                             {
+                                                            	xtype:'label',
+                                                                x:320,
+                                                                y:160,
+                                                                html:'Tipo. de Documento:'
+                                                            },
+                                                            cmbTipoDocumento
+                                                           
+                                                        ]
+                                            },
+                                             crearGridResultadoProcesos()
+                                         ]
+                            }
+                        ) 
+}
+
+
+function crearGridResultadoProcesos()
+{
+	var lector= new Ext.data.JsonReader({
+                                            
+                                            totalProperty:'numReg',
+                                            fields: [
+                                               			{name:'idRegistro'},
+                                                        {name:'idFormulario'},
+                                                        {name:'idCarpeta'},
+		                                                {name: 'folioRegistro'},
+                                                        {name: 'tipoCarpeta'},
+		                                                {name:'fechaRegistro', type:'date', dateFormat:'Y-m-d H:i:s'},
+                                                        {name: 'codigoUnicoProceso'},
+                                                        {name: 'tituloProceso'},
+                                                        {name: 'tipoProceso'},
+                                                        {name: 'especialidad'},
+                                                        {name:'departamento'},
+                                                        {name:'despacho'},
+                                                        {name: 'estadoProceso'},
+                                                        {name: 'actor'},
+                                                        {name: 'demandado'}
+                                            		],
+                                            root:'registros'
+                                            
+                                        }
+                                      );
+	 
+                                                                                      
+	var alDatos=new Ext.data.GroupingStore({
+                                                            reader: lector,
+                                                            proxy : new Ext.data.HttpProxy	(
+
+                                                                                              {
+
+                                                                                                  url: '../modulosEspeciales_SIUGJ/paginasFunciones/funcionesSIUGJ.php'
+
+                                                                                              }
+
+                                                                                          ),
+                                                            sortInfo: {field: 'fechaRegistro', direction: 'ASC'},
+                                                            groupField: 'fechaRegistro',
+                                                            remoteGroup:false,
+				                                            remoteSort: false,
+                                                            autoLoad:false
+                                                            
+                                                        }) 
+	alDatos.on('beforeload',function(proxy)
+    								{
+                                    	proxy.baseParams.funcion='7';
+                                        
+                                    }
+                        )   
+       
+        var cModelo= new Ext.grid.ColumnModel   	(
+                                                        [
+                                                            new  Ext.grid.RowNumberer(),
+                                                            {
+                                                                header:'Folio de Registro',
+                                                                width:110,
+                                                                sortable:true,
+                                                                dataIndex:'folioRegistro',
+                                                                renderer:function(val,meta,registro)
+                                                                		{
+                                                                        	return '<a href="javascript:abrirProcesoBusqueda(\''+bE(registro.data.idFormulario)+'\',\''+bE(registro.data.idRegistro)+'\')">'+val+'</a>';
+                                                                        }
+                                                            },
+                                                            {
+                                                                header:'Fecha de Registro',
+                                                                width:140,
+                                                                sortable:true,
+                                                                dataIndex:'fechaRegistro',
+                                                                renderer:function(val)
+                                                                			{
+                                                                            	return val.format('d/m/Y H:i')+' hrs.';
+                                                                            }
+                                                            },
+                                                            {
+                                                                header:'C&oacute;digo &Uacute;nico de Proceso',
+                                                                width:170,
+                                                                sortable:true,
+                                                                dataIndex:'codigoUnicoProceso',
+                                                                renderer:function(val,meta,registro)
+                                                                		{
+                                                                        	return val;
+                                                                        	return '<a href="javascript:setBusquedaCodigo(\''+bE(val)+'\',\''+bE(registro.data.idCarpeta)+'\')">'+val+'</a>';
+                                                                        }
+                                                            },
+                                                            {
+                                                                header:'Tipo de Expediente',
+                                                                width:220,
+                                                                sortable:true,
+                                                                dataIndex:'tipoCarpeta',
+                                                                renderer:function(val,meta,registro)
+                                                                		{
+                                                                        	return formatearValorRenderer(arrTipoCarpeta,val);
+                                                                        }
+                                                            },
+                                                            {
+                                                                header:'T&iacute;tulo del Proceso',
+                                                                width:400,
+                                                                sortable:true,
+                                                                dataIndex:'tituloProceso'
+                                                            },
+                                                            
+                                                            {
+                                                                header:'Tipo de Proceso',
+                                                                width:160,
+                                                                sortable:true,
+                                                                dataIndex:'tipoProceso',
+                                                                renderer:function(val)
+                                                                			{
+                                                                            	return formatearValorRenderer(arrTiposProcesoGlobal,val);
+                                                                            }
+                                                            },
+                                                            {
+                                                                header:'Especialidad',
+                                                                width:160,
+                                                                sortable:true,
+                                                                dataIndex:'especialidad',
+                                                                renderer:function(val)
+                                                                			{
+                                                                            	return formatearValorRenderer(arrEspecialidades,val);
+                                                                            }
+                                                            },
+                                                            {
+                                                                header:'Departamento',
+                                                                width:160,
+                                                                sortable:true,
+                                                                dataIndex:'departamento',
+                                                                renderer:function(val)
+                                                                			{
+                                                                            	return formatearValorRenderer(arrEstados,val);
+                                                                            }
+                                                            },
+                                                            
+                                                            {
+                                                                header:'Despacho',
+                                                                width:350,
+                                                                sortable:true,
+                                                                dataIndex:'despacho',
+                                                                renderer:function(val)
+                                                                			{
+                                                                            	return formatearValorRenderer(arrDespachos,val);
+                                                                            }
+                                                            },
+                                                            {
+                                                                header:'Actor/Accionante',
+                                                                width:300,
+                                                                sortable:true,
+                                                                dataIndex:'actor',
+                                                                renderer:function(val)
+                                                                			{
+                                                                            	return val;
+                                                                            }
+                                                            },
+                                                            {
+                                                                header:'Demandado/Accionado',
+                                                                width:300,
+                                                                sortable:true,
+                                                                dataIndex:'demandado',
+                                                                renderer:function(val)
+                                                                			{
+                                                                            	return val;
+                                                                            }
+                                                            },
+                                                            {
+                                                                header:'Estado del Proceso',
+                                                                width:200,
+                                                                sortable:true,
+                                                                dataIndex:'estadoProceso',
+                                                                renderer:function(val)
+                                                                			{
+                                                                            	return formatearValorRenderer(arrEstadoProcesoGlobal,val);
+                                                                            }
+                                                            }
+                                                        ]
+                                                    );
+                                                    
+        var tblGrid=	new Ext.grid.GridPanel	(
+                                                            {
+                                                                id:'gResultadoBusqueda',
+                                                                store:alDatos,
+                                                                region:'center',
+                                                                frame:false,
+                                                                cm: cModelo,
+                                                                stripeRows :true,
+                                                                loadMask:true,
+                                                                columnLines : true,
+                                                                tbar:	[
+                                                                			{
+                                                                                x:610,
+                                                                                y:65,
+                                                                                xtype:'button',
+                                                                                icon:'../images/magnifier.png',
+                                                                                cls:'x-btn-text-icon',
+                                                                                text:'Buscar',
+                                                                                handler:function()
+                                                                                        {
+                                                                                        	var cmbDespachos=gEx('cmbDespachos');
+                                                                                            var cmbEspecialidad=gEx('cmbEspecialidad');
+                                                                                            var cmbTipoProceso=gEx('cmbTipoProceso');
+                                                                                            var cmbEstadoProceso=gEx('cmbEstadoProceso');
+                                                                                            var cmbDespachos=gEx('cmbDespachos');
+                                                                                            var cmbInicioFiltro=gEx('cmbInicioFiltro');
+                                                                                            var cmbFinFiltro=gEx('cmbFinFiltro');
+                                                                                            
+                                                                                            if((gEx('fInicioFiltro').getValue()!='')&&(cmbInicioFiltro.getValue()==''))
+                                                                                            {
+                                                                                                function resp1()
+                                                                                                {
+                                                                                                    cmbInicioFiltro.focus();
+                                                                                                }
+                                                                                                msgBox('Debe seleccionar la condici&oacute;n de b&uacute;squeda por fecha',resp1);
+                                                                                                return;
+                                                                                            }
+                                                                                            
+                                                                                            if((gEx('fFinFiltro').getValue()!='')&&(cmbFinFiltro.getValue()==''))
+                                                                                            {
+                                                                                                function resp2()
+                                                                                                {
+                                                                                                    cmbFinFiltro.focus();
+                                                                                                }
+                                                                                                msgBox('Debe seleccionar la condici&oacute;n de b&uacute;squeda por fecha',resp2);
+                                                                                                return;
+                                                                                            }
+                                                                                            
+                                                                                            if((gEx('txtCriterio').getValue()!='')&&(+gEx('cmbTipoFigura').getValue()==''))
+                                                                                            {
+                                                                                            	
+                                                                                            	function resp4()
+                                                                                                {
+                                                                                                    gEx('txtCriterio').focus();
+                                                                                                }
+                                                                                                msgBox('Debe seleccionar el tipo de participaci&oacute;n de la persona que desea buscar',resp4);
+                                                                                                return;
+                                                                                            }
+                                                                                            
+                                                                                            if((gEx('noDocumento').getValue()!='')&&(+gEx('cmbTipoDocumento').getValue()==''))
+                                                                                            {
+                                                                                            	
+                                                                                            	function resp3()
+                                                                                                {
+                                                                                                    gEx('cmbTipoDocumento').focus();
+                                                                                                }
+                                                                                                msgBox('Debe seleccionar el Tipo de Documento que desea buscar',resp3);
+                                                                                                return;
+                                                                                            }
+                                                                                            
+                                                                                        
+                                                                                            var cadObj='{"depacho":"'+cmbDespachos.getValue()+'","especialidad":"'+cmbEspecialidad.getValue()+
+                                                                                            '","tipoProceso":"'+cmbTipoProceso.getValue()+'","estadoProceso":"'+cmbEstadoProceso.getValue()+
+                                                                                            '","fechaInicioRegistro":"'+(gEx('fInicioFiltro').getValue()?gEx('fInicioFiltro').getValue().format('Y-m-d'):'')+
+                                                                                            '","fechaFinRegistro":"'+(gEx('fFinFiltro').getValue()?gEx('fFinFiltro').getValue().format('Y-m-d'):'')+
+                                                                                            '","condFInicioFiltro":"'+cmbInicioFiltro.getValue()+'","condFFinFiltro":"'+cmbFinFiltro.getValue()+
+                                                                                            '","folioRadiacion":"'+cv(gEx('txtFolioRadicacion').getValue())+
+                                                                                            '","procesoJudicial":"'+cv(gEx('txtProcesoJudicial').getValue())+
+                                                                                            '","nombreParticipante":"'+cv(gEx('txtCriterio').getValue())+'","tipoFigura":"'+gEx('cmbTipoFigura').getValue()+
+                                                                                            '","noDocumento":"'+cv(gEx('noDocumento').getValue())+'","tipoDocumento":"'+gEx('cmbTipoDocumento').getValue()+'"}';
+                                                                                        
+                                                                                        
+                                                                                            gEx('gResultadoBusqueda').getStore().load	(
+                                                                                                                                            {
+                                                                                                                                                url:'../modulosEspeciales_SGJ/paginasFunciones/funcionesModulosEspeciales_SGJ.php',
+                                                                                                                                                params:	{
+                                                                                                                                                            criterioBusqueda:cadObj
+                                                                                                                                                        }
+                                                                                                                                             }
+                    
+                                                                                                                                        )
+                                                                                        }
+                                                                                
+                                                                            },'-',
+                                                                            {
+                                                                                x:675,
+                                                                                y:65,
+                                                                                xtype:'button',
+                                                                                icon:'../images/find_remove.png',
+                                                                                cls:'x-btn-text-icon',
+                                                                                text:'Limpiar Filtros',
+                                                                                handler:function()
+                                                                                        {
+                                                                                        	var cmbDespachos=gEx('cmbDespachos');
+                                                                                            var cmbEspecialidad=gEx('cmbEspecialidad');
+                                                                                            var cmbTipoProceso=gEx('cmbTipoProceso');
+                                                                                            var cmbEstadoProceso=gEx('cmbEstadoProceso');
+                                                                                            var cmbDespachos=gEx('cmbDespachos');
+                                                                                            var cmbInicioFiltro=gEx('cmbInicioFiltro');
+                                                                                            var cmbFinFiltro=gEx('cmbFinFiltro');
+                                                                                            
+                                                                                            cmbDespachos.setValue('');
+                                                                                            cmbEspecialidad.setValue('');
+                                                                                            cmbTipoProceso.setValue('');
+                                                                                            cmbEstadoProceso.setValue('');
+                                                                                            cmbInicioFiltro.setValue('');
+                                                                                            gEx('fInicioFiltro').setValue('');
+                                                                                            cmbFinFiltro.setValue('');
+                                                                                            gEx('fFinFiltro').setValue('');
+                                                                                            
+                                                                                            gEx('txtFolioRadicacion').setValue('');
+                                                                                            gEx('txtProcesoJudicial').setValue('');
+                                                                                            gEx('txtCriterio').setValue('');
+                                                                                            gEx('cmbTipoFigura').setValue('');
+                                                                                            gEx('noDocumento').setValue('');
+                                                                                            gEx('cmbTipoDocumento').setValue('');
+                                                                                            
+                                                                                            
+                                                                                            var cadObj='{"depacho":"'+cmbDespachos.getValue()+'","especialidad":"'+cmbEspecialidad.getValue()+
+                                                                                            '","tipoProceso":"'+cmbTipoProceso.getValue()+'","estadoProceso":"'+cmbEstadoProceso.getValue()+
+                                                                                            '","fechaInicioRegistro":"'+(gEx('fInicioFiltro').getValue()?gEx('fInicioFiltro').getValue().format('Y-m-d'):'')+
+                                                                                            '","fechaFinRegistro":"'+(gEx('fFinFiltro').getValue()?gEx('fFinFiltro').getValue().format('Y-m-d'):'')+
+                                                                                            '","condFInicioFiltro":"'+cmbInicioFiltro.getValue()+'","condFFinFiltro":"'+cmbFinFiltro.getValue()+'"}';
+                                                                                        	gEx('gResultadoBusqueda').getStore().removeAll();
+                                                                                        
+                                                                                            /*gEx('gResultadoBusqueda').getStore().load	(
+                                                                                                                                            {
+                                                                                                                                                url:'../modulosEspeciales_SGJ/paginasFunciones/funcionesModulosEspeciales_SGJ.php',
+                                                                                                                                                params:	{
+                                                                                                                                                            criterioBusqueda:cadObj
+                                                                                                                                                        }
+                                                                                                                                             }
+                    
+                                                                                                                                        )*/
+                                                                                        }
+                                                                                
+                                                                            } 
+                                                                		],
+                                                                view:new Ext.grid.GroupingView({
+                                                                                                    forceFit:false,
+                                                                                                    showGroupName: false,
+                                                                                                    enableGrouping :false,
+                                                                                                    enableNoGroups:false,
+                                                                                                    enableGroupingMenu:false,
+                                                                                                    hideGroupedColumn: false,
+                                                                                                    startCollapsed:false
+                                                                                                })
+                                                            }
+                                                        );
+        return 	tblGrid;
+}
+
+
+function abrirProcesoBusqueda(iF,iR)
+{
+	var obj={};
+    obj.ancho='100%';
+    obj.alto='100%';
+    obj.url='../modeloPerfiles/vistaDTDv3.php';
+    obj.params=[['idFormulario',bD(iF)],['idRegistro',bD(iR)],['actor',bE(0)],['dComp',bE('auto')]];
+    
+    abrirVentanaFancySuperior(obj);
+    
+    
+}

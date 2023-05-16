@@ -1,0 +1,501 @@
+<?php session_start();
+	include("conexionBD.php"); 
+	
+	$parametros="";
+	if(isset($_POST["funcion"]))
+	{
+		$funcion=$_POST["funcion"];
+		if(isset($_POST["param"]))
+		{
+			$p=$_POST["param"];
+			$parametros=json_decode($p,true);
+			
+		}
+		
+	}	
+	
+	switch($funcion)
+	{
+		case 1: 
+			registrarDatosTRD();
+		break;
+		case 2:
+			registrarRegistroTRD();
+		break;
+		case 3:
+			obtenerRegistrosTRD();
+		break;
+		case 4:
+			rmeoverRegistroTRD();
+		break;
+		case 5:
+			buscarMetaDato();
+		break;
+		case 6:
+			validarHashDocumentos();
+		break;
+		case 7:
+			importacionExpediente();
+		break;
+	}
+	
+	
+	function registrarDatosTRD()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		
+		if($obj->idRegistro==-1)
+		{
+			$consulta="INSERT INTO 908_tablasRetencionDocumental(cveTabla,nombreTabla,descripcion,version,idResponsableCreacion,
+						fechaCreacion,procesoArchivoGestion,procesoArchivoCentral) 
+					VALUES('".cv($obj->cveTabla)."','".cv($obj->nombreTabla)."','".cv($obj->descripcion)."','".cv($obj->version)."',".$_SESSION["idUsr"].
+					",'".date("Y-m-d H:i:s")."','".$obj->procesoArchivoGestion."','".$obj->procesoArchivoCentral."')";
+		
+		
+			if($con->ejecutarConsulta($consulta))
+				$obj->idRegistro=$con->obtenerUltimoID();
+		}
+		else
+		{
+			$consulta="update 908_tablasRetencionDocumental set cveTabla='".cv($obj->cveTabla)."',nombreTabla='".cv($obj->nombreTabla).
+					"',descripcion='".cv($obj->descripcion)."',version='".cv($obj->version)."',procesoArchivoGestion=".
+					$obj->procesoArchivoGestion.",procesoArchivoCentral=".$obj->procesoArchivoCentral." where idTablaRetencion=".$obj->idRegistro;
+			$con->ejecutarConsulta($consulta);
+			$comentarioAdicionalSQL="Se modifica datos generales. Datos modificados:".bE($cadObj);
+			guardarRegistroBitacoraSistema("../gestorDocumental/tablaRetencionDocumental.php",$obj->idRegistro,13,("TRD: ".$obj->nombreTabla.".- ".$comentarioAdicionalSQL));
+		}
+		
+		echo "1|".$obj->idRegistro;
+	}
+	
+	
+	function registrarRegistroTRD()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		
+		$idTablaRetencion=$obj->idTablaRetencion;
+		
+		
+		$query="SELECT nombreTabla,VERSION FROM 908_tablasRetencionDocumental WHERE idTablaRetencion=".$idTablaRetencion;
+		$fTablaRetencion=$con->obtenerPrimeraFilaAsoc($query);
+		$nomTablaTRD=$fTablaRetencion["nombreTabla"]."(V. ".$fTablaRetencion["VERSION"].")";
+		
+		$idSerie=isset($obj->idSerie)?$obj->idSerie:"NULL";
+		$idSubSerie=isset($obj->idSubSerie)?$obj->idSubSerie:"NULL";
+		$tipoDocumento=isset($obj->tipoDocumento)?$obj->tipoDocumento:"NULL";
+		
+		$retencionArchivoGestion="NULL";
+		$unidadRetencionArchivoGestion="NULL";
+		$retencionArchivoCentral="NULL";
+		$unidadRetencionArchivoCentral="NULL";
+		
+		$conservacionTotal="0";
+		$eliminacion="0";
+		$microfilmacionDigitalizacion="0";
+		$seleccion="0";
+		$procedimiento="NULL";
+		
+		$tipoElemento=$obj->tipoRegistro;
+		$cveElemento=$obj->cveElemento;
+		
+		
+		
+		$arrSoporte=explode(",",$obj->soporte);
+		
+		$soporteFisico=existeValor($arrSoporte,1)?1:0;
+		$soporteElectronico=existeValor($arrSoporte,2)?1:0;
+		
+		if($obj->tRetencionGestion!="")
+			$retencionArchivoGestion=$obj->tRetencionGestion;
+		if($obj->pRetencionGestion!="")
+			$unidadRetencionArchivoGestion=$obj->pRetencionGestion;
+		
+		if($obj->tRetencionCentral!="")
+			$retencionArchivoCentral=$obj->tRetencionCentral;
+		
+		if($obj->pRetencionCentral!="")
+			$unidadRetencionArchivoCentral=$obj->pRetencionCentral;
+		
+		
+		switch($obj->disposicionFinal)
+		{
+			case 1://CT
+				$conservacionTotal=1;
+			break;
+			case 2://E
+				$eliminacion=1;
+			break;
+			case 3://MT
+				$microfilmacionDigitalizacion=1;
+			break;
+			case 4://S
+				$seleccion=1;
+			break;
+		}
+		
+		
+		$procedimiento=$obj->procedimiento;
+		$tituloElemento=isset($obj->tituloElemento)?$obj->tituloElemento:"";
+		
+		
+		
+		
+		
+		
+		
+		$consulta="";
+		if($obj->idRegistro==-1)
+		{
+			switch($tipoElemento)
+			{
+				case '1':
+					
+					$comentarioAdicionalSQL="Se agrega Serie: ".$tituloElemento;
+				break;
+				case '2':
+					$comentarioAdicionalSQL="Se agrega SubSerie: ".$tituloElemento;
+				break;
+				case '3':
+					$consulta="SELECT nombreCategoria FROM 908_categoriasDocumentos WHERE idCategoria=".$tipoDocumento;
+					$nombreCategoria=$con->obtenerValor($consulta);
+					$comentarioAdicionalSQL="Se agrega Tipo Documental: ".$nombreCategoria;
+				break;
+				
+			}
+			$consulta="INSERT INTO 908_registrosTablasRetencionDocumental(idTablaRetencion,idSerie,idSubSerie,tipoDocumento,soporteFisico,soporteElectronico,retencionArchivoGestion,
+					unidadRetencionArchivoGestion,retencionArchivoCentral,unidadRetencionArchivoCentral,conservacionTotal,eliminacion,microfilmacionDigitalizacion,seleccion,procedimiento,
+					tipoElemento,cveElemento,tituloElemento) values(".$idTablaRetencion.",".$idSerie.",".$idSubSerie.",".$tipoDocumento.",".$soporteFisico.",".$soporteElectronico.",".$retencionArchivoGestion.
+					",".$unidadRetencionArchivoGestion.",".$retencionArchivoCentral.",".$unidadRetencionArchivoCentral.",".$conservacionTotal.",".$eliminacion.",".$microfilmacionDigitalizacion.",".$seleccion.
+					",'".cv($procedimiento)."',".$tipoElemento.",'".cv($cveElemento)."','".cv($tituloElemento)."')";
+
+		
+			$comentarioAdicionalSQL.=". Informaci&oacute; Agregada: ".bE($cadObj);
+		}
+		else
+		{
+			$query="SELECT * FROM 908_registrosTablasRetencionDocumental WHERE idRegistro=".$obj->idRegistro;
+			$fRegistro=$con->obtenerPrimeraFilaAsoc($query);
+			$objInformacion=$con->obtenerFilasJSON($query);
+			switch($fRegistro["tipoElemento"])
+			{
+				case '1':
+					
+					$comentarioAdicionalSQL="Modificaci&oacute;n de Serie: ".($fRegistro["tituloElemento"]==$tituloElemento?$fRegistro["tituloElemento"]:($fRegistro["tituloElemento"]."/".$tituloElemento));
+				break;
+				case '2':
+					$comentarioAdicionalSQL="Modificaci&oacute;n de SubSerie: ".($fRegistro["tituloElemento"]==$tituloElemento?$fRegistro["tituloElemento"]:($fRegistro["tituloElemento"]."/".$tituloElemento));
+				break;
+				case '3':
+					$consulta="SELECT nombreCategoria FROM 908_categoriasDocumentos WHERE idCategoria=".$tipoDocumento;
+					$nombreCategoria=$con->obtenerValor($consulta);
+					$consulta="SELECT nombreCategoria FROM 908_categoriasDocumentos WHERE idCategoria=".$fRegistro["tipoDocumento"];
+					$nombreCategoria=$con->obtenerValor($consulta);
+					$comentarioAdicionalSQL="Modificaci&oacute;n de Tipo Documental: ".($nombreCategoria==$nuevoTipoDocumental?$nombreCategoria:($nombreCategoria."/".$nuevoTipoDocumental));
+				break;
+				
+			}
+			$consulta="update 908_registrosTablasRetencionDocumental set idSerie=".$idSerie.",idSubSerie=".$idSubSerie.",tipoDocumento=".$tipoDocumento.",soporteFisico=".$soporteFisico.
+					",soporteElectronico=".$soporteElectronico.",retencionArchivoGestion=".$retencionArchivoGestion.",unidadRetencionArchivoGestion=".$unidadRetencionArchivoGestion.
+					",retencionArchivoCentral=".$retencionArchivoCentral.",unidadRetencionArchivoCentral=".$unidadRetencionArchivoCentral.",conservacionTotal=".$conservacionTotal.
+					",eliminacion=".$eliminacion.",microfilmacionDigitalizacion=".$microfilmacionDigitalizacion.",seleccion=".$seleccion.",procedimiento='".cv($procedimiento)."',
+					cveElemento='".cv($cveElemento)."',tituloElemento='".cv($tituloElemento)."'
+					where idRegistro=".$obj->idRegistro;
+			$comentarioAdicionalSQL.=". Informaci&oacute; Anterior: ".bE($objInformacion).".Informaci&oacute; Actual: ".bE($cadObj);
+		}
+ 		if($con->ejecutarConsulta($consulta))
+		{
+			guardarRegistroBitacoraSistema("../gestorDocumental/tablaRetencionDocumental.php",$idTablaRetencion,13,("TRD: ".$nomTablaTRD.".- ".$comentarioAdicionalSQL));
+			echo "1|";
+		}
+	}
+	
+	
+	function obtenerRegistrosTRD()
+	{
+		global $con;
+		$idTablaRetencion=$_POST["idTablaRetencion"];
+		$arrRegistros="";
+		$numReg=0;
+		$consulta="SELECT idRegistro,idSerie,idSubSerie,tipoDocumento,soporteFisico,soporteElectronico,retencionArchivoGestion,unidadRetencionArchivoGestion,retencionArchivoCentral,unidadRetencionArchivoCentral,
+					conservacionTotal,eliminacion,microfilmacionDigitalizacion,seleccion,procedimiento,tituloElemento,cveElemento,tipoElemento FROM 908_registrosTablasRetencionDocumental WHERE 
+					idTablaRetencion=".$idTablaRetencion." AND tipoElemento=1 ORDER BY cveElemento";
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			$o='{"idRegistro":"'.$fila["idRegistro"].'","idSerie":"","cveSerie":"'.$fila["cveElemento"].'","idSubSerie":"","cveSubSerie":"","tipoDocumento":"'.cv($fila["tituloElemento"]).
+			'","soporteFisico":'.($fila["soporteFisico"]==1?"true":"false").',"soporteElectronico":'.
+				($fila["soporteElectronico"]==1?"true":"false").',"retencionArchivoGestion":"'.$fila["retencionArchivoGestion"].'","unidadRetencionArchivoGestion":"'.$fila["unidadRetencionArchivoGestion"].'",
+					"retencionArchivoCentral":"'.$fila["retencionArchivoCentral"].'","unidadRetencionArchivoCentral":"'.$fila["unidadRetencionArchivoCentral"].
+					'","conservacionTotal":'.($fila["conservacionTotal"]==1?"true":"false").',"eliminacion":'.($fila["eliminacion"]==1?"true":"false").
+					',"microfilmacionDigitalizacion":'.($fila["microfilmacionDigitalizacion"]==1?"true":"false").
+					',"seleccion":'.$fila["seleccion"].',"procedimiento":"'.cv($fila["procedimiento"]).'","tipoElemento":"'.$fila["tipoElemento"].'"}';
+		
+			if($arrRegistros=="")
+				$arrRegistros=$o;
+			else
+				$arrRegistros.=",".$o;
+			$numReg++;	
+				
+			$consulta="SELECT idRegistro,idSerie,idSubSerie,tipoDocumento,soporteFisico,soporteElectronico,retencionArchivoGestion,unidadRetencionArchivoGestion,retencionArchivoCentral,unidadRetencionArchivoCentral,
+					conservacionTotal,eliminacion,microfilmacionDigitalizacion,seleccion,procedimiento,tituloElemento,cveElemento,tipoElemento FROM 908_registrosTablasRetencionDocumental WHERE 
+					idTablaRetencion=".$idTablaRetencion." and idSerie=".$fila["idRegistro"]." AND tipoElemento=2 ORDER BY cveElemento";
+			$resSubserie=$con->obtenerFilas($consulta);
+			while($filaSubserie=mysql_fetch_assoc($resSubserie))
+			{
+				$o='{"idRegistro":"'.$filaSubserie["idRegistro"].'","idSerie":"'.$fila["idRegistro"].'","cveSerie":"'.$fila["cveElemento"].'","idSubSerie":"'.$filaSubserie["idRegistro"].
+					'","cveSubSerie":"'.cv($filaSubserie["cveElemento"]).'","tipoDocumento":"'.cv($filaSubserie["tituloElemento"]).
+				'","soporteFisico":'.($filaSubserie["soporteFisico"]==1?"true":"false").',"soporteElectronico":'.
+					($filaSubserie["soporteElectronico"]==1?"true":"false").',"retencionArchivoGestion":"'.$filaSubserie["retencionArchivoGestion"].'","unidadRetencionArchivoGestion":"'.
+					$filaSubserie["unidadRetencionArchivoGestion"].'",
+						"retencionArchivoCentral":"'.$filaSubserie["retencionArchivoCentral"].'","unidadRetencionArchivoCentral":"'.$filaSubserie["unidadRetencionArchivoCentral"].
+						'","conservacionTotal":'.($filaSubserie["conservacionTotal"]==1?"true":"false").',"eliminacion":'.($filaSubserie["eliminacion"]==1?"true":"false").
+						',"microfilmacionDigitalizacion":'.($filaSubserie["microfilmacionDigitalizacion"]==1?"true":"false").
+						',"seleccion":'.$filaSubserie["seleccion"].',"procedimiento":"'.cv($filaSubserie["procedimiento"]).'","tipoElemento":"'.$filaSubserie["tipoElemento"].'"}';
+			
+				if($arrRegistros=="")
+					$arrRegistros=$o;
+				else
+					$arrRegistros.=",".$o;		
+				
+				$numReg++;
+				
+				
+				$consulta="SELECT idRegistro,idSerie,idSubSerie,tipoDocumento,soporteFisico,soporteElectronico,retencionArchivoGestion,unidadRetencionArchivoGestion,retencionArchivoCentral,unidadRetencionArchivoCentral,
+					conservacionTotal,eliminacion,microfilmacionDigitalizacion,seleccion,procedimiento,tituloElemento,cveElemento,tipoElemento FROM 908_registrosTablasRetencionDocumental WHERE 
+					idTablaRetencion=".$idTablaRetencion." and idSerie=".$fila["idRegistro"]." and idSubSerie=".$filaSubserie["idRegistro"]." AND tipoElemento=3 ORDER BY cveElemento";
+				$resTipoDocumental=$con->obtenerFilas($consulta);
+				while($filaTipoDocumental=mysql_fetch_assoc($resTipoDocumental))
+				{
+					$o='{"idRegistro":"'.$filaTipoDocumental["idRegistro"].'","idSerie":"'.$fila["idRegistro"].'","cveSerie":"'.$fila["cveElemento"].'","idSubSerie":"'.$filaSubserie["idRegistro"].
+						'","cveSubSerie":"'.cv($filaSubserie["cveElemento"]).'","tipoDocumento":"'.cv($filaTipoDocumental["tipoDocumento"]).
+					'","soporteFisico":'.($filaTipoDocumental["soporteFisico"]==1?"true":"false").',"soporteElectronico":'.
+						($filaTipoDocumental["soporteElectronico"]==1?"true":"false").',"retencionArchivoGestion":"'.$filaTipoDocumental["retencionArchivoGestion"].'","unidadRetencionArchivoGestion":"'.
+						$filaTipoDocumental["unidadRetencionArchivoGestion"].'",
+							"retencionArchivoCentral":"'.$filaTipoDocumental["retencionArchivoCentral"].'","unidadRetencionArchivoCentral":"'.$filaTipoDocumental["unidadRetencionArchivoCentral"].
+							'","conservacionTotal":'.($filaTipoDocumental["conservacionTotal"]==1?"true":"false").',"eliminacion":'.($filaTipoDocumental["eliminacion"]==1?"true":"false").
+							',"microfilmacionDigitalizacion":'.($filaTipoDocumental["microfilmacionDigitalizacion"]==1?"true":"false").
+							',"seleccion":'.$filaTipoDocumental["seleccion"].',"procedimiento":"'.cv($filaTipoDocumental["procedimiento"]).'","tipoElemento":"'.$filaTipoDocumental["tipoElemento"].'"}';
+				
+					if($arrRegistros=="")
+						$arrRegistros=$o;
+					else
+						$arrRegistros.=",".$o;		
+					
+					$numReg++;
+				}
+				
+			}
+		}
+		
+		
+		$arrSeries="";
+		$consulta="SELECT idRegistro,CONCAT('[',cveElemento,'] ',tituloElemento) AS serie FROM 908_registrosTablasRetencionDocumental WHERE idTablaRetencion=".$idTablaRetencion." and tipoElemento=1  ORDER BY tituloElemento";
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			
+			$consulta="SELECT idRegistro,CONCAT('[',cveElemento,'] ',tituloElemento) AS subserie FROM 908_registrosTablasRetencionDocumental WHERE 
+					idTablaRetencion=".$idTablaRetencion." and idSerie=".$fila["idRegistro"]." and tipoElemento=2  ORDER BY tituloElemento";
+		
+			$arrSubserie=$con->obtenerFilasArreglo($consulta);
+			$o="['".$fila["idRegistro"]."','".cv($fila["serie"])."',".$arrSubserie."]";
+			if($arrSeries=="")
+				$arrSeries=$o;
+			else
+				$arrSeries.=",".$o;
+		}
+		echo '{"numReg":"'.$numReg.'","registros":['.$arrRegistros.'],"arrSeries":['.$arrSeries.']}';
+		
+		
+	}
+	
+	function rmeoverRegistroTRD()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		
+		$query="SELECT * FROM 908_registrosTablasRetencionDocumental WHERE idRegistro=".$obj->idRegistro;
+		$fRegistro=$con->obtenerPrimeraFilaAsoc($query);
+		$objInformacion=$con->obtenerFilasJSON($query);
+		$idTablaRetencion=$fRegistro["idTablaRetencion"];
+		$query="SELECT nombreTabla,VERSION FROM 908_tablasRetencionDocumental WHERE idTablaRetencion=".$fRegistro["idTablaRetencion"];
+		$fTablaRetencion=$con->obtenerPrimeraFilaAsoc($query);
+		$nomTablaTRD=$fTablaRetencion["nombreTabla"]."(V. ".$fTablaRetencion["VERSION"].")";
+		$x=0;
+		$consulta[$x]="begin";
+		$x++;
+		$consulta[$x]="DELETE FROM 908_registrosTablasRetencionDocumental WHERE idRegistro=".$obj->idRegistro;
+		$x++;
+		switch($obj->tipoElemento)
+		{
+			case '1':
+				$consulta[$x]="DELETE FROM 908_registrosTablasRetencionDocumental WHERE idSerie=".$obj->idRegistro;
+				$x++;
+				$comentarioAdicionalSQL="Eliminación de Serie: ".$fRegistro["tituloElemento"];
+			break;
+			case '2':
+				$consulta[$x]="DELETE FROM 908_registrosTablasRetencionDocumental WHERE idSubSerie=".$obj->idRegistro;
+				$x++;
+				$comentarioAdicionalSQL="Eliminación de SubSerie: ".$fRegistro["tituloElemento"];
+			break;
+			case '3':
+				$consulta="SELECT nombreCategoria FROM 908_categoriasDocumentos WHERE idCategoria=".$fRegistro["tipoDocumento"];
+				$nombreCategoria=$con->obtenerValor($consulta);
+				$comentarioAdicionalSQL="Eliminación de Tipo Documental: ".$nombreCategoria;
+			break;
+			
+		}
+		$comentarioAdicionalSQL.=". Informaci&oacute; Eliminada: ".bE($objInformacion);
+		$consulta[$x]="commit";
+		$x++;
+		
+		if($con->ejecutarBloque($consulta))
+		{
+			guardarRegistroBitacoraSistema("../gestorDocumental/tablaRetencionDocumental.php",$idTablaRetencion,13,("TRD: ".$nomTablaTRD.".- ".$comentarioAdicionalSQL));
+			echo "1|";
+		}
+	}
+	
+	function buscarMetaDato()
+	{
+		global $con;
+		
+		$criterio=$_POST["criterio"];
+		
+		$numRegistros=0;
+		$arrMetaDatos="";
+		$consulta="SELECT idMetaDato,cveMetaDato,nombreMetaDato,metodoResolucion,tipoDatoEntrada,funcionSistema,fuenteDatos FROM 20003_catalogoMetaDatos where 
+					(nombreMetaDato like '%".$criterio."%' or  cveMetaDato like '%".$criterio."%')";
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			$lblDetalle="Tipo de Entrada: ";
+			switch($fila["metodoResolucion"])
+			{
+				case 0:
+					$lblDetalle="Campo Abierto";
+					switch($fila["tipoDatoEntrada"])
+					{
+						case 0:
+							$lblDetalle.=" (Texto Corto)";
+						break;
+						case 1:
+							$lblDetalle.=" (Texto Largo)";
+						break;
+						case 2:
+							$lblDetalle.=" (Entero)";
+						break;
+						case 3:
+							$lblDetalle.=" (Decimal)";
+						break;
+						
+					}
+				break;
+				case 1:
+					$lblDetalle="Mediante Funci&oacute;n de Sistema";
+					$consulta="SELECT nombreConsulta FROM 991_consultasSql WHERE idConsulta=".$fila["funcionSistema"];
+					$lblFuncion=$con->obtenerValor($consulta);
+					$lblDetalle.=" (".$lblFuncion.")";
+				break;
+				case 2:
+					$lblDetalle="Opciones Cerradas (Combo)";
+					
+				break;	
+			}
+			
+			$o='{"idMetaDato":"'.$fila["idMetaDato"].'","nombreMetaDato":"'.cv($fila["cveMetaDato"]."] ".$fila["nombreMetaDato"]).'","detallesAdicionales":"'.cv($lblDetalle).'"}';
+		
+			if($arrMetaDatos=="")
+				$arrMetaDatos=$o;
+			else
+				$arrMetaDatos.=",".$o;
+			$numRegistros++;
+		}
+		
+		echo '{"numReg":"'.$numRegistros.'","registros":['.$arrMetaDatos.']}';
+		
+	}
+	
+	function validarHashDocumentos()
+	{
+		global $con;
+		
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		
+		$arrRegistros="";
+		foreach($obj->arrRegistros as $r)
+		{
+			$consulta="SELECT idArchivo,nomArchivoOriginal,sha512 FROM 908_archivos WHERE sha512='".$r->hash."'";
+			$fila=$con->obtenerPrimeraFilaAsoc($consulta);
+			
+			$permiteMostrar="true";
+			if($fila)
+			{
+				$permiteMostrar=permiteObservarDocumento($fila["idArchivo"])?"true":"false";
+			}
+			
+			$o='{"idArchivo":"'.(isset($fila["idArchivo"])?$fila["idArchivo"]:"").'","nomArchivoOriginal":"'.cv($fila['nomArchivoOriginal']==""?"---------":$fila['nomArchivoOriginal']).'","sha512":"'.$r->hash.'","permiteMostrar":"'.$permiteMostrar.'"}';
+			if($arrRegistros=="")
+				$arrRegistros=$o;
+			else
+				$arrRegistros.=",".$o;
+			
+		}
+		
+		echo "1|[".$arrRegistros."]";
+	}
+	
+	function importacionExpediente()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		$objRespuesta="";
+		
+		$consulta="SELECT idFuncionAsociada FROM 20007_perfilesImportacionExportacionExpedientes WHERE idRegistroPerfil=".$obj->idPerfilImportacion;
+		$idFuncionAsociada=$con->obtenerValor($consulta);
+		$cadObj='{"idArchivo":"'.$obj->idArchivo.'","nombreArchivo":"'.cv($obj->nombreArchivo).'","tipoOperacion":"'.$obj->tipoOperacion.
+				'","despacho":"'.(!isset($obj->despacho)?"":$obj->despacho).'","expediente":"'.(!isset($obj->expediente)?"":$obj->expediente).'"}';
+		$objParametros=json_decode($cadObj);
+
+		$resultado=resolverExpresionCalculoPHP($idFuncionAsociada,$objParametros,$cacheCalculos);
+		if($obj->tipoOperacion==1)
+		{
+			$consulta="SELECT nombreUnidad FROM _17_tablaDinamica WHERE claveUnidad='".$resultado["unidadGestion"]."'";
+			$lblUnidadGestion=$con->obtenerValor($consulta);
+			$objRespuesta='{"carpetaAdministrativa":"'.cv($resultado["carpetaAdministrativa"]).
+						'","unidadGestion":"'.cv($resultado["unidadGestion"]).'","lblUnidadGestion":"'.
+						cv($lblUnidadGestion).'","idArchivo":"'.$obj->idArchivo.'","nombreArchivo":"'.cv($obj->nombreArchivo).
+						'","idPerfilImportacion":"'.$obj->idPerfilImportacion.'"}';
+		}
+		else
+		{
+			if(isset($resultado["error"]))
+			{
+				return "<br>".$resultado["error"];
+			}
+			
+			$consulta="INSERT INTO 20008_importacionesRegistros(fechaRegistro,nombreArchivo,totalArchivosImportados,perfilImportacion,
+						totalSubCarpetasImportadas,carpetaAdministrativa,despacho,responsableImportacion) 
+						VALUES('".date("Y-m-d H:i:s")."','".cv($obj->nombreArchivo)."',".$resultado["totalArchivosImportados"].
+						",".$obj->idPerfilImportacion.",".$resultado["totalSubCarpetas"].",'".cv($obj->expediente)."','".$obj->despacho.
+						"',".$_SESSION["idUsr"].")";
+			$con->ejecutarConsulta($consulta);
+			
+			$objRespuesta="";
+			if($resultado)
+			{
+				$objRespuesta="[['1','Total de archivos importados: ".$resultado["totalArchivosImportados"].
+								"'],['2','Total subcarpetas importadas: ".$resultado["totalSubCarpetas"]."']]";
+			}
+		}
+		
+		echo '1|'.$objRespuesta;
+	}
+?>

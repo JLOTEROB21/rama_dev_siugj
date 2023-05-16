@@ -1,0 +1,523 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+	$scanSession=generarNombreArchivoTemporal();
+	$_SESSION[$scanSession]=array();
+?>
+var scanSession='<?php echo $scanSession ?>';
+var idDocumento='';
+var nombreDocumento='';
+var cScan;
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	mostrarMensajeProcesando('Identificando dispositivos de digitalizaci&oacute;n');
+	cScan=cLatisScan('127.0.0.1','8182',onMessageScan,onErrorConnect);
+
+    
+	
+	new Ext.Viewport(	{
+                                layout: 'border',
+                                items: [
+                                            {
+                                                xtype:'panel',
+                                                region:'center',
+                                                layout:'border',
+                                                cls:'panelSIUGJPrincipal',
+                                                items:	[
+                                                            {
+                                                            	xtype:'panel',
+                                                                width:380,
+                                                                region:'west',
+                                                                cls:'panelSiugjPrincipal',
+                                                                layout:'absolute',
+                                                                tbar:	[
+                                                                			{
+                                                                            	x:10,
+                                                                                y:430,
+                                                                                width:100,
+                                                                                height:45,
+                                                                                xtype:'button',
+                                                                                icon:'../images/document_go.png',
+                                                                                cls:'x-btn-text-icon',
+                                                                                text:'Escanear',                                                                                
+                                                                                id:'btnScan',
+                                                                                handler:function()
+                                                                                        {
+                                                                                            mostrarMensajeProcesando('Digitalizando documento');
+                                                                                            startScanning(gEx('cmdDispositivosEntrada').getValue());
+                                                                                            
+                                                                                        }
+                                                                                
+                                                                            },
+                                                                            {
+                                                                            	xtype:'tbspacer',
+                                                                                width:10
+                                                                            },
+                                                                            {
+                                                                            	x:115,
+                                                                                y:430,
+                                                                                width:100,
+                                                                                height:45,
+                                                                                disabled:true,
+                                                                                xtype:'button',
+                                                                                icon:'../images/icon_big_tick.gif',
+                                                                                cls:'x-btn-text-icon',
+                                                                                text:'Finalizar',
+                                                                                id:'btnAceptar',
+                                                                                handler:function()
+                                                                                        {
+                                                                                        	
+                                                                                            var cadObj=gE('cadObj').value;
+                                                                                            if(cadObj!='')
+                                                                                            {
+                                                                                            	obj=eval('['+bD(gE('cadObj').value)+']')[0];
+                                                                                                
+                                                                                            	mostrarVentanaNombreDocumento(obj);
+                                                                                                
+                                                                                            }
+                                                                                            
+                                                                                        }
+                                                                                
+                                                                            },
+                                                                            {
+                                                                            	xtype:'tbspacer',
+                                                                                width:10
+                                                                            },
+                                                                            {
+                                                                            	x:240,
+                                                                                y:430,
+                                                                                width:100,
+                                                                                height:45,
+                                                                                xtype:'button',
+                                                                                icon:'../images/cross.png',
+                                                                                cls:'x-btn-text-icon',
+                                                                                text:'Cancelar',
+                                                                                id:'btnCancelar',
+                                                                                handler:function()
+                                                                                        {
+                                                                                        	
+                                                                                            function funcAjax()
+                                                                                            {
+                                                                                                var resp=peticion_http.responseText;
+                                                                                                arrResp=resp.split('|');
+                                                                                                if(arrResp[0]=='1')
+                                                                                                {
+                                                                                                    window.parent.cerrarVentanaFancy();
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+                                                                                                }
+                                                                                            }
+                                                                                            obtenerDatosWeb('../paginasFunciones/funcionesModulosEspeciales_SGP.php',funcAjax, 'POST','funcion=401&s='+scanSession,true);
+                                                                                            
+                                                                                        
+                                                                                            
+                                                                                            
+                                                                                        }
+                                                                                
+                                                                            }
+                                                                		],
+                                                                items:	[
+                                                                			{
+                                                                            	x:10,
+                                                                                y:15,
+                                                                                xtype:'label',
+                                                                                cls:'SIUGJ_Etiqueta',
+                                                                                html:'Dispositivo de entrada:'
+                                                                            },
+                                                                            {
+                                                                            	x:10,
+                                                                                y:45,
+                                                                                xtype:'label',
+                                                                                html:'<div id="divComboDispositivoEntrada"></div>'
+                                                                                
+                                                                            }
+                                                                            ,
+                                                                            {
+                                                                            	x:10,
+                                                                                y:100,
+                                                                                xtype:'label',
+                                                                                cls:'SIUGJ_Etiqueta',
+                                                                                html:'Calidad (Dpi´s):'
+                                                                            },
+                                                                            {
+                                                                            	x:10,
+                                                                                y:130,
+                                                                                xtype:'label',
+                                                                                html:'<div id="divComboCalidad"></div>'
+                                                                                
+                                                                            },
+                                                                            {
+                                                                            	x:10,
+                                                                                y:185,
+                                                                                xtype:'label',
+                                                                                cls:'SIUGJ_Etiqueta',
+                                                                                html:'Profundidad:'
+                                                                            },
+                                                                            {
+                                                                            	x:10,
+                                                                                y:215,
+                                                                                xtype:'label',
+                                                                                html:'<div id="divComboProdundidad"></div>'
+                                                                                
+                                                                            },
+                                                                            {
+                                                                            	x:10,
+                                                                                y:270,
+                                                                                xtype:'label',
+                                                                                cls:'SIUGJ_Etiqueta',
+                                                                                html:'Tama&ntilde;o de papel:'
+                                                                            },
+                                                                            {
+                                                                            	x:10,
+                                                                                y:300,
+                                                                                xtype:'label',
+                                                                                html:'<div id="divComboTamano"></div>'
+                                                                                
+                                                                            },
+                                                                            {
+                                                                            	x:10,
+                                                                                y:355,
+                                                                                xtype:'label',
+                                                                                cls:'SIUGJ_Etiqueta',
+                                                                                html:'Escanear Ambos lados:'
+                                                                            },
+                                                                            {
+                                                                            	x:10,
+                                                                                y:385,
+                                                                                disabled:true,
+                                                                                id:'rdoDuplex1',
+                                                                                name:'rdoDuplex',
+                                                                                boxLabel:'Si',
+                                                                                ctCls:'controlSIUGJ',
+                                                                                xtype:'radio'
+                                                                            },
+                                                                            {
+                                                                            	x:100,
+                                                                                y:385,
+                                                                                disabled:true,
+                                                                                id:'rdoDuplex2',
+                                                                                name:'rdoDuplex',
+                                                                                boxLabel:'No',
+                                                                                ctCls:'controlSIUGJ',
+                                                                                xtype:'radio'
+                                                                            }
+                                                                            
+                                                                            
+                                                                		]
+                                                            },
+                                                            {
+                                                            	xtype:'panel',
+                                                                region:'center',
+                                                                layout:'absolute',
+                                                                items:	[
+                                                                			new Ext.ux.IFrameComponent({ 
+                
+                                                                                                            id: 'frameDocScan', 
+                                                                                                            anchor:'100% 100%',
+                                                                                                            loadFuncion:function(iFrame)
+                                                                                                            			{
+                                                                                                                        	
+                                                                                                                        },
+
+                                                                                                            url: '../paginasFunciones/white.php',
+                                                                                                            style: 'width:100%;height:100%' 
+                                                                                                    })
+                                                                
+                                                                		]
+                                                            }
+                                                        ]
+                                            }
+                                         ]
+                            }
+                        )   
+                        
+    getScanList();    
+    
+    
+    var cmdDispositivosEntrada=crearComboExt('cmdDispositivosEntrada',[],0,0,350,{ctCls:'comboWrapSIUGJControl',cls:'comboSIUGJControl',listClass:'listComboSIUGJControl',renderTo:'divComboDispositivoEntrada'});
+    
+    cmdDispositivosEntrada.on('select',function(cmb,registro)
+    									{
+                                        	mostrarMensajeProcesando('Obteniendo informaci&oacute;n del Dispositivo');
+                                        	getCapabilities(registro.data.id);
+                                        }
+    						)
+    
+    var cmbDPI=crearComboExt('cmbDPI',[],0,0,350,{ctCls:'comboWrapSIUGJControl',cls:'comboSIUGJControl',listClass:'listComboSIUGJControl',renderTo:'divComboCalidad'});
+    cmbDPI.on('select',function(cmb,registro)
+    									{
+                                        	setCapabilitie('setDPI',registro.data.id,gEx('cmdDispositivosEntrada').getValue());
+                                        }
+    						)
+    
+    
+    var cmbDepth=crearComboExt('cmbDepth',[],0,0,350,{ctCls:'comboWrapSIUGJControl',cls:'comboSIUGJControl',listClass:'listComboSIUGJControl',renderTo:'divComboProdundidad'});
+    cmbDepth.on('select',function(cmb,registro)
+    									{
+                                        	setCapabilitie('setDepth',registro.data.id,gEx('cmdDispositivosEntrada').getValue());
+                                        }
+    						)
+    var cmbSize=crearComboExt('cmbSize',[],0,0,350,{ctCls:'comboWrapSIUGJControl',cls:'comboSIUGJControl',listClass:'listComboSIUGJControl',renderTo:'divComboTamano'});
+    cmbSize.on('select',function(cmb,registro)
+    									{
+                                        	setCapabilitie('setSizePaper',registro.data.id,gEx('cmdDispositivosEntrada').getValue());
+                                        }
+    						)
+    
+              
+	
+}
+
+function onErrorConnect(e)
+{
+	
+	var lblMensajeError='';	
+	ocultarMensajeProcesando();    
+    switch(e.type)
+    {
+    	case 'error':
+        	lblMensajeError='Ha ocurrido un problema con la conexi&oacute;n a '+lblAplicacion+' Utilities, verifique que la aplicaci&oacute;n se encuentre en ejecuci&oacute;n';
+        break;
+    }
+    msgBox(lblMensajeError);
+    
+}
+
+function onMessageScan(cOMessage)
+{
+	switch(cOMessage.message)
+    {
+    	case 'test':
+        	/*var contenidoArchivo=cOMessage.documento;
+            var contenido=atob(contenidoArchivo)
+            const arrayBuffer = new ArrayBuffer(contenido.length);
+           	const int8Array = new Uint8Array(arrayBuffer);
+          	for (let i = 0; i < contenido.length; i++) 
+            {
+            	int8Array[i] = contenido.charCodeAt(i);
+          	}
+          	const blob = new Blob([int8Array], { type: 'application/pdf'});
+           	var formData = new FormData();
+          	formData.append('archivoEnvio', blob,'documento.pdf');
+          	
+          	$.ajax('../paginasFunciones/procesarDocumentoScanner.php', {
+                                                                            method: "POST",
+                                                                            data: formData,
+                                                                            processData: false,
+                                                                            contentType: false,
+                                                                            success: function (response) 
+                                                                                        {
+                                                                                        	var arrResp=response.split('|');
+                                                                                            idDocumento=arrResp[1];
+                                                                                            nombreDocumento=arrResp[2];
+                                                                                        
+                                                                                            var obj={};
+                                                                                            obj.url='../visoresGaleriaDocumentos/visorDocumentosScan.php';
+                                                                                            obj.params=	{
+                                                                                                            iD:bE('iD_'+arrResp[1]),
+                                                                                                            cPagina:'sFrm=true',
+                                                                                                            extension:'pdf',
+                                                                                                            nombreArchivo:arrResp[2]
+                                                                                                        };	
+                                                                                            
+                                                                                            gEx('frameDocScan').load(obj);                     
+                                                                                            gEx('btnAceptar').enable();
+                                                                                            ocultarMensajeProcesando();
+                                                                                        
+                                                                                        },
+                                                                            error: function () 
+                                                                                    {
+                                                                                    }
+                                                                          }
+                                                                       );*/
+        break;
+        case 'transferError':
+        	ocultarMensajeProcesando();
+            msgBox('Ha ocurrido un problema con el dispositivo, no se ha podido escanear el documento');
+        break;
+        case 'latisUtilityEnd':
+        	ocultarMensajeProcesando();
+            msgBox('La aplicaci&oacute; Latis Uilities ha terminado su ejecuci&oacute;n');
+        break;
+        case 'operacionOK':
+        	ocultarMensajeProcesando();
+        break;
+        case 'operacionError':
+        	ocultarMensajeProcesando();
+            msgBox('No se ha podido llevar a cabo la operaci&oacute;n debido al siguiente problema: <br />'+cOMessage.msgError);
+        break;
+    	case 'listScanners':
+        	gEx('cmdDispositivosEntrada').getStore().loadData(cOMessage.data);
+			ocultarMensajeProcesando();
+        break;
+        case 'getCapabilities':
+        	gEx('cmbDPI').getStore().loadData(cOMessage.data.dpis);
+            gEx('cmbDPI').setValue(cOMessage.data.dpiActual);
+            gEx('cmbDepth').getStore().loadData(cOMessage.data.profundidad);
+           	gEx('cmbDepth').setValue(cOMessage.data.profundidadActual);
+            gEx('cmbSize').getStore().loadData(cOMessage.data.tamanoPapel);
+            gEx('cmbSize').setValue(cOMessage.data.paperActual);
+        	if(cOMessage.data.duplex)
+            {
+            	gEx('rdoDuplex1').enable();
+                gEx('rdoDuplex2').enable();
+                gEx('rdoDuplex1').setValue(false);
+                gEx('rdoDuplex2').setValue(true);
+            }
+            else
+            {
+           	 	gEx('rdoDuplex1').disable();
+                gEx('rdoDuplex2').disable();
+                gEx('rdoDuplex1').setValue(false);
+                gEx('rdoDuplex2').setValue(false);
+            }
+            gEx('btnScan').enable();
+            ocultarMensajeProcesando();
+        break;
+        case 'documentoEscaneado':
+          
+          	var contenidoArchivo=cOMessage.documento;
+            var contenido=atob(contenidoArchivo)
+            var arrayBuffer = new ArrayBuffer(contenido.length);
+           	var int8Array = new Uint8Array(arrayBuffer);
+          	for (let i = 0; i < contenido.length; i++) 
+            {
+            	int8Array[i] = contenido.charCodeAt(i);
+          	}
+          	var blob = new Blob([int8Array], { type: 'application/pdf'});
+           	var formData = new FormData();
+          	formData.append('archivoEnvio', blob,'documento.pdf');
+            formData.append('scanSession', scanSession);
+          	
+          	$.ajax('../paginasFunciones/procesarDocumentoScanner.php', {
+                                                                            method: "POST",
+                                                                            data: formData,
+                                                                            processData: false,
+                                                                            contentType: false,
+                                                                            success: function (response) 
+                                                                                        {
+                                                                                        	var arrResp=response.split('|');
+                                                                                            idDocumento=arrResp[1];
+                                                                                            nombreDocumento=arrResp[2];
+                                                                                        
+                                                                                            var obj={};
+                                                                                            obj.url='../visoresGaleriaDocumentos/visorDocumentosScan.php';
+                                                                                            obj.params=	{
+                                                                                                            iD:bE('iD_'+arrResp[1]),
+                                                                                                            cPagina:'sFrm=true',
+                                                                                                            extension:'pdf',
+                                                                                                            nombreArchivo:arrResp[2]
+                                                                                                        };	
+                                                                                            
+                                                                                            gEx('frameDocScan').load(obj);                     
+                                                                                            gEx('btnAceptar').enable();
+                                                                                            ocultarMensajeProcesando();
+                                                                                        
+                                                                                        },
+                                                                            error: function () 
+                                                                                    {
+                                                                                    }
+                                                                          }
+                                                                       );
+           
+
+        break;
+        
+    }
+	
+}
+
+
+
+function mostrarVentanaNombreDocumento(obj)
+{
+	var form = new Ext.form.FormPanel(	
+										{
+											baseCls: 'x-plain',
+											layout:'absolute',
+											defaultType: 'label',
+											items: 	[
+                                            			{
+                                                        	x:10,
+                                                            y:10,
+                                                            cls:'SIUGJ_Etiqueta',
+                                                            html:'Ingrese el nombre del documento:'
+                                                        },
+                                                        {
+                                                        	x:320,
+                                                            y:5,
+                                                            width:350,
+                                                            cls:'controlSIUGJ',
+                                                            xtype:'textfield',
+                                                            value:'documento',
+                                                            id:'txtNombreDocumento'
+                                                        }
+													]
+										}
+									);
+	
+	var ventanaAM = new Ext.Window(
+									{
+										title: 'Nombre del Documento',
+										width: 770,
+										height:150,
+										layout: 'fit',
+										plain:true,
+										modal:true,
+                                        cls:'msgHistorialSIUGJ',
+										bodyStyle:'padding:5px;',
+										buttonAlign:'center',
+										items: form,
+										listeners : {
+													show : {
+																buffer : 10,
+																fn : function() 
+																{
+                                                                	gEx('txtNombreDocumento').focus(true,500);
+																}
+															}
+												},
+										buttons:	[
+														{
+															text: '<?php echo $etj["lblBtnCancelar"]?>',
+                                                            cls:'btnSIUGJCancel',
+                                                            width:140,
+															handler:function()
+																	{
+																		ventanaAM.close();
+																	}
+														},
+                                                        {
+															
+															text: '<?php echo $etj["lblBtnAceptar"]?>',
+                                                            cls:'btnSIUGJ',
+                                                            width:140,
+															handler: function()
+																	{
+																		var txtNombreDocumento=gEx('txtNombreDocumento');
+                                                                        if(txtNombreDocumento.getValue()=='')
+                                                                        {
+                                                                        	function resp()
+                                                                            {
+                                                                            	txtNombreDocumento.focus();
+                                                                            }
+                                                                            msgBox('Debe ingresar el nombre del documento',resp);
+                                                                        	return;
+                                                                        }
+                                                                        var arrDocumentos=txtNombreDocumento.getValue().split('.');
+                                                                        nombreDocumento=arrDocumentos[0]+'.pdf';
+                                                                        
+                                                                        eval('window.parent.'+obj.afterScanFunction+'(idDocumento,nombreDocumento);');
+                                                                        	
+																	}
+														}
+													]
+									}
+								);
+	ventanaAM.show();	
+}

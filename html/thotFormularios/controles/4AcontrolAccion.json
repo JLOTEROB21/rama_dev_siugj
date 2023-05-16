@@ -1,0 +1,8 @@
+{
+	"id":"btnAddAccion",
+	"funcion":"mostrarVentanaAccion()",
+	"titulo":"Agregar/modificar acci&oacute;n",
+	"icono":"lightning.png",
+	"script":"accion.js.php",
+	"deshabilitado":"1"
+}

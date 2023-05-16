@@ -1,0 +1,7 @@
+{
+	"id":"btnAddEtiqueta",
+	"funcion":"crearVentanaNuevoElemento(1)",
+	"titulo":"Agregar etiqueta",
+	"icono":"font_add.png",
+	"script":"controlEtiqueta.js.php"
+}

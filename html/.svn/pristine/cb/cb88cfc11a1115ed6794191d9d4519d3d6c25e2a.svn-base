@@ -1,0 +1,231 @@
+<?php  session_start();
+
+	include("conexionBD.php");
+	include_once("cCodigoBarras.php");
+	include_once("fpdf/fpdf.php"); 
+	include_once("fpdi/fpdi.php"); 
+
+	$cadenaLlave=generarNombreArchivoTemporal()."_".generarNombreArchivoTemporal();
+	$idDocumento=strtoupper(hash("sha512" ,$cadenaLlave,false));
+	$tamLetra=1;
+	$alto=20;
+	$info=$urlSitio."modulosEspeciales_SIUGJ/validaDocumentoQR.php?idDoc=".$idDocumento;
+	$c=new cCodigoBarras($info,"QR","",1,2,$alto,$tamLetra);
+	$nArchivo=$c->generarCodigoBarrasImagenArchivo();
+	$nArchivo=$baseDir."/archivosTemporalesCodigoBarras/".$nArchivo;
+
+
+	$carpetaAdministrativa=$_POST["cA"];	
+	$idCarpeta=$_POST["idCarpeta"];
+	
+	$consulta="SELECT * FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa."'";
+	if($idCarpeta!="-1")
+		$consulta.=" AND idCarpeta=".$idCarpeta;	
+
+	$fCarpeta=$con->obtenerPrimeraFilaAsoc($consulta);
+
+
+	$consulta="SELECT tituloElemento FROM 908_registrosTablasRetencionDocumental WHERE idRegistro=".$fCarpeta["serie"];
+	$serie=$con->obtenerValor($consulta);
+	if($serie=="")
+		$serie="----";
+	
+	
+	$consulta="SELECT tituloElemento FROM 908_registrosTablasRetencionDocumental WHERE idRegistro=".$fCarpeta["subserie"];
+	$subserie=$con->obtenerValor($consulta);
+	if($subserie=="")
+		$subserie="----";
+
+
+	$libro=new cExcel($baseDir."/modulosEspeciales_SIUGJ/plantillas/plantillaIndiceElectronico.xlsx",true,"Excel2007");		
+	
+	
+	$objImg=$libro->crearObjetoImagen($nArchivo);
+	$objImg->setHeight(130);
+	$objImg->setResizeProportional(true);
+	
+	
+	$libro->insertarImagenHoja(0,$objImg,"H1");
+	
+	$consulta="SELECT id__17_tablaDinamica,upper(nombreUnidad)as nombreUnidad FROM _17_tablaDinamica WHERE claveUnidad='".$fCarpeta["unidadGestion"]."'";
+	$fDespachos=$con->obtenerPrimeraFilaAsoc($consulta);
+	
+	$nombreDespacho=$fDespachos["nombreUnidad"];
+	$idDespacho=$fDespachos["id__17_tablaDinamica"];
+
+	$consulta="SELECT m.municipio FROM _638_tablaDinamica d,821_municipios m WHERE d.idReferencia=".$idDespacho." AND  m.cveMunicipio=d.municipio";
+	$municipio=$con->obtenerValor($consulta);
+	
+	$demantante="";
+	$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+				FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+				AND r.idActividad=".$fCarpeta["idActividad"]." AND r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='A') ORDER BY nombre,nombre,apellidoMaterno";
+	
+	$res=$con->obtenerFilas($consulta);
+	while($filaImputado=mysql_fetch_row($res))
+	{
+		$nombre=trim($filaImputado[0]);
+		if($demantante=="")
+			$demantante=$nombre;
+		else
+			$demantante.=", ".$nombre;
+	}
+
+	$demandados="";
+	$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+				FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+				AND r.idActividad=".$fCarpeta["idActividad"]." AND r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='D') ORDER BY nombre,nombre,apellidoMaterno";
+	
+	$res=$con->obtenerFilas($consulta);
+	while($filaImputado=mysql_fetch_row($res))
+	{
+		$nombre=trim($filaImputado[0]);
+		if($demandados=="")
+			$demandados=$nombre;
+		else
+			$demandados.=", ".$nombre;
+	}
+	
+	
+	$vinculados="";
+	$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+				FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+				AND r.idActividad=".$fCarpeta["idActividad"]." AND r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='V') ORDER BY nombre,nombre,apellidoMaterno";
+	
+	$res=$con->obtenerFilas($consulta);
+	while($filaImputado=mysql_fetch_row($res))
+	{
+		$nombre=trim($filaImputado[0]);
+		if($vinculados=="")
+			$vinculados=$nombre;
+		else
+			$vinculados.=", ".$nombre;
+	}
+	
+	
+	$libro->setValor("B2",$municipio);
+	$libro->setValor("B3",$nombreDespacho);
+	$libro->setValor("B4",$subserie=="----"?$serie:$subserie);
+	$libro->setValor("B5",$carpetaAdministrativa);
+	$libro->setValor("B6",$demandados);
+	$libro->setValor("B7",$demantante);
+	$libro->setValor("B8",$vinculados);
+	
+	
+	$consultaCierre="SELECT fechaCambio FROM 7015_bitacotaCambioSituacionCarpetaAdministrativa WHERE carpetaAdministrativa='".$carpetaAdministrativa."' AND idEstadoActual=3";
+	$consulta="SELECT COUNT(*) FROM 7006_carpetasAdministrativasRelacionadas WHERE carpetaAdministrativaBase='".$carpetaAdministrativa."'";
+	if($idCarpeta!=-1)
+	{
+		$consulta.=" and idCarpetaBase=".$idCarpeta;
+		$consultaCierre.=" and idCarpeta=".$idCarpeta;
+	}
+	
+	$fechaCierre=$con->obtenerValor($consultaCierre);
+	
+	$totalCuadernillos=$con->obtenerValor($consulta);
+	
+	$numFila=12;
+	$consulta="SELECT * FROM 7007_contenidosCarpetaAdministrativa WHERE carpetaAdministrativaRaiz='".$carpetaAdministrativa."' and tipoContenido not in (3,-1) and copia=0";
+	
+	if($idCarpeta!=-1)
+	{
+		$consulta.=" and idCarpetaAdministrativaRaiz=".$idCarpeta;
+	}
+	
+	$consulta.=" order by idContenido";
+	$res=$con->obtenerFilas($consulta);
+	$totalElementos=$con->filasAfectadas;
+	$libro->insertarFila(13,$totalElementos-1);
+	$totalFisicos=0;
+	$nFilaCierre=12;
+	$nFilaTotalCuadernos=13;
+
+	while($fila=mysql_fetch_assoc($res))
+	{
+		$consulta="SELECT nomArchivoOriginal,tamano,descripcion,categoriaDocumentos FROM 908_archivos WHERE idArchivo=".$fila["idRegistroContenidoReferencia"];
+		$fArchivo=$con->obtenerPrimeraFilaAsoc($consulta);
+		
+		
+		if($fArchivo["categoriaDocumentos"]==169)
+		{
+			$totalFisicos++;
+		}
+		
+		$nomArchivoOriginal=$fArchivo["nomArchivoOriginal"];		
+		$tamano=$fArchivo["tamano"];		
+		$arrExtensiones=explode(".",$nomArchivoOriginal);
+		$extension=$arrExtensiones[count($arrExtensiones)-1];
+		
+		
+		$libro->setValor("A".$numFila,$nomArchivoOriginal);
+		$libro->setValor("B".$numFila,date("d/m/Y",strtotime($fila["fechaRegistro"])));
+		$libro->setValor("C".$numFila,date("d/m/Y",strtotime($fila["fechaRegistro"])));
+		$libro->setValor("D".$numFila,$fila["ordenDocumento"]);
+		$libro->setValor("E".$numFila,$fila["noPaginas"]);
+		$libro->setValor("F".$numFila,$fila["paginaInicio"]);
+		$libro->setValor("G".$numFila,$fila["paginaFin"]);
+		$libro->setValor("H".$numFila,$fila["carpetaAdministrativa"]!=$carpetaAdministrativa?$fila["carpetaAdministrativa"]:"----");
+		$libro->setValor("I".$numFila,mb_strtoupper($extension)=="PDF"?"PDF/A":mb_strtoupper($extension));
+		$libro->setValor("J".$numFila,bytesToSize($tamano,0));
+		$libro->setValor("K".$numFila,($fila["tipoContenido"]==4)?"Físico":"Digital");
+		$libro->setValor("L".$numFila,$fArchivo["descripcion"]);
+		
+		if(($fila["tipoContenido"]==4)||($fArchivo["categoriaDocumentos"]==169))
+		{
+			$totalFisicos++;
+		}
+		
+		$numFila++;
+		$nFilaCierre++;
+		$nFilaTotalCuadernos++;
+		
+	}
+	
+	$libro->setValor("K3",($totalFisicos==0)?'No':'Sí');
+	$libro->setValor("J5","0");
+	$libro->setValor("J6","0");
+	$libro->setValor("A".$nFilaCierre,"FECHA DE CIERRE DEL EXPEDIENTE: ".($fechaCierre==""?"NO CERRADO":date("d/m/Y",strtotime($fechaCierre))));
+	$libro->setValor("B".$nFilaTotalCuadernos,$totalCuadernillos);
+
+
+	
+	
+	$nombreArchivoFinal="eIndice_".str_replace("-","_",$carpetaAdministrativa);
+	$directorioDestino=$baseDir."/archivosTemporales/".$nombreArchivoFinal;
+	
+	$archivoFinal=$directorioDestino.".pdf";
+	$libro->generarArchivoServidor("PDF",$directorioDestino);
+	
+
+	if(file_exists($archivoFinal))
+	{
+		
+		
+		
+		
+		
+		
+		$idDocumentoRegistrado=registrarDocumentoServidorRepositorio($nombreArchivoFinal.".pdf",$nombreArchivoFinal.".pdf",2,"");
+		$consulta="UPDATE 908_archivos SET folioQR='".$idDocumento."' WHERE idArchivo=".$idDocumentoRegistrado;
+		$con->ejecutarConsulta($consulta);
+		$rutaDocumento=obtenerRutaDocumento($idDocumentoRegistrado);
+
+		
+		header("Content-type:application/pdf"); 
+		header("Content-length: ".filesize($rutaDocumento)); 
+		header("Content-Disposition: attachment; filename=".$nombreArchivoFinal.".pdf");
+		readfile($rutaDocumento);
+		
+		unlink($nArchivo);
+		
+
+		
+	}
+	else
+	{
+		echo "NO existe";	
+	}
+	
+	
+		
+?>

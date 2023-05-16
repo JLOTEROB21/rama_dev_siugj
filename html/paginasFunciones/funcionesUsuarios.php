@@ -1,0 +1,498 @@
+<?php
+	session_start();
+	$mostrarXML=true;
+	include("conexionBD.php");
+	include("configurarIdioma.php");
+	if($incluirCabeceraISO)
+		header('Content-Type: text/html; charset=iso-8859-1');
+	if(isset($_SESSION["leng"]))
+	{
+		if(isset($_POST["parametros"]))
+			$parametros=$_POST["parametros"];
+		if(isset($_POST["funcion"]))
+			$funcion=$_POST["funcion"];
+		$lenguaje=$_SESSION["leng"];
+		
+		switch($funcion)
+		{
+			
+			case 7:
+				generaLogin();
+			break;
+			case 8:
+				guardarNuevoUsuario();
+			break;
+			
+			case 10:
+				registrarNuevoUsuario();
+			break;
+			
+			
+			
+			case 26:
+				eliminarUsuario();
+			break;
+			case 29:
+				obtenerLocalidadesEstado();
+			break;			
+			case 30:
+				validarNuevoUsr();
+			break;
+			case 103:
+				obtenerBitacoraAccesoUsuarios();
+			break;
+			
+			case 104:
+				removerFotoUsuario();
+			break;
+			case 105:
+				asignarFotoUsuario();
+			break;
+		}
+	}
+	
+	
+	
+	
+	
+	function generaLogin()
+	{
+		global $con;
+		$param=$_POST["param"];
+		$objJson=json_decode($param);
+		
+		$fila[0]=utf8_decode($objJson->apPaterno);
+		$fila[1]=utf8_decode( $objJson->apMaterno);
+		$fila[2]=utf8_decode($objJson->nombre);
+		$arrOpciones[0]=algLogin3($fila);
+		$arrOpciones[1]=algLogin1($fila);
+		$arrOpciones[2]=algLogin2($fila);
+		$ctArr=sizeof($arrOpciones);
+		$arrOpc="";
+		for($x=0;$x<$ctArr;$x++)
+		{
+			if($arrOpc=="")
+				$arrOpc=$arrOpciones[$x];
+			else
+				$arrOpc.="|".$arrOpciones[$x];
+		}
+		echo ($arrOpc);
+	}
+	
+	function existeLogin($login)
+	{
+		global $con;
+		global $conexion;
+		$cond2="";
+		if(isset($_POST["idUsuario"]))
+			$cond2=" and idUsuario<>".$_POST["idUsuario"];
+		$consulta="SELECT Login FROM 800_usuarios WHERE Login='".$login."'".$cond2;
+		$ct=$con->contarRegistros($consulta);
+		if($ct==0)
+			return false;
+		else
+			return true;
+	}
+	
+	function algLogin1($fila)  //Primera y segunda letra del nombre, apellido Paterno y primera letra del apellido materno
+	{
+		//$aPaterno=obtenerNomMayor(trim(utf8_encode($fila[0])));
+		$aPaterno=str_replace(' ','',trim(($fila[0])));
+		$aMaterno=obtenerNomMayor(trim(($fila[1])));
+		$nombre=trim(($fila[2]));
+		$iPN=substr(trim($nombre),0,2);
+		$iN=$iPN;
+		$loginUsado=true;
+		$ctN=1;
+		$lnombre="";
+		while($loginUsado)
+		{
+			if($ctN<=1)
+				$lnombre=substr($aMaterno,0,1);
+			else
+				$lnombre=substr($aMaterno,0,1).$ctN;
+			$login =strtolower($iN);
+			$login.=strtolower($aPaterno);
+			$login.=strtolower($lnombre);
+			$login=str_replace(" ","_",$login);
+			if(!existeLogin($login))
+				return quitarAcentos(($login));
+			$ctN++;
+		}
+	}
+	
+	function algLogin2($fila) //Primera letra del nombre, apellido paterno, primera y segunda letra del apellido materno
+	{
+		//$aPaterno=obtenerNomMayor(trim(utf8_encode($fila[0])));
+		$aPaterno=str_replace(' ','',trim(($fila[0])));
+		$aMaterno=obtenerNomMayor(trim(($fila[1])));
+		$nombre=trim(($fila[2]));
+		$iPN=substr($nombre,0,1);
+		$iN=$iPN;
+		$loginUsado=true;
+		$ctN=2;
+		$lnombre="";
+		while($loginUsado)
+		{
+			if($ctN<=strlen($aMaterno))
+				$lnombre=substr($aMaterno,0,$ctN);
+			else
+				$lnombre=$aMaterno.$ctN;
+			$login =strtolower($iN);
+			$login.=strtolower($aPaterno);
+			$login.=strtolower($lnombre);
+			$login=str_replace(" ","_",$login);
+			if(!existeLogin($login))
+				return quitarAcentos(($login));
+			$ctN++;
+		}
+	}
+	
+	function algLogin3($fila) //Primera letra del nombre, apellido paterno, inicial del apellido materno
+	{
+		//$aPaterno=obtenerNomMayor(trim(utf8_encode($fila[0])));
+		$aPaterno=str_replace(' ','',trim(($fila[0])));
+		$aMaterno=obtenerNomMayor(trim(($fila[1])));
+		$nombre=trim(($fila[2]));
+		$iPN=substr($nombre,0,1);
+		$iN=$iPN;
+		$loginUsado=true;
+		$ctN=1;
+		$lnombre="";
+		while($loginUsado)
+		{
+			if($ctN<=1)
+				$lnombre=substr($aMaterno,0,1);
+			else
+				$lnombre=substr($aMaterno,0,1).$ctN;
+			$login =strtolower($iN);
+			$login.=strtolower($aPaterno);
+			$login.=strtolower($lnombre);
+			$login=str_replace(" ","_",$login);
+			if(!existeLogin($login))
+				return quitarAcentos(($login));
+			$ctN++;
+		}
+	}
+	
+	function obtenerNomMayor($apellido)
+	{
+		$arrNom=explode(' ',$apellido);		
+		if(sizeof($arrNom)>1)
+		{
+
+			$ctNom=sizeof($arrNom);
+			$nomMayor="";
+			for($x=0;$x<$ctNom;$x++)
+			{
+				if(strlen($arrNom[$x])>=strlen($nomMayor))
+					$nomMayor=$arrNom[$x];
+			}
+		}
+		else
+			$nomMayor=$apellido;
+		return $nomMayor;
+	}
+	
+	function guardarNuevoUsuario()
+	{
+		global $con;
+		global $mostrarXML;
+		$mostrarXML=false;
+		$cadObjJson=$_POST["param"];
+		$objJson=json_decode($cadObjJson);
+		$apPaterno=$objJson->apPaterno;
+		$apMaterno=$objJson->apMaterno;
+		$nombre=$objJson->nombre;
+		$nombreC=trim($nombre).' '.trim($apPaterno).' '.trim($apMaterno);
+		$prefijo=$objJson->prefijo;
+		$nacionalidad=$objJson->nacionalidad;
+		$fechaNac=cambiaraFechaMysql($objJson->fechaNac);
+		$mail=$objJson->mail;
+		
+		$password=$objJson->password;
+		$login=$objJson->login;
+		$query[0]="begin";
+		$query[1]="insert into 800_usuarios(Login,Password,Status,Nombre,FechaCambio) values('".cv($login)."','".cv($password)."',5,'".cv($nombreC)."','".date('Y-m-d')."')";
+		if($con->ejecutarBloque($query))
+		{
+			$idUsuario=$con->obtenerUltimoID();
+			$consulta[0]="insert into 805_mails(Mail,Tipo,Notificacion,idUsuario) values('".cv(trim($mail))."',0,1,".$idUsuario.")";
+			$consulta[1]="insert into 807_usuariosVSRoles(idUsuario,idRol,idExtensionRol,codigoRol) values(".$idUsuario.",-1000,0,'-1000_0')";
+			$consulta[2]="insert into 807_usuariosVSRoles(idUsuario,idRol,idExtensionRol,codigoRol) values(".$idUsuario.",6,0,'6_0')";
+			$consulta[3]="insert into 802_identifica(Nom,Paterno,Materno,Nombre,Prefijo,fechaNacimiento,Nacionalidad,Status,idUsuario) 
+						  values('".cv($nombre)."','".cv($apPaterno)."','".cv($apMaterno)."','".cv($nombreC).
+						  "','".cv($prefijo)."','".cv($fechaNac)."','".cv($nacionalidad)."',5,".$idUsuario.")";
+			$consulta[4]="insert into 801_adscripcion(Status,idUsuario) values(5,".$idUsuario.")";
+			$consulta[5]="insert into 803_direcciones(idUsuario,Tipo) values(".$idUsuario.",0)";
+			$consulta[6]="insert into 803_direcciones(idUsuario,Tipo) values(".$idUsuario.",1)";
+			$consulta[7]="insert into 806_fotos(idUsuario) values(".$idUsuario.")";
+			$consulta[8]="commit";
+			if($con->ejecutarBloque($consulta))		
+				echo "1|";
+			else
+				echo "|";
+		}
+		else
+			echo "|";
+	}
+	
+	function registrarNuevoUsuario()
+	{
+		global $con;
+		$obj=json_decode($_POST["obj"]);
+		$status="105";
+		$txtApPaterno=cv($obj->txtApPaterno);
+		$txtApMaterno=cv($obj->txtApMaterno);
+		$txtNombre=cv($obj->txtNombre);
+		$txtCalle=cv($obj->txtCalle);
+		$txtNumero=cv($obj->txtNumero);
+		$txtColonia=cv($obj->txtColonia);
+		$txtCiudad=cv($obj->txtCiudad);
+		$txtMunicipio=cv($obj->txtMunicipio);
+		$txtMail=cv($obj->txtMail);
+		$txtRelacion=cv($obj->txtRelacion);
+		$idAlumno=$obj->idAlumno;
+		$txtNombreC=trim($txtNombre." ".$txtApPaterno." ".$txtApMaterno);
+		
+		$consulta1="begin";
+		$x=0;
+		if($con->ejecutarConsulta($consulta1))
+		{
+			$consulta2="insert into 800_usuarios(Status,Nombre,FechaActualiza,paso)values(".$status.",'".$txtNombreC."','".date('Y-m-d')."',1)";
+			if($con->ejecutarConsulta($consulta2))
+			{
+				$idUsuario=$con->obtenerUltimoID();
+				$consulta[$x]="insert into 801_adscripcion(Status,Actualizado,idUsuario) values(".$status.",0,".$idUsuario.")";
+				$x++;
+				$consulta[$x]="insert into 802_identifica(Nom,Paterno,Materno,Nombre,Status,idUsuario,Actualizado) 
+							values('".$txtNombre."','".$txtApPaterno."','".$txtApMaterno."','".$txtNombreC."',".$status.",".$idUsuario.",0)";
+				$x++;
+				$consulta[$x]="insert into 803_direcciones(Calle,Numero,Colonia,Ciudad,Municipio,idUsuario,Tipo) values
+							('".$txtCalle."','".$txtNumero."','".$txtColonia."','".$txtCiudad."','".$txtMunicipio."',".$idUsuario.",0)";
+				$x++;
+				$consulta[$x]="insert into 803_direcciones(idUsuario,Tipo) values(".$idUsuario.",1)";
+				$x++;
+				if(trim($txtMail)!="")
+				{
+					$consulta[$x]="insert into 805_mails(Mail,Tipo,Notificacion,idUsuario) values('".$txtMail."',0,1,".$idUsuario.")";
+					$x++;
+				}
+				$consulta[$x]="insert into 806_fotos(idUsuario) values(".$idUsuario.")";
+				$x++;
+				$consulta[$x]="insert into 807_usuariosVSRoles(idUsuario,idRol) values(".$idUsuario.",6)";
+				$x++;
+				$consulta[$x]="insert into 4518_alumnosParientes(idAlumno,idUsuario,IdParentezco) values(".$idAlumno.",".$idUsuario.",".$txtRelacion.")";
+				$x++;
+				
+				
+				$consulta[$x]="commit";
+				if($con->ejecutarBloque($consulta))
+				{
+					$idRel=$con->obtenerUltimoID();
+					echo $idRel."|1|".$idUsuario;
+				}
+				else
+					echo "|";
+			}
+			else
+				echo "|";
+		}
+		else
+			echo "|";			
+	}
+	
+	function eliminarUsuario()
+	{
+		global $con;
+		$idUsr=base64_decode($_POST["usr"]);
+		$consulta="delete from 800_usuarios where idUsuario=".$idUsr;
+		//echo $consulta;
+		
+		if($con->ejecutarConsulta($consulta))
+			echo "1|";
+		else
+			echo "|";
+		
+	}
+	
+
+	function obtenerLocalidadesEstado()
+	{
+		global $con;
+		$cveEstado=$_POST["cveEstado"];
+		$consulta="SELECT cveMunicipio,municipio FROM 821_municipios WHERE cveEstado='".$cveEstado."' order by municipio";
+		$arrEstados=$con->ObtenerFilasArreglo($consulta);
+		echo "1|".$arrEstados;
+	}
+	
+
+	
+	function validarNuevoUsr()
+	{
+		global $con;
+		$nombre=$_POST["nombre"];
+		$apPaterno=$_POST["apPaterno"];
+		$apMaterno=$_POST["apMaterno"];
+		$rfc=$_POST["rfc"];
+		$curp=$_POST["curp"];
+		$idUsuario=$_POST["idUsuario"];
+		$tipoIdentificacion=$_POST["tI"];
+		$noIdentificacion=$_POST["nI"];
+		if($rfc!="")
+		{
+			$consulta="select * from 802_identifica where RFC='".$rfc."' and idUsuario<>".$idUsuario;		
+			$fila=$con->obtenerPrimeraFila($consulta);
+			if($fila)
+			{
+				$resp='{"resp":"1","msg":"El RFC ingresado ya estest&aacute; siendo ocupado por otra persona ['.$fila[2]." ".$fila[3]." ".$fila[1].']"}';
+				echo "1|".$resp;
+				return;
+			}
+		}
+		if($curp!="")
+		{
+			$consulta="select * from 802_identifica where CURP='".$curp."' and idUsuario<>".$idUsuario;		
+			$fila=$con->obtenerPrimeraFila($consulta);
+			if($fila)
+			{
+				$resp='{"resp":"1","msg":"La CURP ingresada ya est&aacute; siendo ocupada por otra persona ['.$fila[2]." ".$fila[3]." ".$fila[1].']"}';
+				echo "1|".$resp;
+				return;
+			}
+		}
+		
+		if($tipoIdentificacion!="-1")
+		{
+			$consulta="SELECT * FROM 802_identifica WHERE tipoIdentificacion=".$tipoIdentificacion." AND noIdentificacion='".cv($noIdentificacion)."'";
+			$fila=$con->obtenerPrimeraFila($consulta);
+			if($fila)
+			{
+				$resp='{"resp":"1","msg":"El n&uacute;mero de identificaci&oacute;n ingresado ha sido registrado previamente ['.$fila[2]." ".$fila[3]." ".$fila[1].']"}';
+				echo "1|".$resp;
+				return;
+			}
+		}
+		$consulta="select * from 802_identifica where Paterno='".$apPaterno."' and Materno='".$apMaterno."' and Nom='".$nombre."' and idUsuario<>".$idUsuario;	
+		$fila=$con->obtenerPrimeraFila($consulta);
+		if($fila)
+		{
+			$resp='{"resp":"2","msg":""}';
+			echo "1|".$resp;
+			return;
+		}
+		echo '1|{"resp":"0"}';
+		
+	}
+	
+	function obtenerBitacoraAccesoUsuarios()
+	{
+		global $con;
+		$idUsuario=$_POST["idUsuario"];
+		$fechaInicio=$_POST["fechaInicio"];
+		$fechaFin=$_POST["fechaFin"];
+		$start=$_POST["start"];
+		$limit=$_POST["limit"];
+		$tipoEventos=$_POST["tipoEventos"];
+		$pagina=$_POST["pagina"];
+		
+		
+		$condWhere="";
+		if($tipoEventos!=-1)
+		{
+			$condWhere.=" and tipo in(".$tipoEventos.")";
+		}
+		
+		if($pagina!="")
+		{
+			$condWhere.=" and pagina like '%".$pagina."%'";
+		}
+		
+		
+		$total="";
+		$totalIP=0;
+		$arrRegistros="";
+		if($idUsuario!=-1)
+		{
+		
+			$consulta="SELECT count(*) FROM 8000_logSistema WHERE idUsuario=".$idUsuario."
+					AND fecha>='".$fechaInicio."' AND fecha<='".$fechaFin."' ".$condWhere;
+			
+			
+			
+			
+			$total=$con->obtenerValor($consulta);
+			
+			
+			
+			
+			/*$consulta="SELECT count(distinct dirIP) FROM 8000_logSistema WHERE idUsuario=".$idUsuario."
+					AND fecha>='".$fechaInicio."' AND fecha<='".$fechaFin."' order by fechaEvento";
+			$totalIP=$con->obtenerValor($consulta);*/	
+			
+			$consulta="SELECT idLog,fecha,tipo,hora,pagina,parametros,dirIP,consultaSql,(select Nombre from 800_usuarios u where u.idUsuario=l.idUsuario) as nombreUsuario,idUsuario 
+					FROM 8000_logSistema l WHERE idUsuario=".$idUsuario."
+					AND fecha>='".$fechaInicio."' AND fecha<='".$fechaFin."' ".$condWhere." order by fechaEvento desc limit ".$start.",".$limit;
+	
+			$arrRegistros=utf8_encode($con->obtenerFilasJSON($consulta));		
+		}
+		else
+		{
+			
+			$consulta="SELECT count(*) FROM 8000_logSistema WHERE fecha>='".$fechaInicio."' AND fecha<='".$fechaFin."' ".$condWhere;
+			$total=$con->obtenerValor($consulta);
+			
+			/*$consulta="SELECT count(distinct dirIP) FROM 8000_logSistema WHERE idUsuario=".$idUsuario."
+					AND fecha>='".$fechaInicio."' AND fecha<='".$fechaFin."' order by fechaEvento";
+			$totalIP=$con->obtenerValor($consulta);	*/
+			
+			$consulta="SELECT idLog,fecha,tipo,hora,pagina,parametros,dirIP,consultaSql,(select Nombre from 800_usuarios u where u.idUsuario=l.idUsuario) as nombreUsuario,idUsuario 
+					FROM 8000_logSistema l WHERE  fecha>='".$fechaInicio."' AND fecha<='".$fechaFin."'  ".$condWhere." order by fechaEvento desc limit ".$start.",".$limit;
+			$arrRegistros=utf8_encode($con->obtenerFilasJSON($consulta));	
+			
+		}
+		echo '{"numReg":"'.$total.'","totalIP":"'.$totalIP.'","registros":'.$arrRegistros.'}';
+	}
+	
+	function removerFotoUsuario()
+	{
+		global $con;
+		$idUsuario=$_POST["iU"];
+		
+		$consulta="UPDATE 806_fotos SET Binario=NULL WHERE idUsuario=".$idUsuario;
+		eC($consulta);
+	}
+	
+	
+	function asignarFotoUsuario()
+	{
+		global $con;
+		global $baseDir;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		$rutaDocumento=$baseDir."/archivosTemporales/".$obj->idArchivo;
+		$consulta="SELECT idFoto,Nombre FROM 806_fotos WHERE idUsuario=".$obj->idUsuario;
+		$fDatosUsuario=$con->obtenerPrimeraFilaAsoc($consulta);
+		$idArchivo=$fDatosUsuario["Nombre"];
+		
+		if($idArchivo=="")
+		{
+
+			$idArchivo=registrarDocumentoServidorRepositorio($obj->idArchivo,$obj->nombreArchivo,596);
+
+			$consulta="UPDATE 806_fotos SET Nombre=".$idArchivo." WHERE idFoto=".$fDatosUsuario["idFoto"];
+			eC($consulta);
+
+		}
+		
+		else
+		{
+
+			$cuerpoDocumento=leerContenidoArchivo($rutaDocumento);
+			reemplazarArchivoRepositorio($idArchivo,$cuerpoDocumento,$obj->nombreArchivo);	
+			echo "1|";
+		}
+		
+		
+	}
+?>

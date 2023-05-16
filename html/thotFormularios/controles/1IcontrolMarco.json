@@ -1,0 +1,7 @@
+{
+	"id":"btnAddFrame",
+	"funcion":"crearVentanaNuevoElemento(13)",
+	"titulo":"Insertar Marco",
+	"icono":"frame.png",
+	"script":"controlEtiqueta.js.php"
+}

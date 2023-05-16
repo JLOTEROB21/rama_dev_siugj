@@ -1,0 +1,669 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+
+	$consulta="SELECT valor,texto FROM 1004_siNo";
+	$arrSiNo=$con->obtenerFilasArreglo($consulta);
+	
+	$arrTiposDocumentos="";
+	$consulta="SELECT idCategoria,nombreCategoria FROM 908_categoriasDocumentos order by nombreCategoria";
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_assoc($res))
+	{
+		$o="['".$fila["idCategoria"]."','".cv($fila["nombreCategoria"])."']";
+		if($arrTiposDocumentos=="")
+			$arrTiposDocumentos=$o;
+		else
+			$arrTiposDocumentos.=",".$o;
+	}
+	
+
+	
+	$arrTiposDocumentos="[".$arrTiposDocumentos."]";
+	
+	
+	$iF=$_GET["iF"];
+	$iR=$_GET["iR"];
+	$sL=$_GET["sL"];
+	$idFormularioProceso=$_GET["iFP"];
+	
+	$permiteEdicionPresentaDocumento="true";
+	$arrDocumentosIniciales=obtenerDocumentacionRequeridaRegistroDocumentos($iF,$iR,$idFormularioProceso,$sL==1);
+	$ventanaAdjuntaDocumento=$habilitarLatisScan?"110":"0";
+	
+?>
+
+var sL='<?php echo $sL?>';
+var obligarAdjustarDocumentoPresenta=false;
+var filaRegistro=null;
+var tamanoMaxArchivo='50 MB';
+var extensionesPermitidas='*.jpg;*.jpeg;*.pdf;*.mp3;*.mp4';
+var ventanaAdjuntaDocumento=<?php echo $ventanaAdjuntaDocumento?>;
+var permiteEdicionPresentaDocumento=<?php echo $permiteEdicionPresentaDocumento?>;
+var arrDocumentosIniciales=<?php echo $arrDocumentosIniciales?>;
+var arrTiposDocumentos=<?php echo $arrTiposDocumentos?>;
+var arrTiposDocumentosPermtidos=<?php echo $arrTiposDocumentos?>;
+var arrSiNo=<?php echo $arrSiNo?>;
+
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	idActividad=gE('idActividad').value;
+    new Ext.Viewport(	{
+                                layout: 'border',
+                                items: [
+                                            {
+                                                xtype:'panel',
+                                                region:'center',
+                                                layout:'border',
+                                                border:false,
+                                                
+                                                items:	[
+                                                            crearGridDocumentos()
+                                                        ]
+                                            }
+                                         ]
+                            }
+                        )   
+}
+
+
+function crearGridDocumentos()
+{
+	var checkColumn = new Ext.grid.CheckColumn	(
+	 												{
+													   header: 'Presenta Documento',
+                                                       menuDisabled :true,
+                                                       sortable:false,
+                                                       align:'center',
+                                                       hidden:<?php echo existeRol("'31_0'")?"false":"true"?>,
+													   dataIndex: 'presentaDocumento',
+													   width: 250
+													}
+												);
+
+	var chkRow=new Ext.grid.CheckboxSelectionModel({singleSelect:true,width:60});//checkOnly:true,
+	var dsDatos=arrDocumentosIniciales;
+
+
+    
+    
+    
+    var alDatos=new Ext.data.GroupingStore({
+                                                            reader: new Ext.data.ArrayReader({
+                                                                                             	   fields:	[
+                                                                                                                {name: 'idRegistro'},
+                                                                                                                {name:'idDocumento'},
+                                                                                                                {name:'presentaDocumento'},
+                                                                                                                {name:'documentoDigital'},
+                                                                                                                {name:'obligatorio'}
+                                                                                                            ]
+                                                                                            }),
+                                                            sortInfo: {field: 'obligatorio', direction: 'ASC'},
+                                                            groupField: 'obligatorio',
+                                                            groupDir:'DESC'
+                                            }
+                                          )
+                                                            
+    
+    alDatos.loadData(dsDatos);
+    var cModelo= new Ext.grid.ColumnModel   	(
+                                                        [
+                                                        	chkRow,
+                                                        	{
+                                                                header:'Obligatorio',
+                                                                menuDisabled :true,
+                                                                width:95,
+                                                                hidden:sL=='1',
+                                                                align:'center',
+                                                                sortable:true,
+                                                                
+                                                                dataIndex:'obligatorio',
+                                                                renderer:function (val,meta,registro,fila,columna)
+                                                                        {
+                                                                        	if(val=='1')
+                                                                            	return 'Documentos Obligatorios';
+                                                                            return 'Documentos Opcionales';
+                                                                        }
+                                                            },
+                                                        	{
+                                                            	header:'Documento',
+																menuDisabled :true,
+																width:650,
+                                                                align:'center',
+																sortable:true,
+																dataIndex:'idDocumento',
+																hidden:false,
+																editor:crearComboExt('editor_idDocumento',arrTiposDocumentosPermtidos,0,0,null,{transform:false,ctCls:'comboWrapSIUGJGrid',cls:'comboSIUGJGrid',listClass:'listComboSIUGJGrid'}),
+																renderer:function (val,meta,registro,fila,columna)
+                                                                        {
+                                                                        	meta.attr='style="text-align:left;"';
+                                                                            var editor=gEx('editor_idDocumento');
+                                                                            if(editor==null)
+                                                                                return val;
+                                                                            var almacen=editor.getStore();
+                                                                            var pos=obtenerPosFila(almacen,'id',val);
+                                                                            
+                                                                            if(pos!=-1)
+                                                                                return almacen.getAt(pos).get('nombre');
+                                                                            else
+                                                                                return val;
+                                                                        }
+                                                        	},
+                                                            checkColumn,
+                                                            
+                                                            {
+                                                                header:'Documento Adjunto',
+                                                                menuDisabled :true,
+                                                                width:450,
+                                                                sortable:true,
+                                                                dataIndex:'documentoDigital',
+                                                                hidden:false,
+                                                                align:'center',
+                                                                renderer:textoBotonRendererDocumento
+                                                        	}
+                                                            
+                                                            
+                                                    	]
+                                                    );
+                                                    
+        var tblGrid=	new Ext.grid.EditorGridPanel	(
+                                                            {
+                                                                id:'gDocumentos',
+                                                                store:alDatos,
+                                                                region:'center',
+                                                                frame:false,
+                                                                border:false,
+                                                                clicksToEdit:1,
+                                                                cm: cModelo,
+                                                                stripeRows :true,
+                                                                sm:chkRow,
+                                                                cls:'gridSiugjSeccion',
+                                                                plugins:[checkColumn],
+                                                                view:new Ext.grid.GroupingView({
+                                                                                                    forceFit:false,
+                                                                                                    showGroupName: false,
+                                                                                                    enableGrouping :(sL=='0'),
+                                                                                                    enableNoGroups:false,
+                                                                                                    enableGroupingMenu:false,
+                                                                                                    hideGroupedColumn: true,
+                                                                                                    startCollapsed:false
+                                                                                                }),
+                                                                loadMask:true,
+                                                                tbar:	[
+                                                                			{
+                                                                                icon:'../images/add.png',
+                                                                                cls:'x-btn-text-icon',
+                                                                                height:50,
+                                                                                hidden:true,//gE('sL').value=='1',
+                                                                                text:'Agregar Documento',
+                                                                                handler:function()
+                                                                                        {
+                                                                                    		var reg=crearRegistro	(
+                                                                                            							[
+                                                                                                                        	{name: 'idRegistro'},
+                                                                                                                            {name:'idDocumento'},
+                                                                                                                            {name:'presentaDocumento'},
+                                                                                                                            {name:'documentoDigital'},
+                                                                                                                            {name:'obligatorio'}
+                                                                                                                        ]
+                                                                                            						)
+                                                                                    		
+                                                                                            
+                                                                                            var iRegistro=generarNumeroAleatorio(100000,9999999);
+                                                                                            iRegistro*=-1;
+                                                                                        	var r=new reg	(
+                                                                                            					{
+                                                                                                                	idRegistro:iRegistro,
+                                                                                                                    idDocumento:'',
+                                                                                                                    presentaDocumento:'0',
+                                                                                                                    documentoDigital:'',
+                                                                                                                    obligatorio:'0'
+                                                                                                                }
+                                                                                            				)
+                                                                                        
+                                                                                        	gEx('gDocumentos').getStore().add(r);   
+                                                                                            gEx('gDocumentos').getStore().sort('obligatorio','ASC');                                                                                         
+                                                                                            
+                                                                                            var pos=obtenerPosFila(gEx('gDocumentos').getStore(),'idRegistro',iRegistro);
+                                                                                           
+                                                                                            gEx('gDocumentos').startEditing(pos,2);
+                                                                                        
+                                                                                        }
+                                                                            
+                                                                            },
+                                                                            {
+                                                                                icon:'../images/delete.png',
+                                                                                cls:'x-btn-text-icon',
+                                                                                disabled:true,
+                                                                                height:50,
+                                                                                hidden:true,//gE('sL').value=='1',
+                                                                                id:'btnRemoveDocumento',
+                                                                                text:'Remover Documento',
+                                                                                handler:function()
+                                                                                        {
+                                                                                    		var fila=gEx('gDocumentos').getSelectionModel().getSelected()
+                                                                                            if(!fila)
+                                                                                            {
+                                                                                            	msgBox('Debe seleccionar el documento que desea remover');
+                                                                                            	return;
+                                                                                            }
+                                                                                            
+                                                                                            
+                                                                                            function respAux(btn)
+                                                                                            {
+                                                                                            	if(btn=='yes')
+                                                                                                {
+                                                                                                	gEx('gDocumentos').getStore().remove(fila);
+                                                                                                }
+                                                                                            }
+                                                                                            msgConfirm('Est&aacute; seguro de querer remover el documento seleccionado?',respAux);
+                                                                                            
+                                                                                    	}
+                                                                            
+                                                                            },
+                                                                            {
+                                                                                icon:'../images/guardar.JPG',
+                                                                                cls:'x-btn-text-icon',
+                                                                                height:50,
+                                                                                hidden:gE('sL').value=='1',
+                                                                                text:'Guardar Documentos',
+                                                                                handler:function()
+                                                                                        {
+                                                                                            guardarDocumentos();
+                                                                                        }
+                                                                                
+                                                                            }
+                                                                		],
+                                                                columnLines : true
+                                                            }
+                                                        );
+
+	tblGrid.on('beforeedit',function(e)
+    						{
+                            	e.cancel=gE('sL').value=='1';
+                            }
+                            
+    		)
+        
+	tblGrid.getSelectionModel().on('rowselect',function(sm,numFila,registro)
+    											{
+                                                	
+                                                	gEx('btnRemoveDocumento').disable();
+                                                	if(registro.data.obligatorio=='0')
+                                                    {
+                                                    	gEx('btnRemoveDocumento').enable()
+                                                    }
+                                                }
+    							)        
+
+	tblGrid.getSelectionModel().on('rowdeselect',function(sm,numFila,registro)
+    											{
+                                                	gEx('btnRemoveDocumento').disable();
+                                                	
+                                                }
+    							)     
+
+        return 	tblGrid;
+   
+   
+   
+}
+
+function textoBotonRendererDocumento(val,meta,registro,numFila)
+{
+	meta.attr='style="text-align:left"';
+    	var url='';
+    	var arrDatos=val.split('|');
+       	var nombreArchivo=arrDatos[0];
+        var aArchivo=nombreArchivo.split('.');
+       	var idDocumento=arrDatos[1];
+        var extension=aArchivo[aArchivo.length-1];
+        var comp='';
+        if(gE('sL').value=='0')
+        {
+            if(val!='')
+            {    
+                comp='<a  href="javascript:removerDocumentoAsociado(\''+bE(numFila)+'\')"><img width="13" height="13" src="../images/cross.png" title="Remover Documento" alt="Remover Documento"></a>&nbsp;&nbsp;<a href="javascript:window.parent.visualizarDocumentoAdjuntoB64(\''+bE(idDocumento)+'\',\''+bE(extension)+'\')" class="SIUGJ_nombreDocumentoAdjunto">'+arrDatos[0]+'</a>';
+            }
+            return '<a href="javascript:mostrarVentanaArchivo(\''+bE(numFila)+'\')"><img width="13" height="13" src="../images/pencil.png">&nbsp;&nbsp;'+comp;
+		}
+        else
+        {
+        	return '<a href="javascript:window.parent.visualizarDocumentoAdjuntoB64(\''+bE(idDocumento)+'\',\''+bE(extension)+'\')">'+arrDatos[0]+'</a>';
+        }    
+    
+}
+
+
+function mostrarVentanaArchivo(nFila)
+{
+	filaRegistro=gEx('gDocumentos').getStore().getAt(bD(nFila));
+	var ventanaAM; 
+	var form = new Ext.form.FormPanel(	
+										{
+											baseCls: 'x-plain',
+											layout:'absolute',
+											defaultType: 'label',
+                                            
+											items: 	[
+														 {
+															  xtype:'label',
+															  x:10,
+															  y:20,
+                                                              cls:'SIUGJ_Etiqueta',
+															  html:'Documento a subir: <span id="oblComprobante" style="color:#F00">*</span>'
+														  },
+														  {
+															  x:200,
+															  y:15,
+                                                              cls:'SIUGJ_Etiqueta',
+															  html:	'<table width="290"><tr><td><div id="uploader"><p>Your browser doesn\'t have Flash, Silverlight or HTML5 support.</p></div></td></tr><tr id="filaAvance" style="display:none"><td align="right"><span class="SIUGJ_Etiqueta" style="font-size:12px">Porcentaje de avance: </span><span class="SIUGJ_Etiqueta" style="font-size:12px" id="porcentajeAvance"> 0%</span></td></tr></table>'
+														  },
+														 
+														  {
+															  x:500,
+															  y:16,
+															  id:'btnUploadFile',
+															  xtype:'button',
+                                                              cls:'btnSIUGJCancel',
+                                                              width:140,
+															  icon:'../images/add.png',
+															  text:'Seleccionar',
+															  handler:function()
+																	  {
+																		  $('#containerUploader').click();
+																	  }
+														  },
+														  {
+                                                            x:650,
+                                                            y:16,
+                                                            width:90,
+                                                            id:'btnScanFile',
+                                                            cls:'btnSIUGJCancel',
+                                                            width:140,
+                                                            icon:'../../images/scanner.png',
+															hidden:ventanaAdjuntaDocumento==0,
+                                                            xtype:'button',
+                                                            text:'Escanear',
+                                                            handler:function()
+                                                                    {
+																		gEx('vAddDocumento').hide();
+                                                                        var cadObj='{"afterScanFunction":"scanCorrectoDocumentRegistroFormulario"}';
+                                                                        var obj={};
+                                                                        obj.ancho='100%';
+                                                                        obj.alto='100%';
+																		obj.url='../scan/tLatisScanner.php';
+                                                                        obj.params=[['cadObj',bE(cadObj)]];
+																		obj.funcionCerrar=function()
+																							{
+																								if(gEx('vAddDocumento'))
+																									gEx('vAddDocumento').show();
+																							};
+                                                                        abrirVentanaFancy(obj);
+                                                                       
+                                                                        
+                                                                        
+                                                                    }
+                                                        },
+														  {
+															  x:185,
+															  y:15,
+															  hidden:false,
+															  html:	'<div id="containerUploader"></div>'
+														  },
+														  
+														  {
+															  x:190,
+															  y:5,
+															  xtype:'hidden',
+															  id:'idArchivo'
+  
+														  },
+														  {
+															  x:190,
+															  y:5,
+															  xtype:'hidden',
+															  id:'nombreArchivo'
+														  },
+                                                          {
+															  x:10,
+															  y:80,
+															  html:	'<span class="controlSIUGJ" style="color:#900 !important">* El tama&ntilde;o NO puede ser superior a '+tamanoMaxArchivo+'</span>'
+														  }
+
+													]
+										}
+									);
+
+	var swfu;									
+	
+	ventanaAM = new Ext.Window(
+									{
+										id:'vAddDocumento',
+										title: 'Subir documento al servidor',
+										width: 740+ventanaAdjuntaDocumento,
+										height:220,//145
+										layout: 'fit',
+                                        cls:'msgHistorialSIUGJ',
+										plain:true,
+										modal:true,
+                                        closable:false,
+										bodyStyle:'padding:5px;',
+										buttonAlign:'center',
+										items: form,
+										listeners : {
+													show : {
+																buffer : 10,
+																fn : function() 
+																{
+																	var cObj={
+																								// Backend settings
+																								upload_url: "../paginasFunciones/procesarDocumentoV2.php", //lquevedor
+																								file_post_name: "archivoEnvio",
+																				 
+																								// Flash file settings
+																								file_size_limit : tamanoMaxArchivo,
+																								file_types : extensionesPermitidas,			// or you could use something like: "*.doc;*.wpd;*.pdf",
+																								file_types_description : "Todos los archivos",
+																								file_upload_limit : 0,
+																								file_queue_limit : 1,
+																				 
+																								
+																								upload_success_handler : subidaCorrecta2
+																							}; 
+																	
+																	
+																	
+																	crearControlUploadHTML5(cObj);
+																}
+															}
+												},
+										buttons:	[
+														
+														{
+															text: 'Cancelar',
+                                                            cls:'btnSIUGJCancel',
+                                                            width:140,
+															handler:function()
+																	{
+																		ventanaAM.close();
+																	}
+														},
+                                                        {
+															
+															text: 'Aceptar',
+                                                            cls:'btnSIUGJ',
+                                                            width:140,
+															handler: function()
+																	{
+																		
+																		if(uploadControl.files.length==0)
+																		{
+																			msgBox('Debe indicar el documento que desea subir al servidor');
+																			return;
+																		}
+																		uploadControl.start();
+																		
+																		
+																		
+																	}
+														}
+													]
+									}
+								);
+	ventanaAM.show();
+	
+	                               
+}
+
+function scanCorrectoDocumentRegistroFormulario(idDocumento,nombreDocumento)
+{
+	cerrarVentanaFancy(); 
+	subidaCorrecta2({}, '1|'+idDocumento+'|'+nombreDocumento);
+    
+}
+
+
+
+function subidaCorrecta2(file, serverData) 
+{
+
+	file.id = "singlefile";	// This makes it so FileProgress only makes a single UI element, instead of one for each file
+	var arrDatos=serverData.split('|');
+	if ( arrDatos[0]!='1') 
+	{
+	} 
+	else 
+	{
+		var idArchivo=gEx("idArchivo");
+		
+		if(!filaRegistro)
+		{
+			gEx("nombreArchivo").setValue(arrDatos[2]);
+			
+		}
+		else
+		{
+			
+			filaRegistro.set('documentoDigital',arrDatos[2]+'|'+arrDatos[1]);
+            filaRegistro.set('presentaDocumento',true);
+		}
+		
+		
+		gEx('vAddDocumento').close();
+		
+		
+		
+		
+		
+	}
+		
+}
+
+function removerDocumentoAsociado(nFila)
+{
+	var filaRegistro=gEx('gDocumentos').getStore().getAt(bD(nFila));
+	function resp(btn)
+	{
+		if(btn=='yes')
+		{
+			filaRegistro.set('documentoDigital','');
+			filaRegistro.set('presentaDocumento',false);
+			gEx('vAddDocumento').close();
+		}
+	}
+	msgConfirm('Est&aacute; seguro de querer remover el documento asociado al registro?',resp);
+}
+
+function guardarDocumentos()
+{
+	
+	var gDocumentos=gEx('gDocumentos');
+    var x;
+    var fila;
+    var arrDocumentos='';
+    var oDoc=''
+    for(x=0;x<gDocumentos.getStore().getCount();x++)
+    {
+    	fila=gDocumentos.getStore().getAt(x);
+        
+        if(fila.data.idDocumento=='')
+        {
+        	function resultado200()
+            {
+                gDocumentos.startEditing(x,2);
+            }
+            msgBox('Debe indicar el tipo de documento <b>'+formatearValorRenderer(arrTiposDocumentos,fila.data.idDocumento)+'</b>',resultado200);
+            return false;  
+        }
+        
+        if(fila.data.obligatorio=='1')
+        {
+        	if(obligarAdjustarDocumentoPresenta)
+            {
+            	if((fila.data.presentaDocumento)&&(fila.data.documentoDigital==''))
+                {
+                    function resultado2()
+                    {
+                        gDocumentos.startEditing(x);
+                    }
+                    msgBox('Debe adjuntar el documento <b>'+formatearValorRenderer(arrTiposDocumentos,fila.data.idDocumento)+'</b>',resultado2);
+                    return false;            	
+                }
+            }
+            else
+            {
+                if(!fila.data.presentaDocumento)
+                {
+                    function resultado()
+                    {
+                        gDocumentos.startEditing(x);
+                    }
+                    msgBox('El documento/requisito <b>'+formatearValorRenderer(arrTiposDocumentos,fila.data.idDocumento)+'</b> es obligatorio, debe ingresar el documento o marcarlo como presentado',resultado);
+                    return false;            	
+                }
+			}
+        }
+        
+        
+        
+        oDoc='{"idRegistro":"'+fila.data.idRegistro+'","idDocumento":"'+fila.data.idDocumento+'","presentaDocumento":"'+(fila.data.presentaDocumento?'1':'0')+'","documentoDigital":"'+fila.data.documentoDigital+'"}';
+        if(arrDocumentos=='')
+        	arrDocumentos=oDoc;
+        else
+        	arrDocumentos+=','+oDoc;
+    }
+    
+    var cadObj='{"arrDocumentos":['+arrDocumentos+'],"idActividad":"'+gE('idActividad').value+'","idFormulario":"<?php echo $iF?>","idRegistro":"<?php echo $iR?>"}';
+    
+    function funcAjax()
+    {
+        var resp=peticion_http.responseText;
+        arrResp=resp.split('|');
+        if(arrResp[0]=='1')
+        {
+        	gEx('gDocumentos').getStore().removeAll();
+            var arrDatos=eval(bD(arrResp[1]));
+        	gEx('gDocumentos').getStore().loadData(arrDatos);
+        	function resp()
+            {
+            	if((window.parent)&&(window.parent.recargarMenuDTD))
+                {
+                	window.parent.recargarMenuDTD();
+                }
+            }
+            msgBox('Los documentos han sido guardados correctamente',resp)
+        }
+        else
+        {
+            msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+        }
+    }
+    obtenerDatosWeb('../modulosEspeciales_SIUGJ/paginasFunciones/funcionesModuloRegistroDocumentos.php',funcAjax, 'POST','funcion=1&cadObj='+cadObj,true);
+
+    
+
+}

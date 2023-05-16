@@ -1,0 +1,61 @@
+<?php session_start();
+ini_set("memory_limit","3000M");
+set_time_limit(999000);
+error_reporting(E_ALL);
+include("cInformacionSistema.php");
+
+
+$c=new cInformacionSistema();
+
+$resultadoTablaLocal=json_decode($c->obtenerInformacionTablaSistema());
+
+$client = new nusoap_client("https://qa-siugj.linktic.com/webServices/wsServiciosUtilesSIUGJ.php?wsdl","wsdl");
+$parametros=array();
+
+$parametros["token"]="B2A9B137D32676A56D96C2E160152A2C";
+
+
+$response = $client->call("obtenerInformacionTablaSistema", $parametros);
+$resultadoTablaRemota=json_decode( $response);
+//$oResp=json_decode($response["obtenerInformacionTablaSistemaResult"]);
+
+$arrTablasCrear=array();
+$arrTablasEliminar();
+$arrTablasEditar();
+
+foreach($resultadoTablaLocal->$registros  as $rBase)
+{
+	foreach($resultadoTablaRemota->$registros  as $rBase)
+	{
+		
+	}
+}
+
+
+function esMismaTabla($tabla1,$tabla2)
+{
+	if($tabla1->TABLE_NAME!=$tabla2->TABLE_NAME)
+	{
+		return false;
+	}
+	
+	if($tabla1->ENGINE!=$tabla2->ENGINE)
+	{
+		return false;
+	}
+	
+	if($tabla1->TABLE_TYPE!=$tabla2->TABLE_TYPE)
+	{
+		return false;
+	}
+	
+	if($tabla1->TABLE_COLLATION!=$tabla2->TABLE_COLLATION)
+	{
+		return false;
+	}
+	
+	return true;
+}
+
+
+?>

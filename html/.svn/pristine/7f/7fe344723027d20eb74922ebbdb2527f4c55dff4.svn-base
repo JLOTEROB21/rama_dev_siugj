@@ -1,0 +1,312 @@
+{
+    "success": true,
+    "notice": null,
+    "Reportes": {
+        "Registro Delitos": {
+            "idregistro": "1",
+            "nombrereporte": "Registro Delitos",
+            "fuentesDeDatos": {
+                "0042:Modalidad del Delito": {
+                    "columnas": {
+                        "claveModalidadDelito": {
+                            "Alias": "claveModalidadDelito",
+                            "tipo": "System.String"
+                        },
+                        "codigo": {
+                            "Alias": "codigo",
+                            "tipo": "System.String"
+                        },
+                        "codigoInstitucion": {
+                            "Alias": "codigoInstitucion",
+                            "tipo": "System.String"
+                        },
+                        "codigoUnidad": {
+                            "Alias": "codigoUnidad",
+                            "tipo": "System.String"
+                        },
+                        "descripcion": {
+                            "Alias": "descripcion",
+                            "tipo": "System.String"
+                        },
+                        "fechaCreacion": {
+                            "Alias": "fechaCreacion",
+                            "tipo": "System.DateTime"
+                        },
+                        "fechaModif": {
+                            "Alias": "fechaModif",
+                            "tipo": "System.DateTime"
+                        },
+                        "idEstado": {
+                            "Alias": "idEstado",
+                            "tipo": "System.String"
+                        },
+                        "idReferencia": {
+                            "Alias": "idReferencia",
+                            "tipo": "System.String"
+                        },
+                        "id__42_tablaDinamica": {
+                            "Alias": "id__42_tablaDinamica",
+                            "tipo": "System.String"
+                        },
+                        "modalidadDelito": {
+                            "Alias": "modalidadDelito",
+                            "tipo": "System.String"
+                        },
+                        "respModif": {
+                            "Alias": "respModif",
+                            "tipo": "System.String"
+                        },
+                        "responsable": {
+                            "Alias": "responsable",
+                            "tipo": "System.String"
+                        },
+                        "situacion": {
+                            "Alias": "situacion",
+                            "tipo": "System.String"
+                        },
+                        "calificativo": {
+                            "Alias": "calificativo",
+                            "tipo": "System.String"
+                        },
+                        "capituloDelito": {
+                            "Alias": "capituloDelito",
+                            "tipo": "System.String"
+                        },
+                        "denominacionDelito": {
+                            "Alias": "denominacionDelito",
+                            "tipo": "System.String"
+                        },
+                        "gradoRealizacion": {
+                            "Alias": "gradoRealizacion",
+                            "tipo": "System.String"
+                        },
+                        "idActividad": {
+                            "Alias": "idActividad",
+                            "tipo": "System.String"
+                        },
+                        "id__61_tablaDinamica": {
+                            "Alias": "id__61_tablaDinamica",
+                            "tipo": "System.String"
+                        },
+                        "tituloDelito": {
+                            "Alias": "tituloDelito",
+                            "tipo": "System.String"
+                        },
+                        "claveDenominacionDelito": {
+                            "Alias": "claveDenominacionDelito",
+                            "tipo": "System.String"
+                        },
+                        "delitoOficioso": {
+                            "Alias": "delitoOficioso",
+                            "tipo": "System.String"
+                        },
+                        "id__35_denominacionDelito": {
+                            "Alias": "id__35_denominacionDelito",
+                            "tipo": "System.String"
+                        }
+                    }
+                },
+                "0061:Registro del Delito": {
+                    "columnas": {
+                        "claveModalidadDelito": {
+                            "Alias": "claveModalidadDelito",
+                            "tipo": "System.String"
+                        },
+                        "codigo": {
+                            "Alias": "codigo",
+                            "tipo": "System.String"
+                        },
+                        "codigoInstitucion": {
+                            "Alias": "codigoInstitucion",
+                            "tipo": "System.String"
+                        },
+                        "codigoUnidad": {
+                            "Alias": "codigoUnidad",
+                            "tipo": "System.String"
+                        },
+                        "descripcion": {
+                            "Alias": "descripcion",
+                            "tipo": "System.String"
+                        },
+                        "fechaCreacion": {
+                            "Alias": "fechaCreacion",
+                            "tipo": "System.DateTime"
+                        },
+                        "fechaModif": {
+                            "Alias": "fechaModif",
+                            "tipo": "System.DateTime"
+                        },
+                        "idEstado": {
+                            "Alias": "idEstado",
+                            "tipo": "System.String"
+                        },
+                        "idReferencia": {
+                            "Alias": "idReferencia",
+                            "tipo": "System.String"
+                        },
+                        "id__42_tablaDinamica": {
+                            "Alias": "id__42_tablaDinamica",
+                            "tipo": "System.String"
+                        },
+                        "modalidadDelito": {
+                            "Alias": "modalidadDelito",
+                            "tipo": "System.String"
+                        },
+                        "respModif": {
+                            "Alias": "respModif",
+                            "tipo": "System.String"
+                        },
+                        "responsable": {
+                            "Alias": "responsable",
+                            "tipo": "System.String"
+                        },
+                        "situacion": {
+                            "Alias": "situacion",
+                            "tipo": "System.String"
+                        },
+                        "calificativo": {
+                            "Alias": "calificativo",
+                            "tipo": "System.String"
+                        },
+                        "capituloDelito": {
+                            "Alias": "capituloDelito",
+                            "tipo": "System.String"
+                        },
+                        "denominacionDelito": {
+                            "Alias": "denominacionDelito",
+                            "tipo": "System.String"
+                        },
+                        "gradoRealizacion": {
+                            "Alias": "gradoRealizacion",
+                            "tipo": "System.String"
+                        },
+                        "idActividad": {
+                            "Alias": "idActividad",
+                            "tipo": "System.String"
+                        },
+                        "id__61_tablaDinamica": {
+                            "Alias": "id__61_tablaDinamica",
+                            "tipo": "System.String"
+                        },
+                        "tituloDelito": {
+                            "Alias": "tituloDelito",
+                            "tipo": "System.String"
+                        },
+                        "claveDenominacionDelito": {
+                            "Alias": "claveDenominacionDelito",
+                            "tipo": "System.String"
+                        },
+                        "delitoOficioso": {
+                            "Alias": "delitoOficioso",
+                            "tipo": "System.String"
+                        },
+                        "id__35_denominacionDelito": {
+                            "Alias": "id__35_denominacionDelito",
+                            "tipo": "System.String"
+                        }
+                    }
+                },
+                "_35_denominacionDelito": {
+                    "columnas": {
+                        "claveModalidadDelito": {
+                            "Alias": "claveModalidadDelito",
+                            "tipo": "System.String"
+                        },
+                        "codigo": {
+                            "Alias": "codigo",
+                            "tipo": "System.String"
+                        },
+                        "codigoInstitucion": {
+                            "Alias": "codigoInstitucion",
+                            "tipo": "System.String"
+                        },
+                        "codigoUnidad": {
+                            "Alias": "codigoUnidad",
+                            "tipo": "System.String"
+                        },
+                        "descripcion": {
+                            "Alias": "descripcion",
+                            "tipo": "System.String"
+                        },
+                        "fechaCreacion": {
+                            "Alias": "fechaCreacion",
+                            "tipo": "System.DateTime"
+                        },
+                        "fechaModif": {
+                            "Alias": "fechaModif",
+                            "tipo": "System.DateTime"
+                        },
+                        "idEstado": {
+                            "Alias": "idEstado",
+                            "tipo": "System.String"
+                        },
+                        "idReferencia": {
+                            "Alias": "idReferencia",
+                            "tipo": "System.String"
+                        },
+                        "id__42_tablaDinamica": {
+                            "Alias": "id__42_tablaDinamica",
+                            "tipo": "System.String"
+                        },
+                        "modalidadDelito": {
+                            "Alias": "modalidadDelito",
+                            "tipo": "System.String"
+                        },
+                        "respModif": {
+                            "Alias": "respModif",
+                            "tipo": "System.String"
+                        },
+                        "responsable": {
+                            "Alias": "responsable",
+                            "tipo": "System.String"
+                        },
+                        "situacion": {
+                            "Alias": "situacion",
+                            "tipo": "System.String"
+                        },
+                        "calificativo": {
+                            "Alias": "calificativo",
+                            "tipo": "System.String"
+                        },
+                        "capituloDelito": {
+                            "Alias": "capituloDelito",
+                            "tipo": "System.String"
+                        },
+                        "denominacionDelito": {
+                            "Alias": "denominacionDelito",
+                            "tipo": "System.String"
+                        },
+                        "gradoRealizacion": {
+                            "Alias": "gradoRealizacion",
+                            "tipo": "System.String"
+                        },
+                        "idActividad": {
+                            "Alias": "idActividad",
+                            "tipo": "System.String"
+                        },
+                        "id__61_tablaDinamica": {
+                            "Alias": "id__61_tablaDinamica",
+                            "tipo": "System.String"
+                        },
+                        "tituloDelito": {
+                            "Alias": "tituloDelito",
+                            "tipo": "System.String"
+                        },
+                        "claveDenominacionDelito": {
+                            "Alias": "claveDenominacionDelito",
+                            "tipo": "System.String"
+                        },
+                        "delitoOficioso": {
+                            "Alias": "delitoOficioso",
+                            "tipo": "System.String"
+                        },
+                        "id__35_denominacionDelito": {
+                            "Alias": "id__35_denominacionDelito",
+                            "tipo": "System.String"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

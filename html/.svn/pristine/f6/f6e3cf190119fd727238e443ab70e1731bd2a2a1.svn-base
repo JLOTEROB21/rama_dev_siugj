@@ -1,0 +1,7 @@
+{
+	"id":"btnAddHora",
+	"funcion":"mostrarVentanaPreguntasUnicas(21)",
+	"titulo":"Insertar campo de tiempo(hora)",
+	"icono":"clock_add.jpg",
+	"script":"campoTextoLargo.js.php"
+}

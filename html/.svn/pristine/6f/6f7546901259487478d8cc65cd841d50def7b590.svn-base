@@ -1,0 +1,60 @@
+[08-Aug-2022 08:15:28 America/Mexico_City] PHP Fatal error:  Uncaught exception 'Exception' with message 'Error: Uninitialized string offset: 6. Archivo: /home/linktic/subdominios/dev-siugj/include/SIUGJ/libreriaFuncionesIntegraciones.php. Linea: 261' in /home/linktic/subdominios/dev-siugj/include/latisErrorHandler.php:16
+Stack trace:
+#0 /home/linktic/subdominios/dev-siugj/include/SIUGJ/libreriaFuncionesIntegraciones.php(261): latisErrorHandler(8, 'Uninitialized s...', '/home/linktic/s...', 261, Array)
+#1 /home/linktic/subdominios/dev-siugj/include/SIUGJ/libreriaFuncionesIntegraciones.php(165): calcularDigitoVerificador('800140')
+#2 /home/linktic/subdominios/dev-siugj/modulosEspeciales_SIUGJ/paginasFunciones/funcionesModuloRegistroPartes.php(149): buscarInformacionRues('800140')
+#3 /home/linktic/subdominios/dev-siugj/modulosEspeciales_SIUGJ/paginasFunciones/funcionesModuloRegistroPartes.php(21): buscarDatosPartesProcesales()
+#4 {main}
+  thrown in /home/linktic/subdominios/dev-siugj/include/latisErrorHandler.php on line 16
+[08-Aug-2022 08:15:51 America/Mexico_City] PHP Fatal error:  Uncaught exception 'Exception' with message 'Error: Uninitialized string offset: 6. Archivo: /home/linktic/subdominios/dev-siugj/include/SIUGJ/libreriaFuncionesIntegraciones.php. Linea: 261' in /home/linktic/subdominios/dev-siugj/include/latisErrorHandler.php:16
+Stack trace:
+#0 /home/linktic/subdominios/dev-siugj/include/SIUGJ/libreriaFuncionesIntegraciones.php(261): latisErrorHandler(8, 'Uninitialized s...', '/home/linktic/s...', 261, Array)
+#1 /home/linktic/subdominios/dev-siugj/include/SIUGJ/libreriaFuncionesIntegraciones.php(165): calcularDigitoVerificador('800140')
+#2 /home/linktic/subdominios/dev-siugj/modulosEspeciales_SIUGJ/paginasFunciones/funcionesModuloRegistroPartes.php(149): buscarInformacionRues('800140')
+#3 /home/linktic/subdominios/dev-siugj/modulosEspeciales_SIUGJ/paginasFunciones/funcionesModuloRegistroPartes.php(21): buscarDatosPartesProcesales()
+#4 {main}
+  thrown in /home/linktic/subdominios/dev-siugj/include/latisErrorHandler.php on line 16
+[09-Aug-2022 17:28:45 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 548
+[09-Aug-2022 17:29:19 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 548
+[09-Aug-2022 17:30:07 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 548
+[09-Aug-2022 17:30:31 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 548
+[09-Aug-2022 17:35:12 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 548
+[09-Aug-2022 17:36:18 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 548
+[09-Aug-2022 17:39:50 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 548
+[09-Aug-2022 17:40:12 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 548
+[09-Aug-2022 17:44:17 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 548
+[09-Aug-2022 17:46:07 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 548
+[09-Aug-2022 17:47:58 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 548
+[09-Aug-2022 17:48:49 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 548
+[09-Aug-2022 18:07:01 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 548
+[09-Aug-2022 19:12:31 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 548
+[09-Aug-2022 19:13:09 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 548
+[09-Aug-2022 19:18:29 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 549
+[09-Aug-2022 19:19:25 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 550
+[09-Aug-2022 19:36:10 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$link in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 417
+[09-Aug-2022 19:36:10 America/Mexico_City] PHP Notice:  Trying to get property of non-object in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 417
+[09-Aug-2022 20:17:52 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 549
+[09-Aug-2022 20:18:53 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 550
+[09-Aug-2022 20:20:00 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 550
+[09-Aug-2022 20:21:03 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$uploadUrl in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 550
+[09-Aug-2022 20:23:10 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$link in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 418
+[09-Aug-2022 20:23:10 America/Mexico_City] PHP Notice:  Trying to get property of non-object in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 418
+[09-Aug-2022 20:26:18 America/Mexico_City] PHP Notice:  Undefined index: leng in /home/linktic/subdominios/dev-siugj/modulosEspeciales_SIUGJ/paginasFunciones/funcionesScriptsFormularios.php on line 12
+[09-Aug-2022 20:26:18 America/Mexico_City] PHP Notice:  Undefined index: idUsr in /home/linktic/subdominios/dev-siugj/include/sgjColombia/funcionesDocumentos.php on line 318
+[10-Aug-2022 09:55:21 America/Mexico_City] PHP Fatal error:  Uncaught exception 'Exception' with message 'Error: Uninitialized string offset: 6. Archivo: /home/linktic/subdominios/dev-siugj/include/SIUGJ/libreriaFuncionesIntegraciones.php. Linea: 261' in /home/linktic/subdominios/dev-siugj/include/latisErrorHandler.php:16
+Stack trace:
+#0 /home/linktic/subdominios/dev-siugj/include/SIUGJ/libreriaFuncionesIntegraciones.php(261): latisErrorHandler(8, 'Uninitialized s...', '/home/linktic/s...', 261, Array)
+#1 /home/linktic/subdominios/dev-siugj/include/SIUGJ/libreriaFuncionesIntegraciones.php(165): calcularDigitoVerificador('123456')
+#2 /home/linktic/subdominios/dev-siugj/modulosEspeciales_SIUGJ/paginasFunciones/funcionesModuloRegistroPartes.php(149): buscarInformacionRues('123456')
+#3 /home/linktic/subdominios/dev-siugj/modulosEspeciales_SIUGJ/paginasFunciones/funcionesModuloRegistroPartes.php(21): buscarDatosPartesProcesales()
+#4 {main}
+  thrown in /home/linktic/subdominios/dev-siugj/include/latisErrorHandler.php on line 16
+[13-Aug-2022 00:28:06 America/Mexico_City] PHP Notice:  Undefined property: stdClass::$value in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 170
+[13-Aug-2022 00:28:06 America/Mexico_City] PHP Warning:  Invalid argument supplied for foreach() in /home/linktic/subdominios/dev-siugj/include/cConectoresGestorContenido/cOneDrive.php on line 170
+[15-Aug-2022 15:01:14 America/Mexico_City] PHP Fatal error:  Cannot redeclare obtenerNombreParticipante() (previously declared in /home/linktic/subdominios/dev-siugj/include/utiles.php:6606) in /home/linktic/subdominios/dev-siugj/include/sgjp/libreriaFunciones.php on line 9465
+[17-Aug-2022 15:22:52 America/Mexico_City] PHP Fatal error:  Uncaught exception 'Exception' with message 'Error: Undefined index: tipoEntidad. Archivo: /home/linktic/subdominios/dev-siugj/modulosEspeciales_SIUGJ/paginasFunciones/funcionesModuloRegistroPartes.php. Linea: 95' in /home/linktic/subdominios/dev-siugj/include/latisErrorHandler.php:16
+Stack trace:
+#0 /home/linktic/subdominios/dev-siugj/modulosEspeciales_SIUGJ/paginasFunciones/funcionesModuloRegistroPartes.php(95): latisErrorHandler(8, 'Undefined index...', '/home/linktic/s...', 95, Array)
+#1 /home/linktic/subdominios/dev-siugj/modulosEspeciales_SIUGJ/paginasFunciones/funcionesModuloRegistroPartes.php(21): buscarDatosPartesProcesales()
+#2 {main}
+  thrown in /home/linktic/subdominios/dev-siugj/include/latisErrorHandler.php on line 16

@@ -1,0 +1,216 @@
+<?php
+include("conexionBD.php");
+$modoDebug=false;
+$contenidoArchivo="";
+$tipoContenido="";
+$nombreArchivoDescarga="";
+$tamanoArchivo=0;	
+if(isset($_GET['id'])) 
+{	
+	
+	if(strpos($_GET['id'],"____")!==false)
+	{
+		$_GET['id']="id=".$_GET['id'];
+		$arrParametros=explode("____",$_GET['id']);
+		foreach($arrParametros as $p)
+		{
+				
+			$arrValor=explode("=",$p);
+			$_GET[$arrValor[0]]=$arrValor[1];
+		}
+		
+	}
+	
+	$idDocumento=$_GET['id'];
+	$eV2=0;
+	if(isset($_GET["eV2"]))
+	{
+		$eV2=$_GET["eV2"];
+	}
+	
+	$idDocumento=str_replace("documento_","",bD($_GET['id']));
+
+	if(isset($_GET["ipServidor"]))
+	{
+		
+		$modo="attachment";
+		if(isset($_GET["modoPrinter"]))
+			$modo="inline";
+		$arrDocumentos=explode(".",$_GET['nombreArchivo']);
+		$tipoMime="";
+		
+		switch(strtolower($arrDocumentos[sizeof($arrDocumentos)-1]))
+		{
+			case "pdf":
+				$tipoMime="application/pdf";
+			break;
+		}
+		header("Content-type: ".$tipoMime);
+		header("Content-Disposition: ".$modo."; filename=".$_GET['nombreArchivo']);
+		echo file_get_contents("http://".$_GET["ipServidor"]."/paginasFunciones/obtenerDocumentoEditorArchivos.php?id=".$_GET['id']."&nombreArchivo=".$_GET['nombreArchivo']);
+		return;
+	}
+	
+	if(strpos($idDocumento,"_")===false)
+	{
+		
+		
+		$sql = "SELECT nomArchivoOriginal,documento,tipoArchivo,tamano,enBD,documentoRepositorio,tipoDocumento,repositorioDocumento,idArchivo FROM 908_archivos WHERE ".
+				($eV2==0?"idArchivo":"sha512")."='".$idDocumento."'";
+		$res=$con->obtenerPrimeraFila($sql);
+		
+		$nombreArchivoDescarga=$res[0];
+		$arrDocumentos=explode(".",$nombreArchivoDescarga);
+		$extension=$arrDocumentos[sizeof($arrDocumentos)-1];
+		
+		$rutaDocumento=obtenerRutaDocumento($res[8]);
+
+		$nombreArchivoDescarga=str_replace(",","",$nombreArchivoDescarga);
+		
+		if($res[6]!=10)
+		{
+			if($res[4]==1)
+			{
+				$contenidoArchivo= $res[1];
+			}
+			else
+			{
+				
+				if($rutaDocumento!="")
+				{
+					
+					if(strpos($rutaDocumento,"http")!==false)
+					{
+						$contenidoArchivo=file_get_contents($rutaDocumento);
+						$contenidoArchivo= bD($contenidoArchivo);
+					}
+					else
+					{
+						$tamanoArchivo=filesize($rutaDocumento);
+						$contenidoArchivo=leerContenidoArchivo($rutaDocumento);
+						
+					}
+				}
+				else
+				{
+					if($res[7]>0)
+					{
+						$conexion=generarInstanciaConectorGestor($res[7]);
+						$contenidoArchivo=$conexion->obtenerDocumento($res[5]);
+
+						
+					}
+					else
+					{
+						$contenidoArchivo=file_get_contents("http://172.19.202.116/paginasFunciones/obtenerDocumentoEditorArchivos.php?id=".$_GET['id']."&nombreArchivo=".$_GET['nombreArchivo']);
+					}
+				}
+			}
+			
+			
+		}
+		else
+		{
+			$contenidoArchivo=bD(getAcuerdoPDF($idDocumento));
+
+		}
+		
+		
+		switch(strtolower($extension))
+		{
+			case "doc":
+			case "docx":
+				$pathDocumentoWord=$baseDir."/archivosTemporales/documento_".$idDocumento;
+				$pathDocumentoWordPDF=$baseDir."/repositorioPDFWord/documento_".$idDocumento;
+				
+				if(!file_exists($pathDocumentoWordPDF))
+				{
+					escribirContenidoArchivo($pathDocumentoWord,$contenidoArchivo);
+					convertirWordToPDFServidorConversion($pathDocumentoWord,$pathDocumentoWordPDF);
+					$contenidoArchivo=leerContenidoArchivo($pathDocumentoWordPDF);
+					unlink($pathDocumentoWord);
+				}
+				else
+					$contenidoArchivo=leerContenidoArchivo($pathDocumentoWordPDF);
+				$tamanoArchivo=filesize($pathDocumento);
+				
+				$nombreArchivoDescarga=str_replace(".docx",".pdf",$nombreArchivoDescarga);
+				$nombreArchivoDescarga=str_replace(".doc",".pdf",$nombreArchivoDescarga);
+
+				$tipoContenido="application/pdf";
+			break;
+			case "pdf":
+				$tipoContenido="application/pdf";
+			break;
+			
+		}
+		
+		
+		if(!$modoDebug)
+		{
+			if($tamanoArchivo>0)
+			{
+				header("Content-length: ".$tamanoArchivo);
+			}
+			
+			header("Content-type: ".$tipoContenido);
+		 
+		
+			$modo="attachment";
+			if(isset($_GET["modoPrinter"]))
+				$modo="inline";
+				
+			
+			header("Content-Disposition: ".$modo."; filename=".$nombreArchivoDescarga);
+		}
+		
+		echo $contenidoArchivo;
+	}
+	else
+	{
+		$res=array();
+		$res[0]=!isset($_GET["nombreArchivo"])?"temporal":$_GET["nombreArchivo"];
+		$res[1]="";
+		$res[2]="";		
+		
+		$arrDocumentos=explode(".",$res[0]);	
+		
+		$nombreDocumento="";
+		for($ct=0;$ct<sizeof($arrDocumentos)-1;$ct++)
+		{
+			$nombreDocumento.=$arrDocumentos[$ct];
+		}
+		
+		
+		
+		switch(strtolower($arrDocumentos[sizeof($arrDocumentos)-1]))
+		{
+			case "doc":
+			case "docx":
+			
+				$pathDocumentoWord=$baseDir."/archivosTemporales/".$idDocumento;
+				$pathDocumento=$pathDocumentoWord."_doc";
+				if(!file_exists($pathDocumento))
+					convertirWordToPDFServidorConversion($pathDocumentoWord,$pathDocumento);
+				$idDocumento.="_doc";
+				$res[2]="application/pdf";
+			break;
+			case "pdf":
+				$res[2]="application/pdf";
+			break;
+		}
+		$res[0]=str_replace(",","",$res[0]);		
+		
+		$modo="attachment";
+		if(isset($_GET["modoPrinter"]))
+			$modo="inline";
+		if(!$modoDebug)
+		{		
+			header("Content-type: ".$res[2]);
+			header("Content-length: ".filesize($baseDir."/archivosTemporales/".$idDocumento)); 
+			header ("Content-Disposition: ".$modo."; filename=".$nombreDocumento.".".$arrDocumentos[sizeof($arrDocumentos)-1]);
+		}
+		readfile($baseDir."/archivosTemporales/".$idDocumento);
+	}
+}
+?>

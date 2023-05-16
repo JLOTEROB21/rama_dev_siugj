@@ -1,0 +1,744 @@
+<?php	include_once("conexionBD.php");
+
+function obtenerTitularPuestoSegundaInstanciaCodigoUnico($idFormulario,$idRegistro,$actorDestinatario)
+{
+	global $con;
+	$cAdminitrativa=obtenerCarpetaAdministrativaProceso($idFormulario,$idRegistro);
+	$rolActor=obtenerTituloRol($actorDestinatario);
+	$consulta="SELECT unidadGestion FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$cAdminitrativa."' AND tipoCarpetaAdministrativa=2 ORDER BY fechaCreacion DESC";
+	
+	$unidadGestion=$con->obtenerValor($consulta);
+	
+	$arrDestinatario=array();
+	$consulta="SELECT ad.idUsuario FROM 801_adscripcion ad,807_usuariosVSRoles r WHERE r.idUsuario=ad.idUsuario AND 
+				r.codigoRol='".$actorDestinatario."' AND ad.Institucion='".$unidadGestion."'";
+
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_row($res))
+	{
+		
+		$nombreUsuario=obtenerNombreUsuario($fila[0])." (".$rolActor.")";
+		$o='{"idUsuarioDestinatario":"'.$fila[0].'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+		$o=json_decode($o);
+		array_push($arrDestinatario,$o);
+	}
+
+	return $arrDestinatario;
+	
+}
+
+function obtenerTitularPuestoPrimeraInstanciaCodigoUnico($idFormulario,$idRegistro,$actorDestinatario)
+{
+	global $con;
+	$cAdminitrativa=obtenerCarpetaAdministrativaProceso($idFormulario,$idRegistro);
+	$rolActor=obtenerTituloRol($actorDestinatario);
+	$consulta="SELECT unidadGestion FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$cAdminitrativa."' AND tipoCarpetaAdministrativa=1 ORDER BY fechaCreacion DESC";
+	
+	$unidadGestion=$con->obtenerValor($consulta);
+	
+	$arrDestinatario=array();
+	$consulta="SELECT ad.idUsuario FROM 801_adscripcion ad,807_usuariosVSRoles r WHERE r.idUsuario=ad.idUsuario AND 
+				r.codigoRol='".$actorDestinatario."' AND ad.Institucion='".$unidadGestion."'";
+
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_row($res))
+	{
+		
+		$nombreUsuario=obtenerNombreUsuario($fila[0])." (".$rolActor.")";
+		$o='{"idUsuarioDestinatario":"'.$fila[0].'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+		$o=json_decode($o);
+		array_push($arrDestinatario,$o);
+	}
+
+	return $arrDestinatario;
+	
+}
+
+
+function obtenerTitularPuestoPrimeraInstanciaSIUGJ($idFormulario,$idRegistro,$actorDestinatario)
+{
+	global $con;
+	$cAdminitrativa=obtenerCarpetaAdministrativaProceso($idFormulario,$idRegistro);
+	$rolActor=obtenerTituloRol($actorDestinatario);
+	
+	$arrCarpetas=array();
+	obtenerCarpetasPadre($cAdminitrativa,$arrCarpetas);
+	if(sizeof($arrCarpetas)==0)
+	{
+		array_push($arrCarpetas,$cAdminitrativa);
+	}
+	
+	$carpetaBase=$arrCarpetas[0];
+	
+	$consulta="SELECT unidadGestion FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaBase."' AND tipoCarpetaAdministrativa=1 ORDER BY fechaCreacion DESC";
+	
+	$unidadGestion=$con->obtenerValor($consulta);
+	
+	$arrDestinatario=array();
+	$consulta="SELECT ad.idUsuario FROM 801_adscripcion ad,807_usuariosVSRoles r WHERE r.idUsuario=ad.idUsuario AND 
+				r.codigoRol='".$actorDestinatario."' AND ad.Institucion='".$unidadGestion."'";
+
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_row($res))
+	{
+		
+		$nombreUsuario=obtenerNombreUsuario($fila[0])." (".$rolActor.")";
+		$o='{"idUsuarioDestinatario":"'.$fila[0].'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+		$o=json_decode($o);
+		array_push($arrDestinatario,$o);
+	}
+
+	return $arrDestinatario;
+	
+}
+
+
+function obtenerDestinatariosNotificacionCorreo($idFormulario,$idRegistro,$actorDestinatario)
+{
+	global $con;
+	
+	$rolActor=obtenerTituloRol($actorDestinatario);
+	$arrDestinatario=array();
+	
+	$consulta="SELECT DISTINCT r.idCuentaAcceso FROM _665_gPersonasNotificar p,7005_relacionFigurasJuridicasSolicitud r WHERE p.idReferencia=".$idRegistro."
+				AND r.idParticipante=p.idPersona AND r.idCuentaAcceso IS NOT NULL AND r.idCuentaAcceso<>-1";
+
+	$res=$con->obtenerFilas($consulta);
+	
+	while($fila=mysql_fetch_row($res))
+	{
+		
+		$nombreUsuario=obtenerNombreUsuario($fila[0])." (".$rolActor.")";
+		$o='{"idUsuarioDestinatario":"'.$fila[0].'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+		$o=json_decode($o);
+		array_push($arrDestinatario,$o);
+	}
+	
+	$consulta="SELECT DISTINCT p.idPersona*-1 FROM _665_gPersonasNotificar p WHERE p.idReferencia=".$idRegistro." 	and p.idPersona<0";
+
+	$res=$con->obtenerFilas($consulta);
+	
+	while($fila=mysql_fetch_row($res))
+	{
+		
+		$nombreUsuario=obtenerNombreUsuario($fila[0])." (".$rolActor.")";
+		$o='{"idUsuarioDestinatario":"'.$fila[0].'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+		$o=json_decode($o);
+		array_push($arrDestinatario,$o);
+	}
+
+	return $arrDestinatario;
+	
+}
+
+function obtenerTitularPuestoDespachoAsignado($idFormulario,$idRegistro,$actorDestinatario)
+{
+	global $con;
+	$rolActor=obtenerTituloRol($actorDestinatario);
+	$consulta="select despachoAsignado from _".$idFormulario."_tablaDinamica where id__".$idFormulario."_tablaDinamica=".$idRegistro;
+	$unidadGestion=$con->obtenerValor($consulta);
+	
+	$arrDestinatario=array();
+	$consulta="SELECT ad.idUsuario FROM 801_adscripcion ad,807_usuariosVSRoles r WHERE r.idUsuario=ad.idUsuario AND 
+				r.codigoRol='".$actorDestinatario."' AND ad.Institucion='".$unidadGestion."'";
+
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_row($res))
+	{
+		
+		$nombreUsuario=obtenerNombreUsuario($fila[0])." (".$rolActor.")";
+		$o='{"idUsuarioDestinatario":"'.$fila[0].'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+		$o=json_decode($o);
+		array_push($arrDestinatario,$o);
+	}
+
+	return $arrDestinatario;
+	
+}
+
+
+function obtenerFuncionarioPonenteTutelaAsignada($idFormulario,$idRegistro,$actorDestinatario)
+{
+	global $con;
+	
+	
+	$consulta="SELECT salaRevision FROM _917_tablaDinamica WHERE id__917_tablaDinamica=".$idRegistro;
+	$salaRevision=$con->obtenerValor($consulta);
+	
+	
+	$rolActor=obtenerTituloRol($actorDestinatario);
+	
+	$consulta="SELECT despachoAsigando FROM _993_tablaDinamica WHERE idReferencia=".$salaRevision." AND presideSala=1";
+	$unidadGestion=$con->obtenerValor($consulta);
+	
+	
+	$arrDestinatario=array();
+	$consulta="SELECT ad.idUsuario FROM 801_adscripcion ad,807_usuariosVSRoles r WHERE r.idUsuario=ad.idUsuario AND 
+				r.codigoRol='".$actorDestinatario."' AND ad.Institucion='".$unidadGestion."'";
+
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_row($res))
+	{
+		
+		$nombreUsuario=obtenerNombreUsuario($fila[0])." (".$rolActor.")";
+		$o='{"idUsuarioDestinatario":"'.$fila[0].'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+		$o=json_decode($o);
+		array_push($arrDestinatario,$o);
+	}
+
+	return $arrDestinatario;
+	
+}
+
+function obtenerFuncionarioSalaTutelaAsignada($idFormulario,$idRegistro,$actorDestinatario)
+{
+	global $con;
+	$consulta="SELECT salaRevision FROM _917_tablaDinamica WHERE id__917_tablaDinamica=".$idRegistro;
+	$salaRevision=$con->obtenerValor($consulta);
+	
+	
+	$rolActor=obtenerTituloRol($actorDestinatario);
+	
+	$consulta="SELECT despachoAsigando FROM _993_tablaDinamica WHERE idReferencia=".$salaRevision." AND presideSala=0";
+	$unidadGestion=$con->obtenerListaValores($consulta,"'");
+	
+	
+	$arrDestinatario=array();
+	$consulta="SELECT ad.idUsuario FROM 801_adscripcion ad,807_usuariosVSRoles r WHERE r.idUsuario=ad.idUsuario AND 
+				r.codigoRol='".$actorDestinatario."' AND ad.Institucion in(".$unidadGestion.")";
+
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_row($res))
+	{
+		
+		$nombreUsuario=obtenerNombreUsuario($fila[0])." (".$rolActor.")";
+		$o='{"idUsuarioDestinatario":"'.$fila[0].'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+		$o=json_decode($o);
+		array_push($arrDestinatario,$o);
+	}
+
+	return $arrDestinatario;
+	
+}
+
+
+function obtenerMagistradosSeleccionTutelas($idFormulario,$idRegistro,$actorDestinatario)
+{
+	global $con;
+	$consulta="SELECT carpetaAdministrativa FROM _899_tablaDinamica WHERE id__899_tablaDinamica=".$idRegistro;
+	$carpetaAdministrativa=$con->obtenerValor($consulta);
+	
+	
+	$rolActor=obtenerTituloRol($actorDestinatario);
+	
+	$consulta="SELECT unidadGestion FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa.
+			"' AND tipoCarpetaAdministrativa=30
+				union
+				SELECT despachoAsignado as unidadGestion FROM 7006_carpetasAdministrativasDespachosColegiados 
+				WHERE carpetaAdministrativa='".$carpetaAdministrativa."'";
+
+	$unidadGestion=$con->obtenerListaValores($consulta,"'");
+	
+	
+	$arrDestinatario=array();
+	$consulta="SELECT ad.idUsuario FROM 801_adscripcion ad,807_usuariosVSRoles r WHERE r.idUsuario=ad.idUsuario AND 
+				r.codigoRol='".$actorDestinatario."' AND ad.Institucion in(".$unidadGestion.")";
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_row($res))
+	{
+		
+		$nombreUsuario=obtenerNombreUsuario($fila[0])." (".$rolActor.")";
+		$o='{"idUsuarioDestinatario":"'.$fila[0].'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+		$o=json_decode($o);
+		array_push($arrDestinatario,$o);
+	}
+
+	return $arrDestinatario;
+	
+}
+
+
+function determinarDestinatarioFirmaColegiada($idFormulario,$idRegistro,$actorDestinatario)
+{
+	global $con;
+
+	$consulta="SELECT carpetaAdministrativa,idEstado FROM _".$idFormulario."_tablaDinamica WHERE id__".$idFormulario."_tablaDinamica=".$idRegistro;
+	$fDatos=$con->obtenerPrimeraFilaAsoc($consulta);
+	
+	$carpetaAdministrativa=$fDatos["carpetaAdministrativa"];
+	$idEstado=$fDatos["idEstado"];
+	
+	$posicion=0;
+	switch($idEstado)
+	{
+		case 6:
+			$posicion=1;
+		break;
+		case 7:
+			$posicion=2;
+		break;
+	}
+
+	$rolActor=obtenerTituloRol($actorDestinatario);
+	
+	$arrDestinatario=array();
+	$consulta="SELECT unidadGestion FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa."' AND tipoCarpetaAdministrativa=30 ORDER BY idCarpeta limit ".$posicion.",1";
+
+	$unidadGestion=$con->obtenerValor($consulta);
+	if($unidadGestion=="")
+	{
+		$consulta="SELECT despachoAsignado as unidadGestion FROM 7006_carpetasAdministrativasDespachosColegiados 
+					WHERE carpetaAdministrativa='".$carpetaAdministrativa."' ORDER BY idCarpetaAsignacion limit ".($posicion-1).",1";
+
+		$unidadGestion=$con->obtenerValor($consulta);
+	}
+	$consulta="SELECT ad.idUsuario FROM 801_adscripcion ad,807_usuariosVSRoles r WHERE r.idUsuario=ad.idUsuario AND 
+				r.codigoRol='".$actorDestinatario."' AND ad.Institucion in('".$unidadGestion."')";
+
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_row($res))
+	{
+		$nombreUsuario=obtenerNombreUsuario($fila[0])." (".$rolActor.")";
+		$o='{"idUsuarioDestinatario":"'.$fila[0].'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+		$o=json_decode($o);
+		array_push($arrDestinatario,$o);
+	}
+
+
+	return $arrDestinatario;
+	
+}
+
+function obtenerTitularDespachoEnvioTutela($idFormulario,$idRegistro,$actorDestinatario)
+{
+	global $con;
+	
+
+	$consulta="SELECT carpetaAdministrativa FROM _".$idFormulario."_tablaDinamica WHERE id__".$idFormulario."_tablaDinamica=".$idRegistro;
+	$carpetaAdministrativa=$con->obtenerValor($consulta);
+	
+	$consulta="SELECT codigoInstitucion FROM _917_tablaDinamica WHERE carpetaAdministrativa='".$carpetaAdministrativa."'";
+
+	$unidadGestion=$con->obtenerValor($consulta);
+	
+
+	$rolActor=obtenerTituloRol($actorDestinatario);
+	$arrDestinatario=array();
+	$consulta="SELECT ad.idUsuario FROM 801_adscripcion ad,807_usuariosVSRoles r WHERE r.idUsuario=ad.idUsuario AND 
+				r.codigoRol='".$actorDestinatario."' AND ad.Institucion in('".$unidadGestion."')";
+
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_row($res))
+	{
+		
+		$nombreUsuario=obtenerNombreUsuario($fila[0])." (".$rolActor.")";
+		$o='{"idUsuarioDestinatario":"'.$fila[0].'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+		$o=json_decode($o);
+		array_push($arrDestinatario,$o);
+	}
+
+	return $arrDestinatario;
+	
+}
+
+
+function obtenerTitularSecretaria($idFormulario,$idRegistro,$actorDestinatario)
+{
+	global $con;
+	
+	$campoCarpeta="";
+
+	switch($idFormulario)
+	{
+		case 706:
+			$campoCarpeta="carpetaAdministrativaContestacionExcepcionPrevia";
+		break;
+		default:
+			$campoCarpeta="carpetaAdministrativa";
+		break;
+	}
+	$consulta="SELECT ".$campoCarpeta.",codigoInstitucion FROM _".$idFormulario."_tablaDinamica WHERE id__".$idFormulario."_tablaDinamica=".$idRegistro;
+	$fCarpetaAdministrativa=$con->obtenerPrimeraFilaAsoc($consulta);
+	$carpetaAdministrativa=$fCarpetaAdministrativa[$campoCarpeta];
+	$unidadGestion=$fCarpetaAdministrativa["codigoInstitucion"];
+	
+
+	if($carpetaAdministrativa!="N/E")
+	{
+		$consulta="SELECT unidadGestion FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa."'";
+	
+		$unidadGestion=$con->obtenerValor($consulta);
+	}
+	
+	$consulta="SELECT unidadPadre FROM _17_tablaDinamica WHERE claveUnidad='".$unidadGestion."'";
+	$unidadPadre=$con->obtenerValor($consulta);
+	
+	$consulta="SELECT claveUnidad FROM _17_tablaDinamica WHERE unidadPadre='".$unidadPadre."' AND fungeSecretaria=1";
+	$unidadGestion=$con->obtenerValor($consulta);
+	
+	
+	$rolActor=obtenerTituloRol($actorDestinatario);
+	$arrDestinatario=array();
+	$consulta="SELECT ad.idUsuario FROM 801_adscripcion ad,807_usuariosVSRoles r WHERE r.idUsuario=ad.idUsuario AND 
+				r.codigoRol='".$actorDestinatario."' AND ad.Institucion in('".$unidadGestion."')";
+
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_row($res))
+	{
+		
+		$nombreUsuario=obtenerNombreUsuario($fila[0])." (".$rolActor.")";
+		$o='{"idUsuarioDestinatario":"'.$fila[0].'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+		$o=json_decode($o);
+		array_push($arrDestinatario,$o);
+	}
+
+	return $arrDestinatario;
+	
+}
+
+function obtenerDestinatariosDespachoAtencionSuplica($idFormulario,$idRegistro,$actorDestinatario)
+{
+	global $con;
+	$consulta="SELECT despachoAtencion FROM _1072_tablaDinamica WHERE id__1072_tablaDinamica=".$idRegistro;
+	$despachoAtencion=$con->obtenerValor($consulta);
+	
+	$rolActor=obtenerTituloRol($actorDestinatario);
+	$arrDestinatario=array();
+	$consulta="SELECT ad.idUsuario FROM 801_adscripcion ad,807_usuariosVSRoles r WHERE r.idUsuario=ad.idUsuario AND 
+				r.codigoRol='".$actorDestinatario."' AND ad.Institucion in('".$despachoAtencion."')";
+
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_row($res))
+	{
+		
+		$nombreUsuario=obtenerNombreUsuario($fila[0])." (".$rolActor.")";
+		$o='{"idUsuarioDestinatario":"'.$fila[0].'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+		$o=json_decode($o);
+		array_push($arrDestinatario,$o);
+	}
+
+	return $arrDestinatario;
+}
+
+
+function obtenerTitularSecretariaDespachoAsignado($idFormulario,$idRegistro,$actorDestinatario)
+{
+	global $con;
+	
+
+	$consulta="SELECT despachoAsignado FROM _".$idFormulario."_tablaDinamica WHERE id__".$idFormulario."_tablaDinamica=".$idRegistro;
+	$unidadGestion=$con->obtenerValor($consulta);
+	
+	
+	
+	
+	$consulta="SELECT unidadPadre FROM _17_tablaDinamica WHERE claveUnidad='".$unidadGestion."'";
+	$unidadPadre=$con->obtenerValor($consulta);
+	
+	$consulta="SELECT claveUnidad FROM _17_tablaDinamica WHERE unidadPadre='".$unidadPadre."' AND fungeSecretaria=1";
+	$unidadGestion=$con->obtenerValor($consulta);
+	
+	
+	$rolActor=obtenerTituloRol($actorDestinatario);
+	$arrDestinatario=array();
+	$consulta="SELECT ad.idUsuario FROM 801_adscripcion ad,807_usuariosVSRoles r WHERE r.idUsuario=ad.idUsuario AND 
+				r.codigoRol='".$actorDestinatario."' AND ad.Institucion in('".$unidadGestion."')";
+
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_row($res))
+	{
+		
+		$nombreUsuario=obtenerNombreUsuario($fila[0])." (".$rolActor.")";
+		$o='{"idUsuarioDestinatario":"'.$fila[0].'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+		$o=json_decode($o);
+		array_push($arrDestinatario,$o);
+	}
+
+	return $arrDestinatario;
+	
+}
+
+function obtenerTitularDespachoAsignado($idFormulario,$idRegistro,$actorDestinatario)
+{
+	global $con;
+	
+
+	$consulta="SELECT despachoAsignado FROM _".$idFormulario."_tablaDinamica WHERE id__".$idFormulario."_tablaDinamica=".$idRegistro;
+	$unidadGestion=$con->obtenerValor($consulta);
+	
+	
+	$rolActor=obtenerTituloRol($actorDestinatario);
+	$arrDestinatario=array();
+	$consulta="SELECT ad.idUsuario FROM 801_adscripcion ad,807_usuariosVSRoles r WHERE r.idUsuario=ad.idUsuario AND 
+				r.codigoRol='".$actorDestinatario."' AND ad.Institucion in('".$unidadGestion."')";
+
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_row($res))
+	{
+		
+		$nombreUsuario=obtenerNombreUsuario($fila[0])." (".$rolActor.")";
+		$o='{"idUsuarioDestinatario":"'.$fila[0].'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+		$o=json_decode($o);
+		array_push($arrDestinatario,$o);
+	}
+
+	return $arrDestinatario;
+	
+}
+
+function obtenerSustanciadorAsignadoCorteSuperior($idFormulario,$idRegistro,$actorDestinatario)
+{
+	global $con;
+	$arrDestinatarios=array();	
+	
+	$rolActor=obtenerTituloRol($actorDestinatario);
+	
+	$consulta="SELECT sustanciadorAsignado FROM _1085_tablaDinamica WHERE idReferencia=".$idRegistro;	
+
+	$resDestinatarios=$con->obtenerFilas($consulta);
+	while($fDestinatario=mysql_fetch_assoc($resDestinatarios))	
+	{
+		
+		$nombreUsuario=obtenerNombreUsuario($fDestinatario["sustanciadorAsignado"])." (".$rolActor.")";
+		$o='{"idUsuarioDestinatario":"'.$fDestinatario["sustanciadorAsignado"].'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+		$oDestinatario=json_decode($o);
+		
+		array_push($arrDestinatarios,$oDestinatario);
+	}
+		
+	
+	return $arrDestinatarios;
+}
+
+
+function esCarpetaJudicialCasacion($idFormulario,$idRegistro)
+{
+	global $con;
+	$consulta="SELECT carpetaAdministrativa2aInstancia FROM _952_tablaDinamica WHERE id__952_tablaDinamica=".$idRegistro;
+	$carpetaAdministrativa2aInstancia=$con->obtenerValor($consulta);
+	
+	$consulta="SELECT tipoCarpetaAdministrativa FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa2aInstancia."'";
+	$tipoCarpetaAdministrativa=$con->obtenerValor($consulta);
+	
+	
+	
+	if($tipoCarpetaAdministrativa==20)
+	{
+		return 1;
+	}
+	return 0;
+	
+}
+	
+function obtenerTitularPuestoDespachoPendienteFirma($idFormulario,$idRegistro,$actorDestinatario)
+{
+	global $con;
+	$arrDestinatarios=array();	
+	
+	$rolActor=obtenerTituloRol($actorDestinatario);
+	
+	$consulta="SELECT despachoFimante FROM _04001_firmasColegiadasDocumentos WHERE iFormulario=".$idFormulario." AND iRegistro=".$idRegistro.
+				" AND firmado=0 ORDER BY orden DESC";
+
+	$unidadGestion=$con->obtenerValor($consulta);
+	
+	$rolActor=obtenerTituloRol($actorDestinatario);
+
+	$arrDestinatario=array();
+	$consulta="SELECT ad.idUsuario FROM 801_adscripcion ad,807_usuariosVSRoles r WHERE r.idUsuario=ad.idUsuario AND 
+				r.codigoRol='".$actorDestinatario."' AND ad.Institucion='".$unidadGestion."'";
+
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_row($res))
+	{
+		
+		$nombreUsuario=obtenerNombreUsuario($fila[0])." (".$rolActor.")";
+		$o='{"idUsuarioDestinatario":"'.$fila[0].'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+		$o=json_decode($o);
+		array_push($arrDestinatarios,$o);
+	}
+
+
+	
+		
+	
+	return $arrDestinatarios;
+}
+
+
+
+function obtenerDemandanteProcesoJudicialTableroControl($iFormulario,$iRegistro)
+{
+	global $con;	
+	
+	$carpetaAdministrativa=obtenerCarpetaAdministrativaProcesoSIUGJ($iFormulario,$iRegistro);
+	
+	$consulta="SELECT idActividad FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa."'";
+	$idActividad=$con->obtenerValor($consulta);
+	if($idActividad=="")
+		$idActividad=-1;
+	$demantante="";
+	$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+				FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+				AND r.idActividad=".$idActividad." AND r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='A') ORDER BY nombre,nombre,apellidoMaterno";
+	
+	$demantante=$con->obtenerValor($consulta);
+	if($demantante=="")
+		$demantante="----------";
+	return "'".$demantante."'";
+	
+}
+
+
+function obtenerDemandadoProcesoJudicialTableroControl($iFormulario,$iRegistro)
+{
+	global $con;
+	
+	$carpetaAdministrativa=obtenerCarpetaAdministrativaProcesoSIUGJ($iFormulario,$iRegistro);
+	
+	$consulta="SELECT idActividad FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa."'";
+	$idActividad=$con->obtenerValor($consulta);
+	if($idActividad=="")
+		$idActividad=-1;
+	$demandado="";
+	$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+				FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+				AND r.idActividad=".$idActividad." AND r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='D') ORDER BY nombre,nombre,apellidoMaterno";
+	
+	$demandado=$con->obtenerValor($consulta);
+	if($demandado=="")
+		$demandado="----------";
+	return "'".$demandado."'";
+	
+}
+
+function obtenerPrioridadAtencion($iFormulario,$iRegistro)
+{
+	global $con;
+	
+	$consulta="SELECT prioridadAtencion,tiempoAtencion,periodoAtencion FROM _1044_tablaDinamica WHERE formularioAsociado=".$iFormulario;
+	$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+	
+	if(!$fRegistro)
+		return 0;
+	return $fRegistro["prioridadAtencion"];
+	
+	
+}
+
+function obtenerFechaLimiteAtencionTarea($iFormulario,$iRegistro)
+{
+	global $con;
+	
+	$consulta="SELECT prioridadAtencion,tiempoAtencion,periodoAtencion FROM _1044_tablaDinamica WHERE formularioAsociado=".$iFormulario;
+	$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+	
+	if((!$fRegistro) ||($fRegistro["tiempoAtencion"]==0))
+		return "''";
+	
+	$periodo=$fRegistro["periodoAtencion"]==1?"hours":"days";
+	$fechaActual=date("Y-m-d H:i:s");
+	$fechaAtencion=strtotime("+".$fRegistro["tiempoAtencion"]." ".$periodo,strtotime($fechaActual));	
+	return "'".date("Y-m-d H:i",$fechaAtencion)."'";
+	
+	
+}
+
+
+function obtenerDestinatariosDespachosLevantamientoEmbargoSecuestro($idFormulario,$idRegistro,$actorDestinatario)
+{
+	global $con;
+	
+	$arrDestinatarios=array();	
+	
+	$rolActor=obtenerTituloRol($actorDestinatario);
+	
+	
+	$consulta="SELECT carpetaAdministrativa FROM _981_tablaDinamica WHERE id__981_tablaDinamica=".$idRegistro;
+	$carpetaAdministrativa=$con->obtenerValor($consulta);
+	
+	
+	$consulta="SELECT idActividad FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa."'";
+
+	$idActividad=$con->obtenerValor($consulta);
+	
+	$consulta="SELECT DISTINCT idParticipante FROM 7005_relacionFigurasJuridicasSolicitud WHERE idActividad=".$idActividad." AND idFiguraJuridica IN
+			(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='D')";
+	$listaDemandados=$con->obtenerListaValores($consulta);
+	if($listaDemandados=="")
+		$listaDemandados=-1;
+	
+	$consulta="SELECT idActividad FROM 7005_relacionFigurasJuridicasSolicitud WHERE idParticipante in(".$listaDemandados.
+			") AND idFiguraJuridica IN(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='D')";
+
+	$listaActividades=$con->obtenerListaValores($consulta);
+	if($listaActividades=="")
+	{
+		$listaActividades=-1;
+	}
+	
+	$aDestinatarioAxuliar=array();
+	
+	$consulta="SELECT DISTINCT carpetaAdministrativa,unidadGestion FROM 7006_carpetasAdministrativas WHERE 
+			idActividad IN(".$listaActividades.") and carpetaAdministrativa<>'".$carpetaAdministrativa."' and situacion=1";
+
+	$resCarpetas=$con->obtenerFilas($consulta);
+	while($filaCarpeta=mysql_fetch_assoc($resCarpetas))
+	{
+		$consulta="SELECT ad.idUsuario FROM 801_adscripcion ad,807_usuariosVSRoles r WHERE r.idUsuario=ad.idUsuario AND 
+					r.codigoRol='".$actorDestinatario."' AND ad.Institucion='".$filaCarpeta["unidadGestion"]."'";
+	
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			$aDestinatarioAxuliar[$fila["idUsuario"]]=1;
+			
+		}
+		
+	}
+	foreach($aDestinatarioAxuliar as $idUsuario=>$resto)
+	{
+		$nombreUsuario=obtenerNombreUsuario($idUsuario)." (".$rolActor.")";
+		$o='{"idUsuarioDestinatario":"'.$idUsuario.'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+		$o=json_decode($o);
+		array_push($arrDestinatarios,$o);
+	}
+	
+	return $arrDestinatarios;
+	
+}
+
+
+function enviarMensajeDestinatario($idFormulario,$idRegistro,$actorDestinatario)
+{
+	global $con;
+	$rolActor=obtenerTituloRol($actorDestinatario);
+	$arrDestinatarios=array();
+	
+	$consulta="SELECT destinatario FROM _1230_tablaDinamica WHERE id__1230_tablaDinamica=".$idRegistro;
+	$idUsuario=$con->obtenerValor($consulta);
+	
+	$nombreUsuario=obtenerNombreUsuario($idUsuario)." (".$rolActor.")";
+	$o='{"idUsuarioDestinatario":"'.$idUsuario.'","nombreUsuarioDestinatario":"'.$nombreUsuario.'"}';
+	$o=json_decode($o);
+	array_push($arrDestinatarios,$o);
+	
+	
+	return $arrDestinatarios;
+}
+
+
+function notificarDespachoTerminoSuspension($idFormulario,$idRegistro)
+{
+	global $con;
+	
+	$consulta="SELECT carpetaAdministrativa,ambitoAplicacion FROM _1234_tablaDinamica WHERE id__1234_tablaDinamica=".$idRegistro;
+	$fRegistroBase=$con->obtenerPrimeraFilaAsoc($consulta);
+	if($fRegistroBase["ambitoAplicacion"]==1)
+	{
+		return 1;
+	}
+	
+	return 0;
+}
+?>

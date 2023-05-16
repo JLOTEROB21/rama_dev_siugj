@@ -1,0 +1,163 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+?>
+
+
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	var oDocumento=eval('['+bD(gE('datosDocumento').value)+']')[0];   
+    
+   	var oComp=bD(gE('oComp').value);
+    if(oComp!='')
+    {
+    	oComp=eval('['+oComp+']')[0];
+    }
+    else
+    {
+    	oComp={};
+    }
+    
+  	var arrBar=null;
+    if(gE('ocultarBarraSuperior').value=='0')
+    {
+    	
+    	arrBar=		[
+                      {
+                          xtype:'label',
+                          html:'<div class="letraNombreTableroNegro">Documento: <div class="letraNombreTablero" title="'+oDocumento.nombreArchivo+'" alt="'+oDocumento.nombreArchivo+'">'+
+                          		(oDocumento.nombreArchivo.length>40?oDocumento.nombreArchivo.substr(0,37)+'...':oDocumento.nombreArchivo)+'</label></div>'
+                      },
+                      {
+                      	xtype:'tbspacer',
+                        width:15
+                      },
+                      {
+                          xtype:'label',
+                          html:'<div class="letraNombreTableroNegro">Tama&ntilde;o: <div class="letraNombreTablero">'+(parseInt(oDocumento.tamano)==0?'Indeterminado':bytesToSize(parseInt(oDocumento.tamano),0))+'</div></div>'                      },
+                      
+                      {
+                      	xtype:'tbspacer',
+                        width:10
+                      },
+                      {
+                          xtype:'label',
+                          cls:'letraNombreTablero',
+                          html:'<div class="letraNombreTableroNegro">Formato: <div class="letraNombreTablero">'+oDocumento.extension.toUpperCase()+'</div></div>' 
+                      },
+                      {
+                      	xtype:'tbspacer',
+                        width:10
+                      },
+                      {
+                          xtype:'label',
+                          cls:'letraNombreTablero',
+                          html:'<div class="letraNombreTableroNegro">Fecha de registro: <div class="letraNombreTablero">'+Date.parseDate(oDocumento.fechaCreacion,'Y-m-d H:i:s').format('d/m/Y H:i')+' hrs.'+'</div></div>' 
+                      },
+                      {
+                      	xtype:'tbspacer',
+                        width:10
+                      },
+                      
+                      {
+                          icon:'../images/download.png',
+                          cls:'x-btn-text-icon',
+                          text:'Descargar',
+                          handler:function()
+                                  {
+                                      location.href=oDocumento.urlContenido+'?id='+bE('documento_'+gE('iDocumento').value)+'&eV2='+gE('eV2').value+'&nombreArchivo='+oDocumento.nombreArchivo;
+                                  }
+                          
+                      },
+                      {
+                      	xtype:'tbspacer',
+                        width:10
+                      },
+                      {
+                          icon:'../images/magnifier.png',
+                          cls:'x-btn-text-icon',
+                          hidden:((!oComp.idFormulario) || (parseInt(oComp.idFormulario)<0)) ,
+                          text:'Proceso asociado...',
+                          handler:function()
+                                  {
+                                      var oParam=[['idFormulario',oComp.idFormulario],['idRegistro',oComp.idRegistro],['dComp',bE('auto')],['actor',bE(oComp.actor)]];
+                                      enviarFormularioDatos('<?php echo $visorExpedienteProcesos?>',oParam);
+                                  }
+                          
+                      },
+                      {
+                      	xtype:'tbspacer',
+                        width:10
+                      },
+                      {
+                          icon:'../images/magnifier.png',
+                          cls:'x-btn-text-icon',
+                          hidden:((!oComp.idFormulario) || (parseInt(oComp.idFormulario)!=-5)) ,
+                          text:'Documento origen...',
+                          handler:function()
+                                  {
+                                  		var documentoRespuesta=eval(bD(gE('documentoRespuesta').value))[0];
+                                  		mostrarVisorDocumentoProceso(documentoRespuesta.extension,documentoRespuesta.idDocumento,'',documentoRespuesta.nombreArchivo)
+
+                                  }
+                      }
+                      
+                      
+                      
+                  ];
+    }
+    new Ext.Viewport(	{
+                                layout: 'border',
+                                items: [
+                                            {
+                                                xtype:'panel',
+                                                region:'center',
+                                                layout:'border',
+                                                cls:'panelSiugj',
+                                                tbar:	arrBar,
+                                                items:	[
+                                                            new Ext.ux.IFrameComponent({ 
+  
+                                                                                              id: 'frameContenido', 
+                                                                                              anchor:'100% 100%',
+                                                                                              region:'center',
+                                                                                              loadFuncion:function(iFrame)
+                                                                                                          {
+                                                                                                              
+                                                                                                          },
+
+                                                                                              url: '../paginasFunciones/white.php',
+                                                                                              style: 'width:100%;height:100%' 
+                                                                                      })
+                                                        ]
+                                            }
+                                         ]
+                            }
+                        ) 
+	
+    var parametros={};
+	var urlViewer='../visoresGaleriaDocumentos/pdf_viewerScan.php';                        
+	
+
+    parametros={urlDoc:bE(oDocumento.urlContenido+'?id='+bE('documento_'+gE('iDocumento').value)+'&nombreArchivo='+oDocumento.nombreArchivo)}
+    if(gE('ipServidor').value!='')
+    {
+        parametros={urlDoc:bE(oDocumento.urlContenido+'?ipServidor='+gE('ipServidor').value+'&id='+bE('documento_'+gE('iDocumento').value)+'&nombreArchivo='+oDocumento.nombreArchivo)}
+
+    }
+
+           
+      
+	gEx('frameContenido').load	(
+    
+    								{
+    									url:urlViewer,
+                                        params:parametros	
+                                     }
+    							)                        
+                          
+}
+

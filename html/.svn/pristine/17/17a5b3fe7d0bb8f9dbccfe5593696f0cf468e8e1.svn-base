@@ -1,0 +1,346 @@
+{
+  "ReportGuid": "261fdefddb233b48624f7d94a976a0bb",
+  "ReportName": "Report",
+  "ReportAlias": "Report",
+  "ReportFile": "HistorgramaUsuarios.mrt",
+  "ReportCreated": "/Date(1636941984000-0500)/",
+  "ReportChanged": "/Date(1636949177000-0500)/",
+  "EngineVersion": "EngineV2",
+  "CalculationMode": "Interpretation",
+  "ReportUnit": "Centimeters",
+  "PreviewSettings": 260039167,
+  "Dictionary": {
+    "DataSources": {
+      "0": {
+        "Ident": "StiCustomSource",
+        "Name": "800_usuarios",
+        "Alias": "800_usuarios",
+        "Key": "e7ddc4b0dfc65e42ee445ab5dd9fee6b",
+        "Columns": {
+          "0": {
+            "Name": "FechaActualiza",
+            "Index": -1,
+            "NameInSource": "FechaActualiza",
+            "Alias": "FechaActualiza",
+            "Type": "System.DateTime"
+          },
+          "1": {
+            "Name": "FechaCambio",
+            "Index": -1,
+            "NameInSource": "FechaCambio",
+            "Alias": "FechaCambio",
+            "Type": "System.DateTime"
+          },
+          "2": {
+            "Name": "Login",
+            "Index": -1,
+            "NameInSource": "Login",
+            "Alias": "Login",
+            "Type": "System.String"
+          },
+          "3": {
+            "Name": "Nombre",
+            "Index": -1,
+            "NameInSource": "Nombre",
+            "Alias": "Nombre",
+            "Type": "System.String"
+          },
+          "4": {
+            "Name": "Password",
+            "Index": -1,
+            "NameInSource": "Password",
+            "Alias": "Password",
+            "Type": "System.String"
+          },
+          "5": {
+            "Name": "Status",
+            "Index": -1,
+            "NameInSource": "Status",
+            "Alias": "Status",
+            "Type": "System.String"
+          },
+          "6": {
+            "Name": "cambiarDatosUsr",
+            "Index": -1,
+            "NameInSource": "cambiarDatosUsr",
+            "Alias": "cambiarDatosUsr",
+            "Type": "System.String"
+          },
+          "7": {
+            "Name": "cuentaActiva",
+            "Index": -1,
+            "NameInSource": "cuentaActiva",
+            "Alias": "cuentaActiva",
+            "Type": "System.String"
+          },
+          "8": {
+            "Name": "fechaCreacion",
+            "Index": -1,
+            "NameInSource": "fechaCreacion",
+            "Alias": "fechaCreacion",
+            "Type": "System.DateTime"
+          },
+          "9": {
+            "Name": "idIdioma",
+            "Index": -1,
+            "NameInSource": "idIdioma",
+            "Alias": "idIdioma",
+            "Type": "System.String"
+          },
+          "10": {
+            "Name": "idUsuario",
+            "Index": -1,
+            "NameInSource": "idUsuario",
+            "Alias": "idUsuario",
+            "Type": "System.String"
+          },
+          "11": {
+            "Name": "paso",
+            "Index": -1,
+            "NameInSource": "paso",
+            "Alias": "paso",
+            "Type": "System.String"
+          },
+          "12": {
+            "Name": "registradoEnPlantel",
+            "Index": -1,
+            "NameInSource": "registradoEnPlantel",
+            "Alias": "registradoEnPlantel",
+            "Type": "System.String"
+          },
+          "13": {
+            "Name": "responsableCreacion",
+            "Index": -1,
+            "NameInSource": "responsableCreacion",
+            "Alias": "responsableCreacion",
+            "Type": "System.String"
+          }
+        },
+        "NameInSource": "NombreConexion",
+        "SqlCommand": "800_usuarios",
+        "ServiceName": "Latis"
+      },
+      "1": {
+        "Ident": "StiDataTransformation",
+        "Name": "Data",
+        "Alias": "Data",
+        "Key": "5232e5479413778976732e05f9af36e5",
+        "Columns": {
+          "0": {
+            "Name": "fechaCreacion",
+            "Index": -1,
+            "NameInSource": "fechaCreacion",
+            "Alias": "fechaCreacion",
+            "Type": "System.DateTime",
+            "Key": "5ae31268af9535853b344ada22fe39eb",
+            "Ident": "Transform",
+            "Expression": "[800_usuarios.fechaCreacion]"
+          },
+          "1": {
+            "Name": "idUsuario",
+            "Index": -1,
+            "NameInSource": "idUsuario",
+            "Alias": "idUsuario",
+            "Type": "System.Decimal",
+            "Key": "89c556488f9deebe90c307d415194b4e",
+            "Ident": "Transform",
+            "Expression": "Count([800_usuarios.idUsuario])",
+            "Mode": "Measure"
+          }
+        },
+        "NameInSource": "Categoría"
+      }
+    },
+    "Databases": {
+      "0": {
+        "Ident": "StiCustomDatabase",
+        "Name": "NombreConexion",
+        "Alias": "AliasConexion",
+        "ConnectionStringEncrypted": "xW71C8hZo83iS6XEZ3CkP4vEzUhGWUu8b1z9vepwJRffcNEIxQ==",
+        "ServiceName": "Latis"
+      }
+    }
+  },
+  "Pages": {
+    "0": {
+      "Ident": "StiPage",
+      "Name": "Page1",
+      "Guid": "e65165762209ab8e8ff9813923793460",
+      "Interaction": {
+        "Ident": "StiInteraction"
+      },
+      "Border": ";;2;;;;;solid:Black",
+      "Brush": "solid:",
+      "Components": {
+        "0": {
+          "Ident": "StiChart",
+          "Name": "Chart1",
+          "ClientRectangle": "0.6,1.8,27,14.8",
+          "Interaction": {
+            "Ident": "StiInteraction"
+          },
+          "Border": ";;;;;;;solid:Black",
+          "Brush": "solid:255,255,255",
+          "EditorType": "Simple",
+          "Series": {
+            "0": {
+              "Ident": "StiClusteredColumnSeries",
+              "ShowShadow": false,
+              "SeriesLabels": {
+                "Ident": "StiCenterAxisLabels",
+                "MarkerSize": {
+                  "Width": 8,
+                  "Height": 6
+                },
+                "ValueTypeSeparator": "-",
+                "LabelColor": "50,58,69",
+                "BorderColor": "Transparent",
+                "Brush": "solid:119,255,255,255",
+                "Font": ";10;;"
+              },
+              "ValueDataColumn": "Data.idUsuario",
+              "ArgumentDataColumn": "Data.fechaCreacion",
+              "Title": {
+                "Value": "Series 1"
+              },
+              "BorderColor": "Transparent",
+              "Brush": "solid:52,152,219",
+              "BrushNegative": "solid:Firebrick"
+            }
+          },
+          "Area": {
+            "Ident": "StiClusteredColumnArea",
+            "ColorEach": true,
+            "BorderColor": "Transparent",
+            "Brush": "solid:255,255,255",
+            "InterlacingHor": {
+              "InterlacedBrush": "solid:10,155,155,155",
+              "Area": true
+            },
+            "InterlacingVert": {
+              "InterlacedBrush": "solid:10,155,155,155",
+              "Area": true
+            },
+            "GridLinesHor": {
+              "Color": "100,105,105,105",
+              "MinorColor": "100,105,105,105",
+              "Area": true
+            },
+            "GridLinesHorRight": {
+              "Visible": false,
+              "Area": true
+            },
+            "GridLinesVert": {
+              "Color": "100,105,105,105",
+              "MinorColor": "100,105,105,105",
+              "Area": true
+            },
+            "YAxis": {
+              "Ident": "StiYLeftAxis",
+              "Labels": {
+                "Color": "140,140,140"
+              },
+              "LineColor": "140,140,140",
+              "Title": {
+                "Text": "TOTAL",
+                "Color": "140,140,140",
+                "Direction": "BottomToTop"
+              }
+            },
+            "YRightAxis": {
+              "Ident": "StiYRightAxis",
+              "Labels": {
+                "Color": "140,140,140",
+                "TextAlignment": "Left"
+              },
+              "LineColor": "140,140,140",
+              "Title": {
+                "Color": "140,140,140",
+                "Direction": "TopToBottom"
+              }
+            },
+            "XAxis": {
+              "Ident": "StiXBottomAxis",
+              "Labels": {
+                "Placement": "AutoRotation",
+                "Color": "140,140,140"
+              },
+              "LineColor": "140,140,140",
+              "Title": {
+                "Text": "FECHA CREACION",
+                "Color": "140,140,140"
+              },
+              "ShowEdgeValues": 1
+            },
+            "XTopAxis": {
+              "Ident": "StiXTopAxis",
+              "Labels": {
+                "Color": "140,140,140"
+              },
+              "LineColor": "140,140,140",
+              "Title": {
+                "Color": "140,140,140"
+              }
+            }
+          },
+          "Table": {
+            "GridLineColor": "Transparent",
+            "Header": {
+              "Brush": "solid:White"
+            },
+            "DataCells": {
+              "TextColor": "140,140,140"
+            }
+          },
+          "SeriesLabels": {
+            "Ident": "StiOutsideAxisLabels",
+            "MarkerSize": {
+              "Width": 8,
+              "Height": 6
+            },
+            "ValueTypeSeparator": "-",
+            "LabelColor": "50,58,69",
+            "BorderColor": "Transparent",
+            "Brush": "solid:119,255,255,255",
+            "Font": ";10;;"
+          },
+          "Legend": {
+            "AllowApplyStyle": false,
+            "ShowShadow": false,
+            "BorderColor": "Transparent",
+            "Brush": "solid:255,255,255",
+            "TitleColor": "105,105,105",
+            "LabelsColor": "140,140,140",
+            "TitleFont": ";10;;",
+            "MarkerSize": {
+              "Width": 10,
+              "Height": 10
+            },
+            "Size": "0,0",
+            "Title": "Leyenda"
+          },
+          "Title": {
+            "Text": "DISTRIBUCION DE USUARIOS POR FECHA DE CREACION",
+            "Brush": "solid:140,140,140",
+            "Visible": true
+          },
+          "Style": {
+            "Ident": "StiStyle29"
+          }
+        }
+      },
+      "Orientation": "Landscape",
+      "PageWidth": 29.69,
+      "PageHeight": 21.01,
+      "Watermark": {
+        "TextBrush": "solid:50,0,0,0"
+      },
+      "Margins": {
+        "Left": 1,
+        "Right": 1,
+        "Top": 1,
+        "Bottom": 1
+      }
+    }
+  }
+}

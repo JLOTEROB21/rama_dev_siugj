@@ -1,0 +1,337 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+?>
+
+Ext.onReady(inicializar);
+
+var keyMap = new Ext.KeyMap(document, 
+									{
+										key: 13, 
+										fn: funValidar,
+										scope: this
+									}
+							);
+
+function funValidar()
+{
+	validar('frmEnvio');
+}
+
+function inicializar()
+{
+	gE('_numEtapaint').focus();
+}
+
+function validarfrm(formulario)
+{
+	if(validarFormularios(formulario))
+	{
+    	prepararComboRoles();
+		gE(formulario).submit();
+	}
+}
+
+function regresar()
+{
+	gE('formRegresar').submit();	
+}
+
+function prepararComboRoles()
+{
+	var comboRoles=gE('listRoles');
+    if(comboRoles!=null)
+    {
+        var hRoles=gE('listadoRoles');
+        var x;
+        var roles='';
+        
+        for(x=0;x<comboRoles.options.length;x++)
+        {
+            if(roles=='')
+                roles=comboRoles.options[x].value;
+            else
+                roles+=','+comboRoles.options[x].value;
+        }
+        hRoles.value=roles;
+    }
+}
+
+function validaRoles()
+{
+	var combo=gE('listRoles');
+    if(combo.options.length==0)
+    	return false;
+    else
+    	return true;
+}
+
+function removerRol()
+{
+	var cmbRoles=gE('listRoles');
+	var rol=cmbRoles.selectedIndex;
+	if(rol==-1)
+	{
+		Ext.MessageBox.alert('<?php echo $etj["lblAplicacion"]?>','Debe elegir el rol a remover');
+        return;
+	}
+    
+    function resp(btn)
+    {
+    	if(btn=='yes')
+        	cmbRoles[cmbRoles.selectedIndex]=null;
+    }
+    Ext.MessageBox.confirm('<?php echo $etj["lblAplicacion"]?>','Est&aacute; seguro de querer remover este rol',resp);
+    
+    
+}
+
+function agregarRol()
+{
+
+	<?php
+		if(existeRol("'1_0'"))
+			$consulta="select concat(idRol,'_',extensionRol),nombreGrupo from 8001_roles where  idIdioma=1 and situacion=1 order by nombreGrupo";
+		else
+			$consulta="select concat(idRol,'_',extensionRol),nombreGrupo from 8001_roles where vistosAdmin=1 and situacion=1 and idIdioma=1 order by nombreGrupo";
+		$arrRoles=uEJ($con->obtenerFilasArreglo($consulta));
+	?>
+    var arrRoles=<?php echo $arrRoles;?>;
+    var cmbExtensiones=crearComboExt('cmbExtensiones',[],100,35,250);
+	cmbExtensiones.hide();
+	var cmbRoles=crearComboExt('cmbRoles',arrRoles,100,5,350);
+    function rolSeleccionado(combo,registro,indice)
+    {
+    	cmbExtensiones.reset();
+    	var idRegistro=registro.get('id');
+        var arrId=idRegistro.split('_');
+        if(arrId[1]!=0)
+        {
+        	function funcAjax()
+            {
+                var resp=peticion_http.responseText;
+                arrResp=resp.split('|');
+                if(arrResp[0]=='1')
+                {
+					var arrExtensiones=eval(arrResp[1]);
+                    cmbExtensiones.getStore().loadData(arrExtensiones);                
+                	cmbExtensiones.show();
+		            Ext.getCmp('lblExtension').show();
+                }
+                else
+                {
+                    msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+                }
+            }
+            obtenerDatosWeb('../paginasFunciones/funcionesUsuarios.php',funcAjax, 'POST','funcion=20&extension='+arrId[1],true);
+        
+        	
+        }
+        else
+        {
+        	cmbExtensiones.hide();
+            Ext.getCmp('lblExtension').hide();
+        }
+        
+    }
+    
+    cmbRoles.on('select',rolSeleccionado);
+    
+    
+    var panelPermisos=new Ext.form.FieldSet (
+                                                    {
+                                                        x:10,
+                                                        y:70,
+                                                        width:450,
+                                                        title:'Permisos asignados al rol:',
+                                                        layout:'absolute',
+                                                        height:80,
+                                                        items: [		
+                                                                        {
+                                                                            x:10,
+                                                                            y:10,
+                                                                            fieldLabel: '',
+                                                                            boxLabel: 'Consultar',
+                                                                            name: 'publico',
+                                                                            xtype:'checkbox',
+                                                                            id:'chkConsultar',
+                                                                            checked:true,
+                                                                            disabled:true
+                                                                            
+                                                                        },				
+                                                                        {
+                                                                            x:90,
+                                                                            y:10,
+                                                                            fieldLabel: '',
+                                                                            boxLabel: 'Agregar',
+                                                                            name: 'publico',
+                                                                            xtype:'checkbox',
+                                                                            id:'chkAgregar'
+                                                                        },
+                                                                        {
+                                                                            x:170,
+                                                                            y:10,
+                                                                            fieldLabel: '',
+                                                                            boxLabel: 'Modificar',
+                                                                            name: 'publico',
+                                                                            xtype:'checkbox',
+                                                                            id:'chkModificar'
+                                                                        },
+                                                                        
+                                                                        {
+                                                                            x:250,
+                                                                            y:10,
+                                                                            labelSeparator: '',
+                                                                            boxLabel: 'Eliminar',
+                                                                            name: 'privado',
+                                                                            xtype:'checkbox',
+                                                                            id:'chkElminar'
+                                                                        }
+                                                                ]
+                                                    }
+                                                )
+    
+	var form=new Ext.form.FormPanel(
+										{
+											baseCls: 'x-plain',
+											layout:'absolute',
+											disabled:false,
+											items:
+													[
+													 	{
+                                                        	id:'lblRol',
+                                                            x:10,
+                                                            y:10,
+                                                            xtype:'label',
+                                                            html:'Rol:'
+                                                        },
+                                                        cmbRoles,
+                                                        {
+                                                        	id:'lblExtension',
+                                                        	x:10,
+                                                            y:40,
+                                                            xtype:'label',
+                                                            html:'Extensi&oacute;n:',
+                                                            hidden:true
+                                                        },
+                                                        cmbExtensiones,
+                                                        panelPermisos
+													]
+										}
+									)
+	var ventana=new Ext.Window(
+							   		{
+										title:'Agregar rol',
+										width:485,
+										height:230,
+										layout:'fit',
+										buttonAlign:'center',
+										items:[form],
+										modal:true,
+										plain:true,
+										listeners:
+											{
+												show:
+												{
+													buffer:10,fn:function()
+															{
+																
+															}
+												}
+											},
+										buttons:
+												[
+												 	{
+														text:'Aceptar',
+														handler:function ()
+															{
+                                                            	var rol=cmbRoles.getValue();
+                                                                var arrId=rol.split('_');
+                                                                var extension='0';
+                                                                if(arrId[1]!=0)
+                                                                	extension=cmbExtensiones.getValue();	
+                                                                if(extension=='')
+                                                                {
+                                                                	function resp()
+                                                                    {
+                                                                    	cmbExtensiones.focus();
+                                                                    }
+                                                                	Ext.MessageBox.alert('<?php echo $etj["lblAplicacion"]?>','Debe seleccionar una extensi&oacute;n del rol',resp);
+                                                                    return;
+                                                                }
+                                                                var listRoles=gE('listRoles');
+                                                                var cadPermisos='C';
+                                                                var agreg=Ext.getCmp ('chkAgregar');
+                                                                var modif=Ext.getCmp ('chkModificar');
+                                                                var elim=Ext.getCmp ('chkElminar');
+                                                                if(agreg.getValue()==true)
+                                                                {
+                                                                    cadPermisos=cadPermisos+'A';
+                                                                }
+                                                                if(modif.getValue()==true)
+                                                                {
+                                                                    cadPermisos=cadPermisos+'M';
+                                                                }
+                                                                if(elim.getValue()==true)
+                                                                {
+                                                                    cadPermisos=cadPermisos+'E';
+                                                                }
+
+                                                                var codigoRol=arrId[0]+'_'+extension+'|'+cadPermisos;
+                                                                var rolExiste=existeRol('listRoles',codigoRol);
+                                                                
+                                                                if(!rolExiste)
+                                                                {
+                                                                	
+                                                                	var option=document.createElement('option');
+                                                                    option.value=codigoRol;
+                                                                    var nExtension=cmbExtensiones.getValue();
+                                                                    var txtExtension='';
+                                                                    if(nExtension!='')
+                                                                    {
+                                                                    	txtExtension=' ('+cmbExtensiones.getRawValue()+')';
+                                                                    }
+                                                                    
+                                                                    option.text=cmbRoles.getRawValue()+txtExtension+' ['+cadPermisos+']';
+                                                                    listRoles.options[listRoles.options.length]=option;
+                                                                }
+                                                                else
+                                                                {
+                                                                	Ext.MessageBox.alert('<?php echo $etj["lblAplicacion"]?>','<?php echo $etj["msgRolYaExisteUsr"]?>')
+                                                                    return;
+                                                                }
+                                                                
+                                                                ventana.close();
+																
+															}
+													},
+													{
+														text:'Cancelar',
+														handler:function ()
+															{
+																ventana.close();
+															}
+													}
+												 ]
+									}
+							   )
+	ventana.show();
+
+}
+
+function existeRol(idCombo,valor)
+{
+	var arrValor=valor.split('|');
+	var combo=gE(idCombo);
+    var x;
+    var arrOpcion;
+    for(x=0;x<combo.options.length;x++)
+    {
+    	arrOpcion=combo.options[x].value.split('|');
+    	if(arrOpcion[0]==arrValor[0])
+        	return true;
+    }
+    return false;
+
+}

@@ -1,0 +1,1786 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+
+	$consulta="SELECT idCategoria,nombreCategoria FROM 908_categoriasDocumentos ORDER BY nombreCategoria";
+	$arrTipoDocumental=$con->obtenerFilasArreglo($consulta);
+	
+	$consulta="SELECT idProceso,nombre FROM 4001_procesos WHERE idTipoProceso=4 ORDER BY nombre";
+	$arrProcesos=$con->obtenerFilasArreglo($consulta);
+?>
+var arrProcesos=<?php echo $arrProcesos?>;
+var arrSeries=[];
+var arrSubSeries=[];
+var arrTipoDocumental=<?php echo $arrTipoDocumental?>;
+var arrPeriodosRetencion=[['1','Dias'],['2','Meses'],['3','A\xF1os']];
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	arrProcesos.splice(0,0,['0','Ninguno']);
+	var cmbProcesoArchivoGestion=crearComboExt('cmbProcesoArchivoGestion',arrProcesos,550,5,280);
+    cmbProcesoArchivoGestion.setValue('0');
+    var cmbProcesoArchivoCentral=crearComboExt('cmbProcesoArchivoCentral',arrProcesos,550,35,280);
+    cmbProcesoArchivoCentral.setValue('0');
+    new Ext.Viewport(	{
+                                layout: 'border',
+                                items: [
+                                            {
+                                                xtype:'panel',
+                                                region:'center',
+                                                layout:'border',
+                                                //cls:'panelSiugj',
+                                                title: '<span class="tituloGrid"><b>Tabla de Retenci&oacute;n Documental</b></span>',
+                                                tbar:	[
+                                                			{
+                                                                id:'btnGuardar',
+                                                                icon:'../images/guardar.PNG',
+                                                                cls:'x-btn-text-icon',
+                                                                text:'Guardar',
+                                                                xtype:'button',
+                                                                handler:function()
+                                                                        {
+                                                                            var txtClaveTabla=gEx('txtClaveTabla');
+                                                                            var txtVersion=gEx('txtVersion');
+                                                                            var txtNombreTabla=gEx('txtNombreTabla');
+                                                                            var txtDescripcion=gEx('txtDescripcion');
+                                                                            var cmbProcesoArchivoGestion=gEx('cmbProcesoArchivoGestion');
+                                                                            var cmbProcesoArchivoCentral=gEx('cmbProcesoArchivoCentral');
+                                                                            
+                                                                            if(txtClaveTabla.getValue()=='')
+                                                                            {
+                                                                                function resp()
+                                                                                {
+                                                                                    txtClaveTabla.focus();
+                                                                                }
+                                                                                msgBox('Debe indicar la clave de la Tabla de Retenci&oacute;n',resp);
+                                                                                return;
+                                                                            }
+                                                                            
+                                                                            if(txtVersion.getValue()=='')
+                                                                            {
+                                                                                function resp2()
+                                                                                {
+                                                                                    txtVersion.focus();
+                                                                                }
+                                                                                msgBox('Debe indicar la versi&oacute;n de la Tabla de Retenci&oacute;n',resp2);
+                                                                                return;
+                                                                            }
+                                                                            
+                                                                            
+                                                                             if(txtNombreTabla.getValue()=='')
+                                                                            {
+                                                                                function resp3()
+                                                                                {
+                                                                                    txtNombreTabla.focus();
+                                                                                }
+                                                                                msgBox('Debe indicar el nombre de la Tabla de Retenci&oacute;n',resp3);
+                                                                                return;
+                                                                            }
+                                                                            
+                                                                            var cadObj='{"idRegistro":"'+gE('idTablaRetencion').value+'","cveTabla":"'+cv(gEx('txtClaveTabla').getValue())+
+                                                                                        '","version":"'+cv(gEx('txtVersion').getValue())+'","nombreTabla":"'+cv(gEx('txtNombreTabla').getValue())+
+                                                                                        '","descripcion":"'+cv(gEx('txtDescripcion').getValue())+
+                                                                                        '","procesoArchivoGestion":"'+cmbProcesoArchivoGestion.getValue()+
+                                                                                        '","procesoArchivoCentral":"'+cmbProcesoArchivoCentral.getValue()+'"}';
+
+                                                                            function funcAjax()
+                                                                            {
+                                                                                var resp=peticion_http.responseText;
+                                                                                arrResp=resp.split('|');
+                                                                                if(arrResp[0]=='1')
+                                                                                {
+                                                                                    function respAux()
+                                                                                    {
+                                                                                        gE('idTablaRetencion').value=arrResp[1];
+                                                                                        gEx('gRegistrosTRDs').enable();
+                                                                                    }
+                                                                                    msgBox('La informaci&oacute;n ha sido guardada correctamente',respAux);   
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+                                                                                }
+                                                                            }
+                                                                            obtenerDatosWeb('../paginasFunciones/funcionesGestorDocumental.php',funcAjax, 'POST','funcion=1&cadObj='+cadObj,true);
+
+                                                                        
+                                                                        }
+                                                                
+                                                            },
+                                                            '-',
+                                                            {
+                                                                id:'btnRegresar',
+                                                                icon:'../images/salir.gif',
+                                                                cls:'x-btn-text-icon',
+                                                                text:'Salir',
+                                                                xtype:'button',
+                                                                handler:function()
+                                                                        {
+                                                                           function  resp(btn)
+                                                                            {
+                                                                                if(btn=='yes')
+                                                                                {
+                                                                                    location.href='../gestorDocumental/tblTablasRetencionDocumental.php';
+                                                                                }
+                                                                            }
+                                                                            msgConfirm('Est&aacute; seguro de querer salir?',resp)
+
+                                                                        
+                                                                        }
+                                                                
+                                                            }	
+                                                		],
+                                                items:	[	
+                                                			{
+                                                            	region:'north',
+                                                                height:180,
+                                                                border:false,
+                                                                defaultType: 'label',
+                                                                xtype:'tabpanel',
+                                                                activeTab:0,
+                                                                items:	[
+                                                                			{
+                                                                            	xtype:'panel',
+                                                                                layout:'absolute',
+                                                                                title:'Datos Generales',
+                                                                                defaultType: 'label',
+                                                                                items:	[
+                                                                                
+                                                                                			{
+                                                                                                x:10,
+                                                                                                y:20,
+                                                                                                html:'Cve. Tabla: <span style="color:#F00">*</span>'
+                                                                                            },
+                                                                                            {
+                                                                                                x:180,
+                                                                                                y:15,
+                                                                                                width:250,
+                                                                                                xtype:'textfield',
+                                                                                                id:'txtClaveTabla'
+                
+                                                                                            },
+                                                                                            {
+                                                                                                x:460,
+                                                                                                y:20,
+                                                                                                html:'Versi&oacute;n de la Tabla: <span style="color:#F00">*</span>'
+                                                                                            },
+                                                                                            {
+                                                                                                x:600,
+                                                                                                y:15,
+                                                                                                width:80,
+                                                                                                xtype:'textfield',
+                                                                                                id:'txtVersion'
+                
+                                                                                            },
+                                                                                            {
+                                                                                                x:10,
+                                                                                                y:50,
+                                                                                                html:'Nombre de la Tabla: <span style="color:#F00">*</span>'
+                                                                                            },
+                                                                                            {
+                                                                                                x:180,
+                                                                                                y:45,
+                                                                                                width:400,
+                                                                                                xtype:'textfield',
+                                                                                                id:'txtNombreTabla'
+                
+                                                                                            },
+                                                                                            {
+                                                                                                x:10,
+                                                                                                y:80,
+                                                                                                html:'Descripci&oacute;n de la Tabla: <span style="color:#F00"></span>'
+                                                                                            },
+                                                                                            {
+                                                                                                x:180,
+                                                                                                y:75,
+                                                                                                width:500,
+                                                                                                height:70,
+                                                                                                xtype:'textarea',
+                                                                                                id:'txtDescripcion'
+                
+                                                                                            }
+                                                			
+                                                            
+                                                                                		]
+                                                                            },
+                                                                            {
+                                                                            	xtype:'panel',
+                                                                                layout:'absolute',
+                                                                                title:'Procesos Asociados',
+                                                                                defaultType: 'label',
+                                                                                items:	[
+                                                                                            {
+                                                                                            	x:10,
+                                                                                                y:10,
+                                                                                                html:'Proceso a arrancar al conclu&iacute;r el tiempo de retenci&oacute;n en Archivo de Gesti&oacute;n:'
+                                                                                            },
+                                                                                            cmbProcesoArchivoGestion,
+                                                                                            {
+                                                                                            	x:10,
+                                                                                                y:40,
+                                                                                                html:'Proceso a arrancar al conclu&iacute;r el tiempo de retenci&oacute;n en Archivo Central:'
+                                                                                            },
+                                                                                            cmbProcesoArchivoCentral
+                                                                                			
+                                                			
+                                                            
+                                                                                		]
+                                                                            }
+                                                                            
+                                                                		]
+                                                            },
+                                                            crearGridRegistrosTRDs()
+                                                        ]
+                                            }
+                                         ]
+                            }
+                        )   
+
+
+	var objInfo=eval(bD(gE('objInfo').value));
+    if(objInfo.length>0)
+    {
+    	objInfo=objInfo[0];
+    	var txtClaveTabla=gEx('txtClaveTabla');
+        txtClaveTabla.setValue(objInfo.cveTabla);
+        var txtVersion=gEx('txtVersion');
+        txtVersion.setValue(objInfo.version);
+        var txtNombreTabla=gEx('txtNombreTabla');
+        txtNombreTabla.setValue(objInfo.nombreTabla);
+        var txtDescripcion=gEx('txtDescripcion');
+        txtDescripcion.setValue(escaparBR(objInfo.descripcion));
+    	gEx('gRegistrosTRDs').enable();
+        
+        
+        cmbProcesoArchivoGestion.setValue(objInfo.procesoArchivoGestion);
+    	cmbProcesoArchivoCentral.setValue(objInfo.procesoArchivoCentral);
+    }
+    
+    gEx('txtClaveTabla').focus(false,500);
+
+}
+
+
+function crearGridRegistrosTRDs()
+{
+	var lector= new Ext.data.JsonReader({
+                                            
+                                            totalProperty:'numReg',
+                                            fields: [
+                                               			{name:'idRegistro'},
+		                                                {name: 'idSerie'},
+		                                                {name:'idSubSerie'},
+                                                        {name: 'cveSerie'},
+		                                                {name:'cveSubSerie'},
+		                                                {name: 'tipoDocumento'},
+                                                        {name: 'soporteFisico'},
+                                                        {name:'soporteElectronico'},
+                                                        {name:'retencionArchivoGestion'},
+                                                        {name: 'unidadRetencionArchivoGestion'},
+                                                        {name: 'retencionArchivoCentral'},
+                                                        {name:'unidadRetencionArchivoCentral'},
+                                                        {name:'conservacionTotal'},
+                                                        {name: 'eliminacion'},                                                        
+                                                        {name: 'microfilmacionDigitalizacion'},
+                                                        {name:'seleccion'},
+                                                        {name:'procedimiento'},
+                                                        {name: 'tipoElemento'}
+                                            		],
+                                            root:'registros'
+                                            
+                                        }
+                                      );
+	 
+                                                                                      
+	var alDatos=new Ext.data.GroupingStore({
+                                                            reader: lector,
+                                                            proxy : new Ext.data.HttpProxy	(
+
+                                                                                              {
+
+                                                                                                  url: '../paginasFunciones/funcionesGestorDocumental.php'
+
+                                                                                              }
+
+                                                                                          ),
+                                                            sortInfo: {field: 'tipoDocumento', direction: 'ASC'},
+                                                            groupField: 'tipoDocumento',
+                                                            remoteGroup:false,
+				                                            remoteSort: true,
+                                                            autoLoad:true
+                                                            
+                                                        }) 
+	alDatos.on('beforeload',function(proxy)
+    								{
+                                    	proxy.baseParams.funcion='3';
+                                        proxy.baseParams.idTablaRetencion=gE('idTablaRetencion').value;
+                                        gEx('btnEditarRegistro').disable();
+                                    }
+                        )   
+    
+    
+    alDatos.on('load',function(proxy)
+    								{
+                                    	arrSeries=proxy.reader.jsonData.arrSeries;
+
+                                    }
+                        ) 
+      
+       
+	
+	var cabecera = new Ext.ux.grid.ColumnHeaderGroup	(
+                                                            {
+                                                                rows: 	[
+                                                                			[
+                                                                                {header: '', colspan: 2, align: 'center'},
+                                                                                {header: 'C&oacute;digo', colspan: 2, align: 'center'},
+                                                                                {header: '', colspan: 1, align: 'center'},
+                                                                                {header: 'Soporte', colspan: 2, align: 'center'},
+                                                                                {header: 'Tiempo Retenci&oacute;n', colspan: 4, align: 'center'},
+                                                                                {header: 'Disposici&oacute;n Final', colspan: 4, align: 'center'},
+                                                                                {header: '', colspan: 1, align: 'center'}
+																			]                                                                            
+                                                                        ]
+                                                            }
+                                                        );
+
+  
+  
+  var chkRow=new Ext.grid.CheckboxSelectionModel({checkOnly:true,singleSelect:true});
+  
+   var cModelo= new Ext.grid.ColumnModel   	(
+                                                        [
+                                                            new  Ext.grid.RowNumberer({width:30}),
+                                                            chkRow,
+                                                            
+                                                            {
+                                                                header:'Serie',
+                                                                width:80,
+                                                                align:'center',
+                                                                sortable:true,
+                                                                dataIndex:'cveSerie',
+                                                                renderer:function(val,meta,registro)
+                                                                		{
+                                                                        	if(registro.data.tipoElemento!='3')
+                                                                            {
+                                                                            	return val;
+                                                                            }
+                                                                           	
+                                                                        }
+                                                            },
+                                                            {
+                                                                header:'Sub Serie',
+                                                                 width:80,
+                                                                align:'center',
+                                                                sortable:true,
+                                                                dataIndex:'cveSubSerie',
+                                                                renderer:function(val,meta,registro)
+                                                                		{
+                                                                        	if(registro.data.tipoElemento!='3')
+                                                                            {
+                                                                            	return val;
+                                                                            }
+                                                                           	
+                                                                        }
+                                                            },
+                                                            {
+                                                                header:'Tipo Documental',
+                                                                width:300,
+                                                                sortable:true,
+                                                                dataIndex:'tipoDocumento',
+                                                                renderer:function(val,meta,registro)
+                                                                		{
+                                                                        	if(registro.data.tipoElemento=='3')
+                                                                            {
+                                                                            	return formatearValorRenderer(arrTipoDocumental,val);
+                                                                            }
+                                                                           	return val;
+                                                                        }
+                                                            },
+                                                            {
+                                                                header:'F&iacute;sico',
+                                                                width:90,
+                                                                align:'center',
+                                                                sortable:true,
+                                                                dataIndex:'soporteFisico',
+                                                                renderer:function(val)
+                                                                		{
+                                                                        	if(val)
+                                                                            	return 'X';
+                                                                        }
+                                                            }
+                                                            
+                                                            ,
+                                                            
+                                                             {
+                                                                header:'Electr&oacute;nico',
+                                                                width:90,
+                                                                align:'center',
+                                                                sortable:true,
+                                                                dataIndex:'soporteElectronico',
+                                                                renderer:function(val)
+                                                                		{
+                                                                        	if(val)
+                                                                            	return 'X';
+                                                                        }
+                                                            }
+                                                            ,
+                                                            {
+                                                                header:'Archivo Gesti&oacute;n',
+                                                                width:110,
+                                                                sortable:true,
+                                                                align:'center',
+                                                                dataIndex:'retencionArchivoGestion'
+                                                            },
+                                                            {
+                                                                header:'Unidad Tiempo',
+                                                                width:110,
+                                                                sortable:true,
+                                                                align:'center',
+                                                                dataIndex:'unidadRetencionArchivoGestion',
+                                                                renderer:function(val)
+                                                                		{
+                                                                        	return formatearValorRenderer(arrPeriodosRetencion,val);
+                                                                        }
+                                                            },
+                                                             {
+                                                                header:'Archivo Central',
+                                                                width:110,
+                                                                sortable:true,
+                                                                align:'center',
+                                                                dataIndex:'retencionArchivoCentral'
+                                                            },
+                                                            {
+                                                                header:'Unidad Tiempo',
+                                                                width:110,
+                                                                sortable:true,
+                                                                align:'center',
+                                                                dataIndex:'unidadRetencionArchivoCentral',
+                                                                renderer:function(val)
+                                                                		{
+                                                                        	return formatearValorRenderer(arrPeriodosRetencion,val);
+                                                                        }
+                                                            },
+                                                             {
+                                                                header:'CT',
+                                                                width:60,
+                                                                align:'center',
+                                                                sortable:true,
+                                                                dataIndex:'conservacionTotal',
+                                                                renderer:function(val)
+                                                                		{
+                                                                        	if(val)
+                                                                            	return 'X';
+                                                                        }
+                                                            }
+                                                            
+                                                            ,
+                                                            {
+                                                                header:'E',
+                                                                width:60,
+                                                                align:'center',
+                                                                sortable:true,
+                                                                dataIndex:'eliminacion',
+                                                                renderer:function(val)
+                                                                		{
+                                                                        	if(val)
+                                                                            	return 'X';
+                                                                        }
+                                                            },
+                                                            {
+                                                                header:'MT',
+                                                                width:60,
+                                                                align:'center',
+                                                                sortable:true,
+                                                                dataIndex:'microfilmacionDigitalizacion',
+                                                                renderer:function(val)
+                                                                		{
+                                                                        	if(val)
+                                                                            	return 'X';
+                                                                        }
+                                                            },
+                                                            {
+                                                                header:'S',
+                                                                width:60,
+                                                                align:'center',
+                                                                sortable:true,
+                                                                dataIndex:'seleccion',
+                                                                renderer:function(val)
+                                                                		{
+                                                                        	if(val)
+                                                                            	return 'X';
+                                                                        }
+                                                            },
+                                                            
+                                                            {
+                                                                header:'Procedimiento',
+                                                                width:500,
+                                                                sortable:true,
+                                                                dataIndex:'procedimiento'
+                                                            }
+                                                        ]
+                                                    );
+                                                    
+        var tblGrid=	new Ext.grid.GridPanel	(
+                                                            {
+                                                                id:'gRegistrosTRDs',
+                                                                store:alDatos,
+                                                                disabled:true,
+                                                                region:'center',
+                                                                tbar:	[
+                                                                			{
+                                                                                icon:'../images/add.png',
+                                                                                cls:'x-btn-text-icon',
+                                                                                text:'Agregar...',
+                                                                                menu:	[
+                                                                                			{
+                                                                                                cls:'x-btn-text-icon',
+                                                                                                text:'Serie',
+                                                                                                handler:function()
+                                                                                                        {
+                                                                                                            mostrarVentanaSerie();
+                                                                                                        }
+                                                                                                
+                                                                                            },'-',
+                                                                                            {
+                                                                                                cls:'x-btn-text-icon',
+                                                                                                text:'Subserie',
+                                                                                                handler:function()
+                                                                                                        {
+                                                                                                            mostrarVentanaSubSerie();
+                                                                                                        }
+                                                                                                
+                                                                                            },'-',
+                                                                                            {
+                                                                                                cls:'x-btn-text-icon',
+                                                                                                text:'Tipo Documental',
+                                                                                                handler:function()
+                                                                                                        {
+                                                                                                            mostrarVentanaTipoDocumental()
+                                                                                                        }
+                                                                                                
+                                                                                            }
+                                                                                
+                                                                                		]
+                                                                                
+                                                                            },
+                                                                            '-',
+                                                                            {
+                                                                            	id:'btnEditarRegistro',
+                                                                                icon:'../images/pencil.png',
+                                                                                cls:'x-btn-text-icon',
+                                                                                text:'Editar Registro de TRD',
+                                                                                handler:function()
+                                                                                        {
+                                                                                            var fila=tblGrid.getSelectionModel().getSelected();
+                                                                                            if(!fila)
+                                                                                            {
+                                                                                            	msgBox('Debe seleccionar el registro de TRD que desea editar');
+                                                                                            	return;
+                                                                                            }
+                                                                                            
+                                                                                            switch(fila.data.tipoElemento)
+                                                                                            {
+                                                                                            	case '1':
+                                                                                                	mostrarVentanaSerie(fila);
+                                                                                                break;
+                                                                                                case '2':
+                                                                                                	mostrarVentanaSubSerie(fila);
+                                                                                                break;
+                                                                                                case '3':
+                                                                                                	mostrarVentanaTipoDocumental(fila);
+                                                                                                break;
+                                                                                            }
+                                                                                            
+                                                                                        }
+                                                                                
+                                                                            }
+                                                                            
+                                                                            
+                                                                            ,'-',
+                                                                            {
+                                                                                icon:'../images/delete.png',
+                                                                                cls:'x-btn-text-icon',
+                                                                                text:'Remover Registro de TRD',
+                                                                                handler:function()
+                                                                                        {
+                                                                                            var fila=tblGrid.getSelectionModel().getSelected();
+                                                                                            if(!fila)
+                                                                                            {
+                                                                                                msgBox('Debe seleccionar el registro de TRD que desea remover');
+                                                                                                return;
+                                                                                            }
+                                                                                            
+                                                                                            var cadObj='{"idRegistro":"'+fila.data.idRegistro+'","tipoElemento":"'+fila.data.tipoElemento+'"}';
+                                                                                            
+                                                                                            function resp(btn)
+                                                                                            {
+                                                                                            	if(btn=='yes')
+                                                                                                {
+                                                                                                	function funcAjax()
+                                                                                                    {
+                                                                                                        var resp=peticion_http.responseText;
+                                                                                                        arrResp=resp.split('|');
+                                                                                                        if(arrResp[0]=='1')
+                                                                                                        {
+                                                                                                            gEx('gRegistrosTRDs').getStore().reload();
+                                                                                                        }
+                                                                                                        else
+                                                                                                        {
+                                                                                                            msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+                                                                                                        }
+                                                                                                    }
+                                                                                                    obtenerDatosWeb('../paginasFunciones/funcionesGestorDocumental.php',funcAjax, 'POST','funcion=4&cadObj='+cadObj,true);
+                                                                                                }
+                                                                                            }
+                                                                                            msgConfirm('Est&aacute; seguro de querer remover el elemento seleccionado?',resp);
+                                                                                            
+                                                                                        }
+                                                                                
+                                                                            }
+                                                                		],
+                                                                frame:false,
+                                                                cm: cModelo,
+                                                                stripeRows :true,
+                                                                loadMask:true,
+                                                                sm:chkRow,
+                                                                columnLines : true,
+                                                                plugins:	[
+                                                                				cabecera
+                                                                                
+                                                                			]
+                                                            }
+                                                        );
+	
+    tblGrid.getSelectionModel().on('rowselect',function(sm,nFila,registro)
+    											{
+                                                	gEx('btnEditarRegistro').enable();
+                                                }
+    								)
+     tblGrid.getSelectionModel().on('rowdeselect',function(sm,nFila,registro)
+    											{
+                                                	gEx('btnEditarRegistro').disable();
+                                                }
+    								)
+    
+    return 	tblGrid;	
+}
+
+function mostrarVentanaSerie(fila)
+{
+	console.log(fila);
+	var cmbPeriodoArchivoGestion=crearComboExt('cmbPeriodoArchivoGestion',arrPeriodosRetencion,240,5,110);
+    var cmbPeriodoArchivoCentral=crearComboExt('cmbPeriodoArchivoCentral',arrPeriodosRetencion,240,35,110);
+	var form = new Ext.form.FormPanel(	
+										{
+											baseCls: 'x-plain',
+											layout:'absolute',
+											defaultType: 'label',
+											items: 	[
+                                            			{
+                                                        	x:10,
+                                                            y:10,
+                                                            html:'Cve. Serie: <span style="color:#F00">*</span>'
+                                                        },
+                                                        {
+                                                        	x:180,
+                                                            y:5,
+                                                            xtype:'textfield',
+                                                            width:80,
+                                                            id:'txtCveSerie'
+                                                        },
+                                                        {
+                                                        	x:10,
+                                                            y:40,
+                                                            html:'T&iacute;titulo de la Serie: <span style="color:#F00">*</span>'
+                                                        },
+                                                        {
+                                                        	x:180,
+                                                            y:35,
+                                                            xtype:'textfield',
+                                                            width:350,
+                                                            id:'txtTituloSerie'
+                                                        },
+                                                        {
+                                                        	x:10,
+                                                            y:70,
+                                                            html:'Soporte:'
+                                                        },	
+                                                        {
+                                                        	x:180,
+                                                            y:65,
+                                                            id:'chkSoporteGroup',
+                                                            width:200,
+                                                            xtype:'checkboxgroup',
+                                                            items: [
+                                                                        {boxLabel: 'F&iacute;sico', name: 'rdoSoporte', inputValue: 1},
+                                                                        {boxLabel: 'Electr&oacute;nico', name: 'rdoSoporte', inputValue: 2}
+                                                                    ]
+                                                        },
+                                                        {
+                                                        	x:0,
+                                                            y:100,
+                                                            xtype:'fieldset',
+                                                            width:600,
+                                                            height:100,
+                                                            layout:'absolute',
+                                                            defaultType: 'label',
+                                                            title:'Tiempo de retenci&oacute;n:',
+                                                            items:	[
+                                                            			{
+                                                                        	x:10,
+                                                                            y:10,
+                                                                            html:'Archivo Gesti&oacute;n:'
+                                                                        },
+                                                                        {
+                                                                        	x:180,
+                                                                            y:5,
+                                                                            width:50,
+                                                                            xtype:'numberfield',
+                                                                            id:'txtTiempoRetencionArchivoGestion',
+                                                                            allowDecimals:false,
+                                                                            allowNegative:false
+                                                                        },
+                                                                        cmbPeriodoArchivoGestion,
+                                                                        {
+                                                                        	x:10,
+                                                                            y:40,
+                                                                            html:'Archivo Central:'
+                                                                        },
+                                                                        
+                                                                         {
+                                                                        	x:180,
+                                                                            y:35,
+                                                                            width:50,
+                                                                            xtype:'numberfield',
+                                                                            id:'txtTiempoRetencionArchivoCentral',
+                                                                            allowDecimals:false,
+                                                                            allowNegative:false
+                                                                        },
+                                                                        cmbPeriodoArchivoCentral
+                                                            		]
+                                                        },	
+                                                        
+                                                        {
+                                                        	x:10,
+                                                            y:220,
+                                                            html:'Disposici&oacute;n Final:'
+                                                        },	
+                                                        {
+                                                        	x:180,
+                                                            y:215,
+                                                            id:'rdoDiposicionGroup',
+                                                            width:420,
+                                                            xtype:'radiogroup',
+                                                            items: [
+                                                                        {boxLabel: 'CT', name: 'rdoDisposicion', inputValue: 1},
+                                                                        {boxLabel: 'E', name: 'rdoDisposicion', inputValue: 2},
+                                                                        {boxLabel: 'MT', name: 'rdoDisposicion', inputValue: 3},
+                                                                        {boxLabel: 'S', name: 'rdoDisposicion', inputValue: 4},
+                                                                        {boxLabel: '(Ninguno)', name: 'rdoDisposicion', inputValue: 0}
+                                                                    ]
+                                                        },
+                                                        {
+                                                        	x:10,
+                                                            y:250,
+                                                            html:'Procedimiento:'
+                                                        },
+                                                        {
+                                                        	x:10,
+                                                            y:280,
+                                                            id:'txtProcedimiento',
+                                                            xtype:'textarea',
+                                                            width:600,
+                                                            height:60,
+                                                        }
+													]
+										}
+									);
+	
+	var ventanaAM = new Ext.Window(
+									{
+										title: 'Serie',
+										width: 650,
+										height:440,
+										layout: 'fit',
+										plain:true,
+										modal:true,
+										bodyStyle:'padding:5px;',
+										buttonAlign:'center',
+										items: form,
+										listeners : {
+													show : {
+																buffer : 10,
+																fn : function() 
+																{
+                                                                	gEx('txtCveSerie').focus(false,500);
+																}
+															}
+												},
+										buttons:	[
+														{
+															
+															text: '<?php echo $etj["lblBtnAceptar"]?>',
+                                                            
+															handler: function()
+																	{
+                                                                    	var idRegistro=fila?fila.data.idRegistro:-1;
+                                                                    	var txtCveSerie=gEx('txtCveSerie');
+                                                                        
+                                                                        if(txtCveSerie.getValue()=='')
+                                                                        {
+                                                                        	function resp()
+                                                                            {
+                                                                            	txtCveSerie.focus();
+                                                                            }
+                                                                            msgBox('Debe ingresar la clave de la serie',resp)
+                                                                            return;
+                                                                        }
+                                                                        
+                                                                        var txtTituloSerie=gEx('txtTituloSerie');
+                                                                        
+                                                                        
+                                                                        if(txtTituloSerie.getValue()=='')
+                                                                        {
+                                                                        	function resp2()
+                                                                            {
+                                                                            	txtTituloSerie.focus();
+                                                                            }
+                                                                            msgBox('Debe ingresar el t&iacute;tutlo de la serie',resp2)
+                                                                            return;
+                                                                        }
+                                                                        
+                                                                        
+                                                                        var chkSoporteGroup=gEx('chkSoporteGroup');
+                                                                        
+                                                                        var aSoporte=chkSoporteGroup.getValue();
+                                                                        
+                                                                        var arrSoporte='';
+                                                                        
+                                                                        if(aSoporte)
+                                                                        {
+                                                                            var x;
+                                                                            var o;
+                                                                            for(x=0;x<aSoporte.length;x++)
+                                                                            {
+                                                                                
+                                                                                o=aSoporte[x];
+                                                                                if(arrSoporte=='')
+                                                                                    arrSoporte=o.inputValue;
+                                                                                else
+                                                                                    arrSoporte+=','+o.inputValue;
+                                                                                
+                                                                            }
+																		}                                                                        
+                                                                        var txtTiempoRetencionArchivoGestion=gEx('txtTiempoRetencionArchivoGestion');
+                                                                        var cmbPeriodoArchivoGestion=gEx('cmbPeriodoArchivoGestion');
+                                                                        
+                                                                        var txtTiempoRetencionArchivoCentral=gEx('txtTiempoRetencionArchivoCentral');
+                                                                        var cmbPeriodoArchivoCentral=gEx('cmbPeriodoArchivoCentral');
+                                                                        
+                                                                        
+                                                                        if(txtTiempoRetencionArchivoGestion.getValue()=='')
+                                                                        {
+                                                                        	cmbPeriodoArchivoGestion.setValue('');
+                                                                            
+                                                                        }
+                                                                        
+                                                                        if(txtTiempoRetencionArchivoCentral.getValue()=='')
+                                                                        {
+                                                                        	cmbPeriodoArchivoCentral.setValue('');
+                                                                            
+                                                                        }
+                                                                        
+                                                                       
+                                                                        
+                                                                        var rdoDiposicionGroup=gEx('rdoDiposicionGroup');
+                                                                        var aDisposicion=rdoDiposicionGroup.getValue();
+                                                                        
+                                                                        var disposicionFinal='';
+                                                                        var arrDisposicion='';
+                                                                        var x;
+                                                                        var o;
+                                                                        if(aDisposicion)
+                                                                        {
+                                                                        	disposicionFinal=aDisposicion.inputValue;
+																		}                                                                        
+                                                                        
+                                                                        var txtProcedimiento=gEx('txtProcedimiento');
+                                                                        
+                                                                        
+																		var cadObj='{"cveElemento":"'+cv(txtCveSerie.getValue())+'","tituloElemento":"'+cv(txtTituloSerie.getValue())+'","soporte":"'+arrSoporte+
+                                                                        		'","tRetencionGestion":"'+txtTiempoRetencionArchivoGestion.getValue()+'","pRetencionGestion":"'+cmbPeriodoArchivoGestion.getValue()+
+                                                                                '","tRetencionCentral":"'+txtTiempoRetencionArchivoCentral.getValue()+
+                                                                                '","pRetencionCentral":"'+cmbPeriodoArchivoCentral.getValue()+
+                                                                                '","disposicionFinal":"'+disposicionFinal+'","procedimiento":"'+cv(gEx('txtProcedimiento').getValue())+
+                                                                                '","idRegistro":"'+idRegistro+'","tipoRegistro":"1","idTablaRetencion":"'+gE('idTablaRetencion').value+'"}';
+																		
+                                                                        
+                                                                        function funcAjax()
+                                                                        {
+                                                                            var resp=peticion_http.responseText;
+                                                                            arrResp=resp.split('|');
+                                                                            if(arrResp[0]=='1')
+                                                                            {
+                                                                            	gEx('gRegistrosTRDs').getStore().reload();
+                                                                                ventanaAM.close();
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+                                                                            }
+                                                                        }
+                                                                        obtenerDatosWeb('../paginasFunciones/funcionesGestorDocumental.php',funcAjax, 'POST','funcion=2&cadObj='+cadObj,true);
+
+                                                                        
+                                                                    	
+                                                                    }
+														},
+														{
+															text: '<?php echo $etj["lblBtnCancelar"]?>',
+															handler:function()
+																	{
+																		ventanaAM.close();
+																	}
+														}
+													]
+									}
+								);
+	ventanaAM.show();
+    
+    
+    if(fila)
+    {
+    	var txtCveSerie=gEx('txtCveSerie');
+        var txtTituloSerie=gEx('txtTituloSerie');
+        var chkSoporteGroup=gEx('chkSoporteGroup');
+        var txtTiempoRetencionArchivoGestion=gEx('txtTiempoRetencionArchivoGestion');
+        var cmbPeriodoArchivoGestion=gEx('cmbPeriodoArchivoGestion');
+        var txtTiempoRetencionArchivoCentral=gEx('txtTiempoRetencionArchivoCentral');
+        var cmbPeriodoArchivoCentral=gEx('cmbPeriodoArchivoCentral');
+        var rdoDiposicionGroup=gEx('rdoDiposicionGroup');
+        var txtProcedimiento=gEx('txtProcedimiento');
+        console.log(fila);
+        
+        txtCveSerie.setValue(fila.data.cveSerie);
+        txtTituloSerie.setValue(fila.data.tipoDocumento);
+        
+        if(fila.data.conservacionTotal)
+        {
+        	rdoDiposicionGroup.setValue(1);
+        }
+         if(fila.data.eliminacion)
+        {
+        	rdoDiposicionGroup.setValue(2);
+        }
+         if(fila.data.microfilmacionDigitalizacion)
+        {
+        	rdoDiposicionGroup.setValue(3);
+        }
+         if(fila.data.seleccion)
+        {
+        	rdoDiposicionGroup.setValue(4);
+        }
+        
+        chkSoporteGroup.setValue([fila.data.soporteFisico,fila.data.soporteElectronico]);
+        txtTiempoRetencionArchivoGestion.setValue(fila.data.retencionArchivoGestion);
+        cmbPeriodoArchivoGestion.setValue(fila.data.unidadRetencionArchivoGestion);
+        txtTiempoRetencionArchivoCentral.setValue(fila.data.retencionArchivoCentral);
+        cmbPeriodoArchivoCentral.setValue(fila.data.unidadRetencionArchivoCentral);
+        //rdoDiposicionGroup.setValue(fila.data.cveSubSerie);
+        txtProcedimiento.setValue(fila.data.procedimiento);
+        
+    }	
+}
+
+
+function mostrarVentanaSubSerie(fila)
+{
+	
+	var cmbSerie=crearComboExt('cmbSerie',arrSeries,180,5,350);
+	var cmbPeriodoArchivoGestion=crearComboExt('cmbPeriodoArchivoGestion',arrPeriodosRetencion,240,5,110);
+    var cmbPeriodoArchivoCentral=crearComboExt('cmbPeriodoArchivoCentral',arrPeriodosRetencion,240,35,110);
+	var form = new Ext.form.FormPanel(	
+										{
+											baseCls: 'x-plain',
+											layout:'absolute',
+											defaultType: 'label',
+											items: 	[
+                                            			{
+                                                        	x:10,
+                                                            y:10,
+                                                            html:'Serie: <span style="color:#F00">*</span>'
+                                                        },
+                                                        cmbSerie,
+                                                        
+                                                        {
+                                                        	x:10,
+                                                            y:40,
+                                                            html:'Cve. Sub Serie: <span style="color:#F00">*</span>'
+                                                        },
+                                                        {
+                                                        	x:180,
+                                                            y:35,
+                                                            xtype:'textfield',
+                                                            width:80,
+                                                            id:'txtSubSerie'
+                                                        },
+                                                        
+                                                        
+                                                        {
+                                                        	x:10,
+                                                            y:70,
+                                                            html:'T&iacute;titulo de la Serie: <span style="color:#F00">*</span>'
+                                                        },
+                                                        {
+                                                        	x:180,
+                                                            y:65,
+                                                            xtype:'textfield',
+                                                            width:350,
+                                                            id:'txtTituloSerie'
+                                                        },
+                                                        {
+                                                        	x:10,
+                                                            y:100,
+                                                            html:'Soporte:'
+                                                        },	
+                                                        {
+                                                        	x:180,
+                                                            y:95,
+                                                            id:'chkSoporteGroup',
+                                                            width:200,
+                                                            xtype:'checkboxgroup',
+                                                            items: [
+                                                                        {boxLabel: 'F&iacute;sico', name: 'rdoSoporte', inputValue: 1},
+                                                                        {boxLabel: 'Electr&oacute;nico', name: 'rdoSoporte', inputValue: 2}
+                                                                    ]
+                                                        },
+                                                        {
+                                                        	x:0,
+                                                            y:130,
+                                                            xtype:'fieldset',
+                                                            width:600,
+                                                            height:100,
+                                                            layout:'absolute',
+                                                            defaultType: 'label',
+                                                            title:'Tiempo de retenci&oacute;n:',
+                                                            items:	[
+                                                            			{
+                                                                        	x:10,
+                                                                            y:10,
+                                                                            html:'Archivo Gesti&oacute;n:'
+                                                                        },
+                                                                        {
+                                                                        	x:180,
+                                                                            y:5,
+                                                                            width:50,
+                                                                            xtype:'numberfield',
+                                                                            id:'txtTiempoRetencionArchivoGestion',
+                                                                            allowDecimals:false,
+                                                                            allowNegative:false
+                                                                        },
+                                                                        cmbPeriodoArchivoGestion,
+                                                                        {
+                                                                        	x:10,
+                                                                            y:40,
+                                                                            html:'Archivo Central:'
+                                                                        },
+                                                                        
+                                                                         {
+                                                                        	x:180,
+                                                                            y:35,
+                                                                            width:50,
+                                                                            xtype:'numberfield',
+                                                                            id:'txtTiempoRetencionArchivoCentral',
+                                                                            allowDecimals:false,
+                                                                            allowNegative:false
+                                                                        },
+                                                                        cmbPeriodoArchivoCentral
+                                                            		]
+                                                        },	
+                                                        
+                                                        {
+                                                        	x:10,
+                                                            y:250,
+                                                            html:'Disposici&oacute;n Final:'
+                                                        },	
+                                                        {
+                                                        	x:180,
+                                                            y:245,
+                                                            id:'rdoDiposicionGroup',
+                                                            width:420,
+                                                            xtype:'radiogroup',
+                                                            items: [
+                                                                        {boxLabel: 'CT', name: 'rdoDisposicion', inputValue: 1},
+                                                                        {boxLabel: 'E', name: 'rdoDisposicion', inputValue: 2},
+                                                                        {boxLabel: 'MT', name: 'rdoDisposicion', inputValue: 3},
+                                                                        {boxLabel: 'S', name: 'rdoDisposicion', inputValue: 4},
+                                                                        {boxLabel: '(Ninguno)', name: 'rdoDisposicion', inputValue: 0}
+                                                                    ]
+                                                        },
+                                                        {
+                                                        	x:10,
+                                                            y:280,
+                                                            html:'Procedimiento:'
+                                                        },
+                                                        {
+                                                        	x:10,
+                                                            y:310,
+                                                            id:'txtProcedimiento',
+                                                            xtype:'textarea',
+                                                            width:600,
+                                                            height:60,
+                                                        }
+													]
+										}
+									);
+	
+	var ventanaAM = new Ext.Window(
+									{
+										title: 'Sub Serie',
+										width: 650,
+										height:470,
+										layout: 'fit',
+										plain:true,
+										modal:true,
+										bodyStyle:'padding:5px;',
+										buttonAlign:'center',
+										items: form,
+										listeners : {
+													show : {
+																buffer : 10,
+																fn : function() 
+																{
+                                                                	cmbSerie.focus(false,500);
+																}
+															}
+												},
+										buttons:	[
+														{
+															
+															text: '<?php echo $etj["lblBtnAceptar"]?>',
+                                                            
+															handler: function()
+																	{
+                                                                    	var idRegistro=fila?fila.data.idRegistro:-1;
+                                                                    	var txtSubSerie=gEx('txtSubSerie');
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        if(cmbSerie.getValue()=='')
+                                                                        {
+                                                                        	function resp()
+                                                                            {
+                                                                            	cmbSerie.focus();
+                                                                            }
+                                                                            msgBox('Debe indicar la serie a la cual pertenece la subserie',resp)
+                                                                            return;
+                                                                        }
+                                                                        
+                                                                        var txtTituloSerie=gEx('txtTituloSerie');
+                                                                        
+                                                                        
+                                                                        if(txtTituloSerie.getValue()=='')
+                                                                        {
+                                                                        	function resp2()
+                                                                            {
+                                                                            	txtTituloSerie.focus();
+                                                                            }
+                                                                            msgBox('Debe ingresar el t&iacute;tutlo de la serie',resp2)
+                                                                            return;
+                                                                        }
+                                                                        
+                                                                        
+                                                                        var chkSoporteGroup=gEx('chkSoporteGroup');
+                                                                        
+                                                                        var aSoporte=chkSoporteGroup.getValue();
+                                                                        
+                                                                        var arrSoporte='';
+                                                                        
+                                                                        if(aSoporte)
+                                                                        {
+                                                                            var x;
+                                                                            var o;
+                                                                            for(x=0;x<aSoporte.length;x++)
+                                                                            {
+                                                                                
+                                                                                o=aSoporte[x];
+                                                                                if(arrSoporte=='')
+                                                                                    arrSoporte=o.inputValue;
+                                                                                else
+                                                                                    arrSoporte+=','+o.inputValue;
+                                                                                
+                                                                            }
+																		}                                                                        
+                                                                        var txtTiempoRetencionArchivoGestion=gEx('txtTiempoRetencionArchivoGestion');
+                                                                        var cmbPeriodoArchivoGestion=gEx('cmbPeriodoArchivoGestion');
+                                                                        
+                                                                        var txtTiempoRetencionArchivoCentral=gEx('txtTiempoRetencionArchivoCentral');
+                                                                        var cmbPeriodoArchivoCentral=gEx('cmbPeriodoArchivoCentral');
+                                                                        
+                                                                        
+                                                                        if((txtTiempoRetencionArchivoGestion.getValue()!='')||(cmbPeriodoArchivoGestion.getValue()!=''))
+                                                                        {
+                                                                        	if(txtTiempoRetencionArchivoGestion.getValue()=='')
+                                                                            {
+                                                                            	function resp3()
+                                                                                {
+                                                                                	txtTiempoRetencionArchivoGestion.focus();
+                                                                                }
+                                                                                msgBox('Debe ingresar el tiempo de retenci&oacute;n en archivo de gesti&oacute;n',resp3)
+                                                                                return;
+                                                                            
+                                                                            }
+                                                                            
+                                                                            if(cmbPeriodoArchivoGestion.getValue()=='')
+                                                                            {
+                                                                            	function resp4()
+                                                                                {
+                                                                                	cmbPeriodoArchivoGestion.focus();
+                                                                                }
+                                                                                msgBox('Debe ingresar el periodo de retenci&oacute;n en archivo de gesti&oacute;n',resp4)
+                                                                                return;
+                                                                            }
+                                                                            
+                                                                        }
+                                                                        
+                                                                        
+                                                                        if((txtTiempoRetencionArchivoCentral.getValue()!='')||(cmbPeriodoArchivoCentral.getValue()!=''))
+                                                                        {
+                                                                        	if(txtTiempoRetencionArchivoCentral.getValue()=='')
+                                                                            {
+                                                                            	function resp5()
+                                                                                {
+                                                                                	txtTiempoRetencionArchivoCentral.focus();
+                                                                                }
+                                                                                msgBox('Debe ingresar el tiempo de retenci&oacute;n en archivo de central',resp5)
+                                                                                return;
+                                                                            
+                                                                            }
+                                                                            
+                                                                            if(cmbPeriodoArchivoCentral.getValue()=='')
+                                                                            {
+                                                                            	function resp6()
+                                                                                {
+                                                                                	cmbPeriodoArchivoCentral.focus();
+                                                                                }
+                                                                                msgBox('Debe ingresar el periodo de retenci&oacute;n en archivo de central',resp6)
+                                                                                return;
+                                                                            }
+                                                                        }
+                                                                        
+                                                                        var rdoDiposicionGroup=gEx('rdoDiposicionGroup');
+                                                                        var aDisposicion=rdoDiposicionGroup.getValue();
+                                                                        
+                                                                        var disposicionFinal='';
+                                                                        var arrDisposicion='';
+                                                                        var x;
+                                                                        var o;
+                                                                        if(aDisposicion)
+                                                                        {
+                                                                        	disposicionFinal=aDisposicion.inputValue;
+																		}                                                                        
+                                                                        
+                                                                        var txtProcedimiento=gEx('txtProcedimiento');
+                                                                        
+                                                                        
+																		var cadObj='{"cveElemento":"'+cv(txtSubSerie.getValue())+'","tituloElemento":"'+cv(txtTituloSerie.getValue())+'","soporte":"'+arrSoporte+
+                                                                        		'","tRetencionGestion":"'+txtTiempoRetencionArchivoGestion.getValue()+'","pRetencionGestion":"'+cmbPeriodoArchivoGestion.getValue()+
+                                                                                '","tRetencionCentral":"'+txtTiempoRetencionArchivoCentral.getValue()+
+                                                                                '","pRetencionCentral":"'+cmbPeriodoArchivoCentral.getValue()+
+                                                                                '","disposicionFinal":"'+disposicionFinal+'","procedimiento":"'+cv(gEx('txtProcedimiento').getValue())+
+                                                                                '","idRegistro":"'+idRegistro+'","tipoRegistro":"2","idTablaRetencion":"'+gE('idTablaRetencion').value+
+                                                                                '","idSerie":"'+cmbSerie.getValue()+'"}';
+																		
+                                                                        
+                                                                        function funcAjax()
+                                                                        {
+                                                                            var resp=peticion_http.responseText;
+                                                                            arrResp=resp.split('|');
+                                                                            if(arrResp[0]=='1')
+                                                                            {
+                                                                            	gEx('gRegistrosTRDs').getStore().reload();
+                                                                                ventanaAM.close();
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+                                                                            }
+                                                                        }
+                                                                        obtenerDatosWeb('../paginasFunciones/funcionesGestorDocumental.php',funcAjax, 'POST','funcion=2&cadObj='+cadObj,true);
+
+                                                                        
+                                                                    	
+                                                                    }
+														},
+														{
+															text: '<?php echo $etj["lblBtnCancelar"]?>',
+															handler:function()
+																	{
+																		ventanaAM.close();
+																	}
+														}
+													]
+									}
+								);
+	ventanaAM.show();
+    
+    
+    if(fila)
+    {
+    	var cmbSerie=gEx('cmbSerie');
+    	var txtSubSerie=gEx('txtSubSerie');
+        var txtTituloSerie=gEx('txtTituloSerie');
+        var chkSoporteGroup=gEx('chkSoporteGroup');
+        var txtTiempoRetencionArchivoGestion=gEx('txtTiempoRetencionArchivoGestion');
+        var cmbPeriodoArchivoGestion=gEx('cmbPeriodoArchivoGestion');
+        var txtTiempoRetencionArchivoCentral=gEx('txtTiempoRetencionArchivoCentral');
+        var cmbPeriodoArchivoCentral=gEx('cmbPeriodoArchivoCentral');
+        var rdoDiposicionGroup=gEx('rdoDiposicionGroup');
+        var txtProcedimiento=gEx('txtProcedimiento');
+
+        cmbSerie.setValue(fila.data.idSerie);
+        txtSubSerie.setValue(fila.data.cveSubSerie);
+        txtTituloSerie.setValue(fila.data.tipoDocumento);
+        
+        if(fila.data.conservacionTotal)
+        {
+        	rdoDiposicionGroup.setValue(1);
+        }
+         if(fila.data.eliminacion)
+        {
+        	rdoDiposicionGroup.setValue(2);
+        }
+         if(fila.data.microfilmacionDigitalizacion)
+        {
+        	rdoDiposicionGroup.setValue(3);
+        }
+         if(fila.data.seleccion)
+        {
+        	rdoDiposicionGroup.setValue(4);
+        }
+        
+        chkSoporteGroup.setValue([fila.data.soporteFisico,fila.data.soporteElectronico]);
+        txtTiempoRetencionArchivoGestion.setValue(fila.data.retencionArchivoGestion);
+        cmbPeriodoArchivoGestion.setValue(fila.data.unidadRetencionArchivoGestion);
+        txtTiempoRetencionArchivoCentral.setValue(fila.data.retencionArchivoCentral);
+        cmbPeriodoArchivoCentral.setValue(fila.data.unidadRetencionArchivoCentral);
+       
+        txtProcedimiento.setValue(escaparBR(fila.data.procedimiento));
+        
+    }	
+}
+
+
+function mostrarVentanaTipoDocumental(fila)
+{
+	
+	var cmbSerie=crearComboExt('cmbSerie',arrSeries,180,5,350);
+    cmbSerie.on('select',function(cmb,registro)
+    						{
+                            	cmbSubSerie.setValue('');
+                            	cmbSubSerie.getStore().removeAll();
+                                cmbSubSerie.getStore().loadData(registro.data.valorComp);
+                            }
+    			)
+    var cmbSubSerie=crearComboExt('cmbSubSerie',[],180,35,350);
+    var cmbTipoDocumental=crearComboExt('cmbTipoDocumental',arrTipoDocumental,180,65,350);
+	var cmbPeriodoArchivoGestion=crearComboExt('cmbPeriodoArchivoGestion',arrPeriodosRetencion,240,5,110);
+    var cmbPeriodoArchivoCentral=crearComboExt('cmbPeriodoArchivoCentral',arrPeriodosRetencion,240,35,110);
+	var form = new Ext.form.FormPanel(	
+										{
+											baseCls: 'x-plain',
+											layout:'absolute',
+											defaultType: 'label',
+											items: 	[
+                                            			{
+                                                        	x:10,
+                                                            y:10,
+                                                            html:'Serie: <span style="color:#F00">*</span>'
+                                                        },
+                                                        cmbSerie,
+                                                        
+                                                        {
+                                                        	x:10,
+                                                            y:40,
+                                                            html:'Sub Serie: <span style="color:#F00">*</span>'
+                                                        },
+                                                        cmbSubSerie,
+                                                        
+                                                        
+                                                        {
+                                                        	x:10,
+                                                            y:70,
+                                                            html:'Tipo Documental: <span style="color:#F00">*</span>'
+                                                        },
+                                                        cmbTipoDocumental,
+                                                        {
+                                                        	x:10,
+                                                            y:100,
+                                                            html:'Soporte:'
+                                                        },	
+                                                        {
+                                                        	x:180,
+                                                            y:95,
+                                                            id:'chkSoporteGroup',
+                                                            width:200,
+                                                            xtype:'checkboxgroup',
+                                                            items: [
+                                                                        {boxLabel: 'F&iacute;sico', name: 'rdoSoporte', inputValue: 1},
+                                                                        {boxLabel: 'Electr&oacute;nico', name: 'rdoSoporte', inputValue: 2}
+                                                                    ]
+                                                        },
+                                                        {
+                                                        	x:0,
+                                                            y:130,
+                                                            xtype:'fieldset',
+                                                            width:600,
+                                                            height:100,
+                                                            layout:'absolute',
+                                                            defaultType: 'label',
+                                                            title:'Tiempo de retenci&oacute;n:',
+                                                            items:	[
+                                                            			{
+                                                                        	x:10,
+                                                                            y:10,
+                                                                            html:'Archivo Gesti&oacute;n:'
+                                                                        },
+                                                                        {
+                                                                        	x:180,
+                                                                            y:5,
+                                                                            width:50,
+                                                                            xtype:'numberfield',
+                                                                            id:'txtTiempoRetencionArchivoGestion',
+                                                                            allowDecimals:false,
+                                                                            allowNegative:false
+                                                                        },
+                                                                        cmbPeriodoArchivoGestion,
+                                                                        {
+                                                                        	x:10,
+                                                                            y:40,
+                                                                            html:'Archivo Central:'
+                                                                        },
+                                                                        
+                                                                         {
+                                                                        	x:180,
+                                                                            y:35,
+                                                                            width:50,
+                                                                            xtype:'numberfield',
+                                                                            id:'txtTiempoRetencionArchivoCentral',
+                                                                            allowDecimals:false,
+                                                                            allowNegative:false
+                                                                        },
+                                                                        cmbPeriodoArchivoCentral
+                                                            		]
+                                                        },	
+                                                        
+                                                        {
+                                                        	x:10,
+                                                            y:250,
+                                                            html:'Disposici&oacute;n Final:'
+                                                        },	
+                                                        {
+                                                        	x:180,
+                                                            y:245,
+                                                            id:'rdoDiposicionGroup',
+                                                            width:420,
+                                                            xtype:'radiogroup',
+                                                            items: [
+                                                                        {boxLabel: 'CT', name: 'rdoDisposicion', inputValue: 1},
+                                                                        {boxLabel: 'E', name: 'rdoDisposicion', inputValue: 2},
+                                                                        {boxLabel: 'MT', name: 'rdoDisposicion', inputValue: 3},
+                                                                        {boxLabel: 'S', name: 'rdoDisposicion', inputValue: 4},
+                                                                        {boxLabel: '(Ninguno)', name: 'rdoDisposicion', inputValue: 0}
+                                                                    ]
+                                                        },
+                                                        {
+                                                        	x:10,
+                                                            y:280,
+                                                            html:'Procedimiento:'
+                                                        },
+                                                        {
+                                                        	x:10,
+                                                            y:275,
+                                                            id:'txtProcedimiento',
+                                                            xtype:'textarea',
+                                                            width:600,
+                                                            height:60,
+                                                        }
+													]
+										}
+									);
+	
+	var ventanaAM = new Ext.Window(
+									{
+										title: 'Sub Serie',
+										width: 650,
+										height:470,
+										layout: 'fit',
+										plain:true,
+										modal:true,
+										bodyStyle:'padding:5px;',
+										buttonAlign:'center',
+										items: form,
+										listeners : {
+													show : {
+																buffer : 10,
+																fn : function() 
+																{
+                                                                	cmbSerie.focus(false,500);
+																}
+															}
+												},
+										buttons:	[
+														{
+															
+															text: '<?php echo $etj["lblBtnAceptar"]?>',
+                                                            
+															handler: function()
+																	{
+                                                                    	var idRegistro=fila?fila.data.idRegistro:-1;
+                                                                    	var txtSubSerie=gEx('txtSubSerie');
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        if(cmbSerie.getValue()=='')
+                                                                        {
+                                                                        	function resp()
+                                                                            {
+                                                                            	cmbSerie.focus();
+                                                                            }
+                                                                            msgBox('Debe indicar la serie a la cual pertenece el tipo documental',resp)
+                                                                            return;
+                                                                        }
+                                                                        
+                                                                        if(cmbSubSerie.getValue()=='')
+                                                                        {
+                                                                        	function resp20()
+                                                                            {
+                                                                            	cmbSubSerie.focus();
+                                                                            }
+                                                                            msgBox('Debe indicar la suberie a la cual pertenece el tipo documental',resp20)
+                                                                            return;
+                                                                        }
+                                                                        
+                                                                         if(cmbTipoDocumental.getValue()=='')
+                                                                        {
+                                                                        	function resp30()
+                                                                            {
+                                                                            	cmbTipoDocumental.focus();
+                                                                            }
+                                                                            msgBox('Debe indicar el tipo documental a agregar',resp30)
+                                                                            return;
+                                                                        }
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        var chkSoporteGroup=gEx('chkSoporteGroup');
+                                                                        
+                                                                        var aSoporte=chkSoporteGroup.getValue();
+                                                                        
+                                                                        var arrSoporte='';
+                                                                        
+                                                                        if(aSoporte)
+                                                                        {
+                                                                            var x;
+                                                                            var o;
+                                                                            for(x=0;x<aSoporte.length;x++)
+                                                                            {
+                                                                                
+                                                                                o=aSoporte[x];
+                                                                                if(arrSoporte=='')
+                                                                                    arrSoporte=o.inputValue;
+                                                                                else
+                                                                                    arrSoporte+=','+o.inputValue;
+                                                                                
+                                                                            }
+																		}                                                                        
+                                                                        var txtTiempoRetencionArchivoGestion=gEx('txtTiempoRetencionArchivoGestion');
+                                                                        var cmbPeriodoArchivoGestion=gEx('cmbPeriodoArchivoGestion');
+                                                                        
+                                                                        var txtTiempoRetencionArchivoCentral=gEx('txtTiempoRetencionArchivoCentral');
+                                                                        var cmbPeriodoArchivoCentral=gEx('cmbPeriodoArchivoCentral');
+                                                                        
+                                                                        
+                                                                        if((txtTiempoRetencionArchivoGestion.getValue()!='')||(cmbPeriodoArchivoGestion.getValue()!=''))
+                                                                        {
+                                                                        	if(txtTiempoRetencionArchivoGestion.getValue()=='')
+                                                                            {
+                                                                            	function resp3()
+                                                                                {
+                                                                                	txtTiempoRetencionArchivoGestion.focus();
+                                                                                }
+                                                                                msgBox('Debe ingresar el tiempo de retenci&oacute;n en archivo de gesti&oacute;n',resp3)
+                                                                                return;
+                                                                            
+                                                                            }
+                                                                            
+                                                                            if(cmbPeriodoArchivoGestion.getValue()=='')
+                                                                            {
+                                                                            	function resp4()
+                                                                                {
+                                                                                	cmbPeriodoArchivoGestion.focus();
+                                                                                }
+                                                                                msgBox('Debe ingresar el periodo de retenci&oacute;n en archivo de gesti&oacute;n',resp4)
+                                                                                return;
+                                                                            }
+                                                                            
+                                                                        }
+                                                                        
+                                                                        
+                                                                        if((txtTiempoRetencionArchivoCentral.getValue()!='')||(cmbPeriodoArchivoCentral.getValue()!=''))
+                                                                        {
+                                                                        	if(txtTiempoRetencionArchivoCentral.getValue()=='')
+                                                                            {
+                                                                            	function resp5()
+                                                                                {
+                                                                                	txtTiempoRetencionArchivoCentral.focus();
+                                                                                }
+                                                                                msgBox('Debe ingresar el tiempo de retenci&oacute;n en archivo de central',resp5)
+                                                                                return;
+                                                                            
+                                                                            }
+                                                                            
+                                                                            if(cmbPeriodoArchivoCentral.getValue()=='')
+                                                                            {
+                                                                            	function resp6()
+                                                                                {
+                                                                                	cmbPeriodoArchivoCentral.focus();
+                                                                                }
+                                                                                msgBox('Debe ingresar el periodo de retenci&oacute;n en archivo de central',resp6)
+                                                                                return;
+                                                                            }
+                                                                        }
+                                                                        
+                                                                        var rdoDiposicionGroup=gEx('rdoDiposicionGroup');
+                                                                        var aDisposicion=rdoDiposicionGroup.getValue();
+                                                                        
+                                                                        var disposicionFinal='';
+                                                                        var arrDisposicion='';
+                                                                        var x;
+                                                                        var o;
+                                                                        if(aDisposicion)
+                                                                        {
+                                                                        	disposicionFinal=aDisposicion.inputValue;
+																		}                                                                        
+                                                                        
+                                                                        var txtProcedimiento=gEx('txtProcedimiento');
+                                                                        
+                                                                        
+																		var cadObj='{"cveElemento":"","tituloElemento":"","soporte":"'+arrSoporte+
+                                                                        		'","tRetencionGestion":"'+txtTiempoRetencionArchivoGestion.getValue()+'","pRetencionGestion":"'+cmbPeriodoArchivoGestion.getValue()+
+                                                                                '","tRetencionCentral":"'+txtTiempoRetencionArchivoCentral.getValue()+
+                                                                                '","pRetencionCentral":"'+cmbPeriodoArchivoCentral.getValue()+
+                                                                                '","disposicionFinal":"'+disposicionFinal+'","procedimiento":"'+cv(gEx('txtProcedimiento').getValue())+
+                                                                                '","idRegistro":"'+idRegistro+'","tipoRegistro":"3","idTablaRetencion":"'+gE('idTablaRetencion').value+
+                                                                                '","idSerie":"'+cmbSerie.getValue()+'","idSubSerie":"'+cmbSubSerie.getValue()+'","tipoDocumento":"'+cmbTipoDocumental.getValue()+'"}';
+																		
+                                                                        
+                                                                        function funcAjax()
+                                                                        {
+                                                                            var resp=peticion_http.responseText;
+                                                                            arrResp=resp.split('|');
+                                                                            if(arrResp[0]=='1')
+                                                                            {
+                                                                            	gEx('gRegistrosTRDs').getStore().reload();
+                                                                                ventanaAM.close();
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+                                                                            }
+                                                                        }
+                                                                        obtenerDatosWeb('../paginasFunciones/funcionesGestorDocumental.php',funcAjax, 'POST','funcion=2&cadObj='+cadObj,true);
+
+                                                                        
+                                                                    	
+                                                                    }
+														},
+														{
+															text: '<?php echo $etj["lblBtnCancelar"]?>',
+															handler:function()
+																	{
+																		ventanaAM.close();
+																	}
+														}
+													]
+									}
+								);
+	ventanaAM.show();
+    
+    
+    if(fila)
+    {
+    	var cmbSerie=gEx('cmbSerie');
+        cmbSerie.setValue(fila.data.idSerie);
+        var cmbSubSerie=gEx('cmbSubSerie');
+        
+        cmbSubSerie.setValue('');
+        cmbSubSerie.getStore().removeAll();
+        
+        var pos=existeValorMatriz(arrSeries,fila.data.idSerie);
+        
+        cmbSubSerie.getStore().loadData(arrSeries[pos][2]);
+        cmbSubSerie.setValue(fila.data.idSubSerie);
+      
+        
+        var cmbTipoDocumental=gEx('cmbTipoDocumental');
+        
+        cmbTipoDocumental.setValue(fila.data.tipoDocumento);
+        var chkSoporteGroup=gEx('chkSoporteGroup');
+        var txtTiempoRetencionArchivoGestion=gEx('txtTiempoRetencionArchivoGestion');
+        var cmbPeriodoArchivoGestion=gEx('cmbPeriodoArchivoGestion');
+        var txtTiempoRetencionArchivoCentral=gEx('txtTiempoRetencionArchivoCentral');
+        var cmbPeriodoArchivoCentral=gEx('cmbPeriodoArchivoCentral');
+        var rdoDiposicionGroup=gEx('rdoDiposicionGroup');
+        var txtProcedimiento=gEx('txtProcedimiento');
+
+        
+       
+        if(fila.data.conservacionTotal)
+        {
+        	rdoDiposicionGroup.setValue(1);
+        }
+         if(fila.data.eliminacion)
+        {
+        	rdoDiposicionGroup.setValue(2);
+        }
+         if(fila.data.microfilmacionDigitalizacion)
+        {
+        	rdoDiposicionGroup.setValue(3);
+        }
+         if(fila.data.seleccion)
+        {
+        	rdoDiposicionGroup.setValue(4);
+        }
+        
+        chkSoporteGroup.setValue([fila.data.soporteFisico,fila.data.soporteElectronico]);
+        txtTiempoRetencionArchivoGestion.setValue(fila.data.retencionArchivoGestion);
+        cmbPeriodoArchivoGestion.setValue(fila.data.unidadRetencionArchivoGestion);
+        txtTiempoRetencionArchivoCentral.setValue(fila.data.retencionArchivoCentral);
+        cmbPeriodoArchivoCentral.setValue(fila.data.unidadRetencionArchivoCentral);
+       
+        txtProcedimiento.setValue(escaparBR(fila.data.procedimiento));
+        
+    }	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

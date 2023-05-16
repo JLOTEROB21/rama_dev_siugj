@@ -1,0 +1,7 @@
+{
+	"id":"btnAddGaleriaImagen",
+	"funcion":"insertarControlGaleriaImagen()",
+	"titulo":"Insertar Galeria Imagen",
+	"icono":"pictures.png",
+	"script":"galeriaImagen.js.php"
+}

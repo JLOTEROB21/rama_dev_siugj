@@ -1,0 +1,7 @@
+{
+	"id":"btnAddFecha",
+	"funcion":"mostrarVentanaPreguntasUnicas(8)",
+	"titulo":"Insertar campo de fecha",
+	"icono":"date_add.png",
+	"script":"campoTextoLargo.js.php"
+}

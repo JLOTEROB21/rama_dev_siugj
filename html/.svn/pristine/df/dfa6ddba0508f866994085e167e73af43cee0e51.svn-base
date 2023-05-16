@@ -1,0 +1,85 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+?>
+
+
+var arrEventos=[['1','Roles de Guardias'],['3','Incidencias de Jueces/Jueces/Magistrados'],['4','Vacaciones de Jueces/Magistrados']];
+
+
+
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	var cmbAccion=crearComboExt('cmbAccion',arrEventos,0,0,250);
+    
+    
+    cmbAccion.on('select',function(cmb,registro)
+    						{
+                            
+                            	var idUnidadGestion='';
+                                switch(registro.data.id)
+                                {
+                                	case '1':
+                                    	urlDestino='../modulosEspeciales_SGJP/tblCalendarioJuezGuardia.php';
+                                    break;
+                                    case '2':
+                                    	urlDestino='../modulosEspeciales_SGJP/tblCalendarioJuezTramite.php';
+                                    break;
+                                    case '3':
+                                    	urlDestino='../modulosEspeciales_SGJP/tblAgendaJuezIncidencias.php';
+                                    	
+                                    break;
+                                    case '4':
+                                    	urlDestino='../modulosEspeciales_SGJP/tblAgendaJuezVacaciones.php';
+                                    break;
+                                }
+                            
+                            	gEx('frameControl').load	(
+                                								{
+                                                                	url:urlDestino,
+                                                                    params:	{
+                                                                    			idUnidadGestion:gE('idUnidadGestion').value,
+                                                                                cPagina:'sFrm=true'
+                                                                    		}
+                                                                }
+                                							)
+                            }
+    			)
+    
+    new Ext.Viewport(	{
+                                layout: 'border',
+                                items: [
+                                            {
+                                                xtype:'panel',
+                                                region:'center',
+                                                layout:'border',
+                                                tbar:	[
+                                                			{
+                                                            	html:'Tipo de eventos a observar:&nbsp;&nbsp;&nbsp;'
+                                                            },
+                                                            cmbAccion
+                                                		],
+                                                items:	[
+                                                			{
+                                                            	xtype:'panel',
+                                                                region:'center',
+                                                            	items:	[
+                                                                            new Ext.ux.IFrameComponent({ 
+                                
+                                                                                                              id: 'frameControl', 
+                                                                                                              anchor:'100% 100%',
+                                                                                                              url: '../paginasFunciones/white.php',
+                                                                                                              style: 'width:100%;height:100%' 
+                                                                                                      })
+                                                                        ]
+                                                            }
+                                                            
+                                                        ]
+                                            }
+                                         ]
+                            }
+                        )   
+}

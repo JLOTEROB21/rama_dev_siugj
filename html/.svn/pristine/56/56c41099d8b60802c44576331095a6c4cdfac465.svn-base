@@ -1,0 +1,165 @@
+<?php session_start();
+	include_once("conexionBD.php");
+	include_once("utiles.php");
+	
+
+
+	
+	if(isset($_POST["parametros"]))
+		$parametros=$_POST["parametros"];
+	if(isset($_POST["funcion"]))
+		$funcion=$_POST["funcion"];
+	$lenguaje=$_SESSION["leng"];
+	
+	switch($funcion)
+	{
+		case 1:
+			obtenerPartesExpediente();
+		break;
+		case 2:
+			buscarDatosPartesProcesales();
+		break;
+		case 3:
+			asociarParteProcesalRegistro();
+		break;
+	}
+	
+
+
+
+
+	function obtenerPartesExpediente()
+	{
+		global $con;
+		
+		$numReg=0;
+		$idActividad=$_POST["idActividad"];
+		$consulta="	SELECT idRelacion,idFiguraJuridica,
+					CONCAT(IF(p.nombre IS NULL,'',p.nombre),' ',IF(p.apellidoPaterno IS NULL,'',p.apellidoPaterno),' ',IF(p.apellidoMaterno IS NULL,'',p.apellidoMaterno)) AS nombre,
+					id__47_tablaDinamica,p.nombre as nombreRazonSocial,apellidoPaterno,apellidoMaterno FROM 7005_relacionFigurasJuridicasSolicitud r,_47_tablaDinamica p WHERE r.idActividad=".$idActividad."
+					AND  p.id__47_tablaDinamica=r.idParticipante ORDER BY p.nombre,p.apellidoPaterno,p.apellidoMaterno";
+
+		$res=$con->obtenerfilas($consulta);
+		$arrRegistros="";
+		while($fila=mysql_fetch_row($res))
+		{
+			$relacion="";
+			
+			$consulta="SELECT idOpcion FROM _47_personasAsocia WHERE idPadre=".$fila[3]."
+						UNION
+						SELECT 	idActorRelacionado FROM 7005_relacionParticipantes WHERE idActividad=".$idActividad." AND idParticipante=".$fila[3];
+			$listaRelacionados=$con->obtenerListaValores($consulta);
+			if($listaRelacionados!="")
+			{
+				$consulta="SELECT CONCAT(IF(p.nombre IS NULL,'',p.nombre),' ',IF(p.apellidoPaterno IS NULL,'',p.apellidoPaterno),' ',IF(p.apellidoMaterno IS NULL,'',p.apellidoMaterno)) AS nombre FROM
+						_47_tablaDinamica p WHERE p.id__47_tablaDinamica in(".$listaRelacionados.") ORDER BY p.nombre,p.apellidoPaterno,p.apellidoMaterno";
+				$resAsocia=$con->obtenerfilas($consulta);	
+				while($filaAsocia=mysql_fetch_row($resAsocia))
+				{
+					if($relacion=="")
+						$relacion=$filaAsocia[0];
+					else
+						$relacion.="<br>".$filaAsocia[0];
+				}
+			}
+			
+			$direccion="";
+			
+			$domicilio=obtenerUltimoDomicilioFiguraJuridica($fila[3]);
+			$oDomicilio=json_decode($domicilio);
+			$direccion=$oDomicilio->lblDireccion;
+			
+			
+			
+			$o='{"idParticipante":"'.$fila[0].'","nombre":"'.cv($fila[4]).'","primerApellido":"'.cv($fila[5]).'","segundoApellido":"'.cv($fila[6]).'","idRegistro":"'.$fila[3].
+					'","nombreParticipante":"'.cv($fila[2]).'","figura":"'.$fila[1].'","relacion":"'.cv($relacion).'","direccion":"'.cv($direccion).'"}';
+			if($arrRegistros=="")
+				$arrRegistros=$o;
+			else
+				$arrRegistros.=",".$o;
+			
+			$numReg++;
+		}
+		
+		echo '{"numReg":"'.$numReg.'","registros":['.$arrRegistros.']}';
+	}
+	
+	
+	function buscarDatosPartesProcesales()
+	{
+		global $con;
+		$tipoBusqueda=$_POST["tB"];
+		$valorBusqueda=$_POST["vB"];
+		
+		$fBusqueda=NULL;
+		if($tipoBusqueda>0)
+		{
+			$consulta="SELECT id__47_tablaDinamica as idParticipante,tipoPersona,nacionalidad,otraNacionalidad,apellidoPaterno,apellidoMaterno,fechaNacimiento,estadoCivil,
+						tipoIdentificacion,folioIdentificacion,nombre,genero,esMexicano,grupoEtnico,discapacidad FROM _47_tablaDinamica WHERE tipoIdentificacion=".$tipoBusqueda.
+						" AND folioIdentificacion='".cv($valorBusqueda)."'";
+			$fBusqueda=$con->obtenerPrimeraFilaAsoc($consulta);
+			
+			
+			
+		}
+		else
+		{
+			$consulta="SELECT id__47_tablaDinamica as idParticipante,tipoPersona,nacionalidad,otraNacionalidad,apellidoPaterno,apellidoMaterno,fechaNacimiento,estadoCivil,tipoIdentificacion,
+					folioIdentificacion,nombre,genero,esMexicano,grupoEtnico,discapacidad FROM _47_tablaDinamica p,
+					7025_datosContactoParticipante dC,7025_correosElectronico cE WHERE cE.idReferencia=dC.idRegistro AND cE.correo='".cv($valorBusqueda)."' and p.id__47_tablaDinamica=dC.idParticipante";
+			
+			$fBusqueda=$con->obtenerPrimeraFilaAsoc($consulta);
+		}
+		
+
+		if($fBusqueda)
+		{
+			$objDatosParticipante='';
+			foreach($fBusqueda as $clave=>$valor)
+			{
+				$o='"'.$clave.'":"'.cv($valor).'"';
+				if($objDatosParticipante=="")
+					$objDatosParticipante=$o;
+				else
+					$objDatosParticipante.=",".$o;
+			}
+			$objDatosParticipante='{'.$objDatosParticipante.'}';
+			$objInfo=obtenerUltimoDomicilioFiguraJuridica($fBusqueda["idParticipante"]);
+			$oFinalParticipante='{"datosParticipante":'.$objDatosParticipante.',"datosContacto":'.$objInfo.'}';
+			echo "1|1|".bE($oFinalParticipante);
+			
+		}
+		else
+		{
+			echo "1|0";
+		}
+		
+	}
+	
+	function asociarParteProcesalRegistro()
+	{
+		global $con;
+		$iA=$_POST["iA"];
+		$iP=$_POST["iP"];
+		$iF=$_POST["iF"];
+		
+		$consulta="SELECT COUNT(*) FROM 7005_relacionFigurasJuridicasSolicitud WHERE idActividad=".$iA." AND idParticipante=".$iP." AND idFiguraJuridica=".$iF;
+		$numReg=$con->obtenerValor($consulta);
+		if($numReg==0)
+		{
+			$consulta="SELECT idCuentaAcceso FROM 7005_relacionFigurasJuridicasSolicitud WHERE idParticipante=".$iP;
+			$idCuentaAcceso=$con->obtenerValor($consulta);
+			if($idCuentaAcceso=="")
+				$idCuentaAcceso="NULL";
+			$consulta="INSERT INTO 7005_relacionFigurasJuridicasSolicitud(idActividad,idParticipante,idFiguraJuridica,situacion,idCuentaAcceso,etapaProcesal,situacionProcesal,cuentaAccesoGenerica)
+					VALUES(".$iA.",".$iP.",".$iF.",1,".$idCuentaAcceso.",1,1,0)";
+			eC($consulta);
+			return;
+		}
+		echo "1|";
+		
+		
+		
+	}
+	
+?>

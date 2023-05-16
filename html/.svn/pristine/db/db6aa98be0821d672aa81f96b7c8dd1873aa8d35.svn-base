@@ -1,0 +1,582 @@
+{
+  "ReportGuid": "bcf76e7153f5b41cc8cb6d5e9baafdbf",
+  "ReportName": "Report",
+  "ReportAlias": "Report",
+  "ReportFile": "RegistroDelitos (1) (9) (1).mrt",
+  "ReportCreated": "/Date(1635105791000-0400)/",
+  "ReportChanged": "/Date(1636915418000-0500)/",
+  "EngineVersion": "EngineV2",
+  "CalculationMode": "Interpretation",
+  "ReportUnit": "Centimeters",
+  "PreviewSettings": 268435455,
+  "Dictionary": {
+    "DataSources": {
+      "0": {
+        "Ident": "StiCustomSource",
+        "Name": "0042:Modalidad del Delito",
+        "Alias": "0042:Modalidad del Delito",
+        "Columns": {
+          "0": {
+            "Name": "claveModalidadDelito",
+            "Index": -1,
+            "NameInSource": "claveModalidadDelito",
+            "Alias": "claveModalidadDelito",
+            "Type": "System.String"
+          },
+          "1": {
+            "Name": "codigo",
+            "Index": -1,
+            "NameInSource": "codigo",
+            "Alias": "codigo",
+            "Type": "System.String"
+          },
+          "2": {
+            "Name": "codigoInstitucion",
+            "Index": -1,
+            "NameInSource": "codigoInstitucion",
+            "Alias": "codigoInstitucion",
+            "Type": "System.String"
+          },
+          "3": {
+            "Name": "codigoUnidad",
+            "Index": -1,
+            "NameInSource": "codigoUnidad",
+            "Alias": "codigoUnidad",
+            "Type": "System.String"
+          },
+          "4": {
+            "Name": "descripcion",
+            "Index": -1,
+            "NameInSource": "descripcion",
+            "Alias": "descripcion",
+            "Type": "System.String"
+          },
+          "5": {
+            "Name": "fechaCreacion",
+            "Index": -1,
+            "NameInSource": "fechaCreacion",
+            "Alias": "fechaCreacion",
+            "Type": "System.DateTime"
+          },
+          "6": {
+            "Name": "fechaModif",
+            "Index": -1,
+            "NameInSource": "fechaModif",
+            "Alias": "fechaModif",
+            "Type": "System.DateTime"
+          },
+          "7": {
+            "Name": "idEstado",
+            "Index": -1,
+            "NameInSource": "idEstado",
+            "Alias": "idEstado",
+            "Type": "System.String"
+          },
+          "8": {
+            "Name": "idReferencia",
+            "Index": -1,
+            "NameInSource": "idReferencia",
+            "Alias": "idReferencia",
+            "Type": "System.String"
+          },
+          "9": {
+            "Name": "id__42_tablaDinamica",
+            "Index": -1,
+            "NameInSource": "id__42_tablaDinamica",
+            "Alias": "id__42_tablaDinamica",
+            "Type": "System.String"
+          },
+          "10": {
+            "Name": "modalidadDelito",
+            "Index": -1,
+            "NameInSource": "modalidadDelito",
+            "Alias": "modalidadDelito",
+            "Type": "System.String"
+          },
+          "11": {
+            "Name": "respModif",
+            "Index": -1,
+            "NameInSource": "respModif",
+            "Alias": "respModif",
+            "Type": "System.String"
+          },
+          "12": {
+            "Name": "responsable",
+            "Index": -1,
+            "NameInSource": "responsable",
+            "Alias": "responsable",
+            "Type": "System.String"
+          },
+          "13": {
+            "Name": "situacion",
+            "Index": -1,
+            "NameInSource": "situacion",
+            "Alias": "situacion",
+            "Type": "System.String"
+          }
+        },
+        "NameInSource": "Conexión",
+        "SqlCommand": "0042:Modalidad del Delito",
+        "Parameters": {
+          "0": {
+            "Name": "ModalidadDelito",
+            "Expression": "1",
+            "Type": 8,
+            "Size": 1
+          }
+        },
+        "ServiceName": "Latis"
+      },
+      "1": {
+        "Ident": "StiCustomSource",
+        "Name": "0061:Registro del Delito",
+        "Alias": "0061:Registro del Delito",
+        "Columns": {
+          "0": {
+            "Name": "calificativo",
+            "Index": -1,
+            "NameInSource": "calificativo",
+            "Alias": "calificativo",
+            "Type": "System.String"
+          },
+          "1": {
+            "Name": "capituloDelito",
+            "Index": -1,
+            "NameInSource": "capituloDelito",
+            "Alias": "capituloDelito",
+            "Type": "System.String"
+          },
+          "2": {
+            "Name": "codigo",
+            "Index": -1,
+            "NameInSource": "codigo",
+            "Alias": "codigo",
+            "Type": "System.String"
+          },
+          "3": {
+            "Name": "codigoInstitucion",
+            "Index": -1,
+            "NameInSource": "codigoInstitucion",
+            "Alias": "codigoInstitucion",
+            "Type": "System.String"
+          },
+          "4": {
+            "Name": "codigoUnidad",
+            "Index": -1,
+            "NameInSource": "codigoUnidad",
+            "Alias": "codigoUnidad",
+            "Type": "System.String"
+          },
+          "5": {
+            "Name": "denominacionDelito",
+            "Index": -1,
+            "NameInSource": "denominacionDelito",
+            "Alias": "denominacionDelito",
+            "Type": "System.String"
+          },
+          "6": {
+            "Name": "fechaCreacion",
+            "Index": -1,
+            "NameInSource": "fechaCreacion",
+            "Alias": "fechaCreacion",
+            "Type": "System.DateTime"
+          },
+          "7": {
+            "Name": "fechaModif",
+            "Index": -1,
+            "NameInSource": "fechaModif",
+            "Alias": "fechaModif",
+            "Type": "System.DateTime"
+          },
+          "8": {
+            "Name": "gradoRealizacion",
+            "Index": -1,
+            "NameInSource": "gradoRealizacion",
+            "Alias": "gradoRealizacion",
+            "Type": "System.String"
+          },
+          "9": {
+            "Name": "idActividad",
+            "Index": -1,
+            "NameInSource": "idActividad",
+            "Alias": "idActividad",
+            "Type": "System.String"
+          },
+          "10": {
+            "Name": "idEstado",
+            "Index": -1,
+            "NameInSource": "idEstado",
+            "Alias": "idEstado",
+            "Type": "System.String"
+          },
+          "11": {
+            "Name": "idReferencia",
+            "Index": -1,
+            "NameInSource": "idReferencia",
+            "Alias": "idReferencia",
+            "Type": "System.String"
+          },
+          "12": {
+            "Name": "id__61_tablaDinamica",
+            "Index": -1,
+            "NameInSource": "id__61_tablaDinamica",
+            "Alias": "id__61_tablaDinamica",
+            "Type": "System.String"
+          },
+          "13": {
+            "Name": "modalidadDelito",
+            "Index": -1,
+            "NameInSource": "modalidadDelito",
+            "Alias": "modalidadDelito",
+            "Type": "System.String"
+          },
+          "14": {
+            "Name": "respModif",
+            "Index": -1,
+            "NameInSource": "respModif",
+            "Alias": "respModif",
+            "Type": "System.String"
+          },
+          "15": {
+            "Name": "responsable",
+            "Index": -1,
+            "NameInSource": "responsable",
+            "Alias": "responsable",
+            "Type": "System.String"
+          },
+          "16": {
+            "Name": "tituloDelito",
+            "Index": -1,
+            "NameInSource": "tituloDelito",
+            "Alias": "tituloDelito",
+            "Type": "System.String"
+          }
+        },
+        "NameInSource": "Conexión",
+        "SqlCommand": "0061:Registro del Delito",
+        "ServiceName": "Latis"
+      },
+      "2": {
+        "Ident": "StiCustomSource",
+        "Name": "_35_denominacionDelito",
+        "Alias": "_35_denominacionDelito",
+        "Columns": {
+          "0": {
+            "Name": "claveDenominacionDelito",
+            "Index": -1,
+            "NameInSource": "claveDenominacionDelito",
+            "Alias": "claveDenominacionDelito",
+            "Type": "System.String"
+          },
+          "1": {
+            "Name": "delitoOficioso",
+            "Index": -1,
+            "NameInSource": "delitoOficioso",
+            "Alias": "delitoOficioso",
+            "Type": "System.String"
+          },
+          "2": {
+            "Name": "denominacionDelito",
+            "Index": -1,
+            "NameInSource": "denominacionDelito",
+            "Alias": "denominacionDelito",
+            "Type": "System.String"
+          },
+          "3": {
+            "Name": "idReferencia",
+            "Index": -1,
+            "NameInSource": "idReferencia",
+            "Alias": "idReferencia",
+            "Type": "System.String"
+          },
+          "4": {
+            "Name": "id__35_denominacionDelito",
+            "Index": -1,
+            "NameInSource": "id__35_denominacionDelito",
+            "Alias": "id__35_denominacionDelito",
+            "Type": "System.String"
+          }
+        },
+        "NameInSource": "Conexión",
+        "SqlCommand": "_35_denominacionDelito",
+        "ServiceName": "Latis"
+      }
+    },
+    "Databases": {
+      "0": {
+        "Ident": "StiCustomDatabase",
+        "Name": "Conexión",
+        "Alias": "Conexión",
+        "ConnectionStringEncrypted": "xW71C8hZo83iS6XEZ3CkP4vEzUhGWUu8b1z9vepwJRffcNEIxQ==",
+        "ServiceName": "Latis"
+      }
+    },
+    "Relations": {
+      "0": {
+        "Name": "Relación",
+        "ChildColumns": {
+          "0": "calificativo"
+        },
+        "ParentColumns": {
+          "0": "claveModalidadDelito"
+        },
+        "NameInSource": "Relación",
+        "Alias": "Relación",
+        "ParentSource": "0042:Modalidad del Delito",
+        "ChildSource": "0061:Registro del Delito"
+      },
+      "1": {
+        "Name": "Relación2",
+        "ChildColumns": {
+          "0": "denominacionDelito"
+        },
+        "ParentColumns": {
+          "0": "id__35_denominacionDelito"
+        },
+        "NameInSource": "Relación2",
+        "Alias": "Relación2",
+        "ParentSource": "_35_denominacionDelito",
+        "ChildSource": "0061:Registro del Delito"
+      }
+    }
+  },
+  "Pages": {
+    "0": {
+      "Ident": "StiPage",
+      "Name": "Page1",
+      "Guid": "352227ec2a2cfa0c53499ec253d2752d",
+      "Interaction": {
+        "Ident": "StiInteraction"
+      },
+      "Border": ";;2;;;;;solid:Black",
+      "Brush": "solid:",
+      "Components": {
+        "0": {
+          "Ident": "StiGroupHeaderBand",
+          "Name": "GroupHeaderBand1",
+          "ClientRectangle": "0,0.4,19.01,0.6",
+          "Interaction": {
+            "Ident": "StiBandInteraction"
+          },
+          "Border": ";;;;;;;solid:Black",
+          "Brush": "solid:",
+          "Components": {
+            "0": {
+              "Ident": "StiText",
+              "Name": "Text7",
+              "ClientRectangle": "0.2,0,18.6,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "Modalidad delito: {n0061_Registro_del_Delito.Relación.claveModalidadDelito} - {n0061_Registro_del_Delito.Relación.modalidadDelito}"
+              },
+              "Font": ";;Bold;",
+              "Border": ";;;;;;;solid:Black",
+              "Brush": "solid:",
+              "TextBrush": "solid:Black",
+              "Type": "Expression"
+            },
+            "1": {
+              "Ident": "StiStartPointPrimitive",
+              "Name": "StartPointPrimitive1",
+              "ClientRectangle": "0,0,0,0",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "ReferenceToGuid": "a3ece789b2f207f6ce83b890047e5383"
+            },
+            "2": {
+              "Ident": "StiEndPointPrimitive",
+              "Name": "EndPointPrimitive1",
+              "ClientRectangle": "18.8,0.4,0,0",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "ReferenceToGuid": "a3ece789b2f207f6ce83b890047e5383"
+            }
+          },
+          "Condition": {
+            "Value": "{n0061_Registro_del_Delito.Relación.claveModalidadDelito}"
+          }
+        },
+        "1": {
+          "Ident": "StiHeaderBand",
+          "Name": "HeaderBand1",
+          "ClientRectangle": "0,1.8,19.01,0.4",
+          "Interaction": {
+            "Ident": "StiInteraction"
+          },
+          "Border": ";;;;;;;solid:Black",
+          "Brush": "solid:",
+          "Components": {
+            "0": {
+              "Ident": "StiText",
+              "Name": "Text2",
+              "ClientRectangle": "0,0,2.2,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "CODIGO"
+              },
+              "Border": ";;;;;;;solid:Black",
+              "Brush": "solid:",
+              "TextBrush": "solid:Black",
+              "Type": "Expression"
+            },
+            "1": {
+              "Ident": "StiText",
+              "Name": "Text4",
+              "Guid": "8474829b977713942a49afd87c3c2596",
+              "ClientRectangle": "3.2,0,3.4,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "FECHA CREACION"
+              },
+              "Border": ";;;;;;;solid:Black",
+              "Brush": "solid:",
+              "TextBrush": "solid:Black",
+              "Type": "Expression"
+            },
+            "2": {
+              "Ident": "StiText",
+              "Name": "Text8",
+              "Guid": "b52d0832e41b4f282bde1f3327802d9a",
+              "ClientRectangle": "6.8,0,9.6,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DENOMINACION DELITO"
+              },
+              "Border": ";;;;;;;solid:Black",
+              "Brush": "solid:",
+              "TextBrush": "solid:Black",
+              "Type": "Expression"
+            },
+            "3": {
+              "Ident": "StiHorizontalLinePrimitive",
+              "Name": "HorizontalLinePrimitive2",
+              "Guid": "77f6b82f84ec857c46faf29ec9127b8b",
+              "ClientRectangle": "0.2,0.4,18.6,0.0254",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "StartCap": ";;;",
+              "EndCap": ";;;"
+            }
+          }
+        },
+        "2": {
+          "Ident": "StiDataBand",
+          "Name": "DataBand1",
+          "ClientRectangle": "0,3,19.01,0.4",
+          "Interaction": {
+            "Ident": "StiBandInteraction"
+          },
+          "Border": ";;;;;;;solid:Black",
+          "Brush": "solid:",
+          "Components": {
+            "0": {
+              "Ident": "StiText",
+              "Name": "Text6",
+              "ClientRectangle": "6.6,0,12.4,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{n0061_Registro_del_Delito.Relación2.claveDenominacionDelito} - {n0061_Registro_del_Delito.Relación2.denominacionDelito}"
+              },
+              "Border": ";;;;;;;solid:Black",
+              "Brush": "solid:",
+              "TextBrush": "solid:Black",
+              "Type": "Expression"
+            },
+            "1": {
+              "Ident": "StiText",
+              "Name": "Text1",
+              "ClientRectangle": "3.2,0,3,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{n0061_Registro_del_Delito.fechaCreacion}"
+              },
+              "Border": ";;;;;;;solid:Black",
+              "Brush": "solid:",
+              "TextBrush": "solid:Black"
+            },
+            "2": {
+              "Ident": "StiText",
+              "Name": "Text3",
+              "ClientRectangle": "0,0,3,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{n0061_Registro_del_Delito.codigo}"
+              },
+              "Border": ";;;;;;;solid:Black",
+              "Brush": "solid:",
+              "TextBrush": "solid:Black",
+              "Type": "DataColumn"
+            }
+          },
+          "DataSourceName": "0061:Registro del Delito"
+        },
+        "3": {
+          "Ident": "StiGroupFooterBand",
+          "Name": "GroupFooterBand1",
+          "ClientRectangle": "0,4.2,19.01,0.4",
+          "Interaction": {
+            "Ident": "StiInteraction"
+          },
+          "Border": ";;;;;;;solid:Black",
+          "Brush": "solid:",
+          "Components": {
+            "0": {
+              "Ident": "StiText",
+              "Name": "Text5",
+              "ClientRectangle": "0,0,9.2,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "Total: {CountDistinct(n0061_Registro_del_Delito.codigo)}"
+              },
+              "Font": ";6;Bold;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            }
+          },
+          "NewPageAfter": true
+        },
+        "4": {
+          "Ident": "StiRoundedRectanglePrimitive",
+          "Name": "RoundedRectanglePrimitive1",
+          "Guid": "a3ece789b2f207f6ce83b890047e5383",
+          "ClientRectangle": "0,0.4,18.8,0.4",
+          "Interaction": {
+            "Ident": "StiInteraction"
+          }
+        }
+      },
+      "PageWidth": 21.01,
+      "PageHeight": 29.69,
+      "Watermark": {
+        "TextBrush": "solid:50,0,0,0"
+      },
+      "Margins": {
+        "Left": 1,
+        "Right": 1,
+        "Top": 1,
+        "Bottom": 1
+      }
+    }
+  }
+}

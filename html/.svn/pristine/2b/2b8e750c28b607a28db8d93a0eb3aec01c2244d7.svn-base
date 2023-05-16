@@ -1,0 +1,201 @@
+<?php session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+	
+	$consulta="SELECT valor,texto FROM 1004_siNo";
+	$arrSiNo=$con->obtenerFilasArreglo($consulta);
+	
+	$consulta="SELECT idTipoRegistro,nombreTipoRegistro FROM 00019_tiposRegistroBitacora";
+	$arrTipoRegistrosBitacora=$con->obtenerFilasArreglo($consulta);
+	
+	$consulta="SELECT idRegistro,nombreTipoComponene FROM 00020_tiposCompoentesRegistroBitacora";
+	$arrTipoComponente=$con->obtenerFilasArreglo($consulta);
+?>
+
+var arrTipoComponente=<?php echo $arrTipoComponente ?>;
+var arrTipoRegistrosBitacora=<?php echo $arrTipoRegistrosBitacora?>;
+var arrSiNo=<?php echo $arrSiNo?>;
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	new Ext.Button (
+                                {
+                                    cls:'btnSIUGJ',
+                                    text:'Guardar',
+                                    width:150,
+                                    height:50,
+                                    id:'btnGuardarForm',
+                                    renderTo:'contenedor1',
+                                    handler:function()
+                                            {
+                                                validarFrm('frmEnvio')
+                                            }
+                                }
+                            )
+
+                            new Ext.Button (
+                                {
+                                    cls:'btnSIUGJCancel',
+                                    text:'Cancelar',
+                                    width:150,
+                                    height:50,
+                                    id:'btnCancelarForm',
+                                    renderTo:'contenedor2',
+                                    handler:function()
+                                            {
+                                            	function  resp(btn)
+                                                {
+                                                	if(btn=='yes')
+                                                    {
+                                                    	regresarPagina();
+                                                    }
+                                                }
+                                                msgConfirm('Est&aacute; seguro de querer cancelar la operaci&oacute;n?',resp)
+                                                
+                                            }
+                                    
+                                }
+                            )                            
+
+	crearGridPoliticasSeguridad();
+}
+
+
+function validarFrm()
+{
+	if(validarFormularios('frmEnvio'))
+    {
+    	var objArr='';
+        
+        var x=0;
+        var gRegistrosBitacora=gEx('gRegistrosBitacora');
+        var fila;
+        var o;
+        for(x=0;x<gRegistrosBitacora.getStore().getCount();x++)
+        {
+        	fila=gRegistrosBitacora.getStore().getAt(x);
+            o='{"idRegistroBitacora":"'+fila.data.idRegistroBitacora+'","valor":"'+fila.data.valor+'"}';
+            
+            if(objArr=='')
+            	objArr=o;
+            else
+            	objArr+=','+o;
+            
+            
+        }
+        
+        objArr='{"registros":['+objArr+']}';
+        
+        gE('funcPHPEjecutarModif').value=bE('asociarRegsitrosBitacoraAuditorio(\''+bE(objArr)+'\')');
+        gE('frmEnvio').submit();
+    }
+}
+
+
+function crearGridPoliticasSeguridad()
+{
+	var cmbValor=crearComboExt('cmbValor',arrSiNo);
+	 var lector= new Ext.data.JsonReader({
+                                            
+                                            totalProperty:'numReg',
+                                            fields: [
+                                               			{name:'idRegistroBitacora'},
+		                                                {name: 'descripcionBitacora'},
+		                                                {name:'valor'},
+                                                        {name: 'tipoComponente'}
+                                            		],
+                                            root:'registros'
+                                            
+                                        }
+                                      );
+	 
+                                                                                      
+	var alDatos=new Ext.data.GroupingStore({
+                                                            reader: lector,
+                                                            proxy : new Ext.data.HttpProxy	(
+
+                                                                                              {
+
+                                                                                                  url: '../paginasFunciones/funcionesEspecialesSistema.php'
+
+                                                                                              }
+
+                                                                                          ),
+                                                            sortInfo: {field: 'descripcionBitacora', direction: 'ASC'},
+                                                            groupField: 'tipoComponente',
+                                                            remoteGroup:false,
+				                                            remoteSort: false,
+                                                            autoLoad:true
+                                                            
+                                                        }) 
+	alDatos.on('beforeload',function(proxy)
+    								{
+                                    	proxy.baseParams.funcion='6';
+                                        
+                                    }
+                        )   
+       //{width:40}
+        var cModelo= new Ext.grid.ColumnModel   	(
+                                                        [
+                                                            new  Ext.grid.RowNumberer({width:40}),
+                                                            
+                                                            {
+                                                                header:'Tipo de Registro',
+                                                                width:600,
+                                                                sortable:true,
+                                                                dataIndex:'descripcionBitacora'
+                                                            },
+                                                            
+                                                             {
+                                                                header:'Tipo de Componente',
+                                                                width:300,
+                                                                sortable:true,
+                                                                dataIndex:'tipoComponente',
+                                                                renderer:function(val)
+                                                                		{
+                                                                        	return formatearValorRenderer(arrTipoComponente,val);
+                                                                        }
+                                                            },
+                                                            {
+                                                                header:'Registrar',
+                                                                width:110,
+                                                                sortable:true,
+                                                                dataIndex:'valor',
+                                                                editor:cmbValor,
+                                                                renderer:function(val)
+                                                                		{
+                                                                        	return formatearValorRenderer(arrSiNo,val);
+                                                                        }
+                                                            }
+                                                        ]
+                                                    );
+                                                    
+        var tblGrid=	new Ext.grid.EditorGridPanel	(
+                                                            {
+                                                                id:'gRegistrosBitacora',
+                                                                store:alDatos,
+                                                                renderTo:'tblBitacora',
+                                                                width:900,
+                                                                height:500,
+                                                                frame:false,
+                                                                cm: cModelo,
+                                                                clicksToEdit:1,
+                                                                stripeRows :false,
+                                                                loadMask:true,
+                                                                columnLines : false,
+                                                                cls:'gridSiugjPrincipal',
+                                                                
+                                                                view:new Ext.grid.GroupingView({
+                                                                                                    forceFit:false,
+                                                                                                    showGroupName: false,
+                                                                                                    enableGrouping :true,
+                                                                                                    enableNoGroups:false,
+                                                                                                    enableGroupingMenu:false,
+                                                                                                    hideGroupedColumn: true,
+                                                                                                    startCollapsed:false
+                                                                                                })
+                                                            }
+                                                        );
+        return 	tblGrid;	
+}

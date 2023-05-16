@@ -1,0 +1,188 @@
+<?php session_start();
+	include_once("conexionBD.php");
+	include_once("utiles.php");
+	
+
+
+	
+	if(isset($_POST["parametros"]))
+		$parametros=$_POST["parametros"];
+	if(isset($_POST["funcion"]))
+		$funcion=$_POST["funcion"];
+	$lenguaje=$_SESSION["leng"];
+	
+	switch($funcion)
+	{
+		case 1:
+			obtenerActuacionesDiposnibles();
+		break;
+		case 2:
+			obtenerPromoventeActuacionSesion();
+		break;
+		case 3:
+			obtenerInformacionAmbitosAplicacionPlantillas();
+		break;
+		
+	}
+
+
+
+
+	function obtenerActuacionesDiposnibles()
+	{
+		global $con;
+		
+		
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		$fInfoCarpetasAdminsitrativas=NULL;
+		$consulta="SELECT tipoCarpetaAdministrativa FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$obj->cup."'";
+		$tCarpetaAdministrativa=$con->obtenerValor($consulta);
+		
+		if($tCarpetaAdministrativa==3)
+		{
+			$arrCarpetas=array();
+			obtenerCarpetasPadre($obj->cup,$arrCarpetas);
+			if(sizeof($arrCarpetas)==0)
+			{
+				array_push($arrCarpetas,$obj->cup);
+			}
+			
+			$carpetaBase=$arrCarpetas[0];
+		
+			$consulta="SELECT idActividad,tipoProceso,tipoCarpetaAdministrativa,etapaProcesalActual FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaBase."' and tipoCarpetaAdministrativa=1";
+			$fInfoCarpetasAdminsitrativas=$con->obtenerPrimeraFilaAsoc($consulta);
+		
+		}
+		else
+		{
+			$consulta="SELECT idActividad,tipoProceso,tipoCarpetaAdministrativa,etapaProcesalActual FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$obj->cup.
+					"' and tipoCarpetaAdministrativa in(1,2,20)";
+			$fInfoCarpetasAdminsitrativas=$con->obtenerPrimeraFilaAsoc($consulta);
+			$tCarpetaAdministrativa=$fInfoCarpetasAdminsitrativas["etapaProcesalActual"];
+		}
+		
+
+
+		$idActividad=$fInfoCarpetasAdminsitrativas["idActividad"];
+		$tipoProceso=$fInfoCarpetasAdminsitrativas["tipoProceso"];
+		
+		$consulta="SELECT idFiguraJuridica FROM 7005_relacionFigurasJuridicasSolicitud WHERE idActividad=".$idActividad." AND idParticipante=".$obj->idParticipante;
+		$idFiguraJuridica=$con->obtenerValor($consulta);
+		if($idFiguraJuridica=="")
+			$idFiguraJuridica=0;
+			
+		$tipoParticipante=$idFiguraJuridica;
+		
+		
+		
+		$consulta="SELECT idActorRelacionado FROM 7005_relacionParticipantes WHERE idActividad=".$idActividad." AND idParticipante=".$obj->idParticipante;
+		$idActorRelacionado=$con->obtenerValor($consulta);
+		if($idActorRelacionado!="")
+		{
+			$consulta="SELECT idFiguraJuridica FROM 7005_relacionFigurasJuridicasSolicitud WHERE idActividad=".$idActividad." AND idParticipante=".$idActorRelacionado;
+			$idFiguraJuridica=$con->obtenerValor($consulta);
+			if($idFiguraJuridica=="")
+				$idFiguraJuridica=0;
+			$tipoParticipante=$idFiguraJuridica;
+		}
+		
+		$consulta="SELECT naturalezaFigura FROM _5_tablaDinamica WHERE id__5_tablaDinamica=".$tipoParticipante;
+		$tipoParticipante=$con->obtenerValor($consulta);
+		
+		$arrRegistros="";
+		
+		
+		$cacheCalculos=NULL;
+		$cadParametros='{"cup":"'.$obj->cup.'","idParticipante":"'.$obj->idParticipante.'","tipoActuacion":"'.$obj->tipoActuacion.'","idFiguarJuridica":"'.$tipoParticipante.'"}';
+		$objParametros=json_decode($cadParametros);
+		
+		
+		$consulta="SELECT * FROM _700_tablaDinamica a,_700_intervinientesActuaciones i,_700_chkTiposProceso tP,_700_chkTiposCarpetas tC 
+				WHERE tipoAccionActuaciones=".$obj->tipoActuacion."  AND i.idPadre=a.id__700_tablaDinamica and tP.idPadre=a.id__700_tablaDinamica
+				and tP.idOpcion=".$tipoProceso." AND i.idOpcion='".$tipoParticipante."' and tC.idPadre=a.id__700_tablaDinamica and tC.idOpcion=".$tCarpetaAdministrativa;
+
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			$continuar=true;
+			if(($fila["idFuncionVisualizacion"]!=-1)||($fila["idFuncionVisualizacion"]==""))
+			{
+
+				$resultadoEvaluacion=removerComillasLimite(resolverExpresionCalculoPHP($fila["idFuncionVisualizacion"],$objParametros,$cacheCalculos));
+				if(($resultadoEvaluacion==0)||($resultadoEvaluacion==false))
+				{
+					$continuar=false;
+				}
+			}
+			
+			if($continuar)
+			{
+				$o="['".$fila["id__700_tablaDinamica"]."','".cv($fila["nombreActuacion"])."']";
+				if($arrRegistros=="")
+					$arrRegistros=$o;
+				else
+					$arrRegistros.=",".$o;
+			}
+			
+		}
+		
+		echo "1|[".$arrRegistros."]";
+	}
+	
+	function obtenerPromoventeActuacionSesion()
+	{
+		global $con;
+		$cAdministrativa=$_POST["cAdministrativa"];
+		$consulta="SELECT idActividad FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$cAdministrativa."'";
+		$idActividad=$con->obtenerValor($consulta);
+		$consulta="SELECT idParticipante FROM 7005_relacionFigurasJuridicasSolicitud WHERE idActividad=".$idActividad." AND idCuentaAcceso=".$_SESSION["idUsr"];
+		$idParticipante=$con->obtenerValor($consulta);
+		if($idParticipante=="")
+			$idParticipante=-1;
+		$nombre=obtenerNombreParticipante($idParticipante);
+		echo "1|".$idParticipante."|".$nombre;
+	}
+	
+	
+	function obtenerInformacionAmbitosAplicacionPlantillas()
+	{
+		global $con;
+		$idRegistro=$_POST["iR"];
+		$tipoAmbito=$_POST["tA"];
+		
+		$consulta="";
+		switch($tipoAmbito)
+		{
+			case 1:
+				$consulta="SELECT codigoUnidad as cveElemento,unidad as nombreElemento FROM 817_organigrama WHERE  codigoUnidad  
+						in(SELECT cveElemento FROM _10_ambitoAplicacionPlantilla WHERE idFormulario=10 and idReferencia=".$idRegistro.
+					" AND tipoAmbito=1)ORDER BY unidad";
+			break;
+			case 2:
+				
+				$consulta="SELECT codigoUnidad as cveElemento,unidad as nombreElemento FROM 817_organigrama WHERE  codigoUnidad  
+					in(SELECT cveElemento FROM _10_ambitoAplicacionPlantilla WHERE idFormulario=10 and idReferencia=".$idRegistro.
+					" AND tipoAmbito=2)ORDER BY unidad";
+			break;
+			case 3:
+				$consulta="SELECT codigoUnidad as cveElemento,unidad as nombreElemento  FROM 817_organigrama WHERE  codigoUnidad  
+					in(SELECT cveElemento FROM _10_ambitoAplicacionPlantilla WHERE idFormulario=10 and idReferencia=".$idRegistro.
+					" AND tipoAmbito=3)ORDER BY unidad";	
+					
+			break;
+			case 4:
+			
+				$consulta="SELECT claveUnidad as cveElemento,nombreUnidad as nombreElemento FROM _17_tablaDinamica 
+					where claveUnidad in(SELECT cveElemento FROM _10_ambitoAplicacionPlantilla WHERE idFormulario=10 and idReferencia=".$idRegistro." AND 
+					tipoAmbito=4)  ORDER BY nombreUnidad";
+			
+			break;
+			
+		}
+		
+		$arrRegistros=$con->obtenerFilasJSON($consulta);
+		echo '{"numReg":"'.$con->filasAfectadas.'","registros":'.utf8_encode($arrRegistros).'}';
+	}
+	
+?>

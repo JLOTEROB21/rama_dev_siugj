@@ -1,0 +1,7 @@
+{
+	"id":"btnAddArchivo",
+	"funcion":"mostrarVentanaPreguntasUnicas(12)",
+	"titulo":"Insertar campo de tipo archivo",
+	"icono":"drive_add.png",
+	"script":"campoTextoLargo.js.php"
+}

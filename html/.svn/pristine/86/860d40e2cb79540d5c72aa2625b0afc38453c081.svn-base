@@ -1,0 +1,128 @@
+<?php  session_start();
+
+		include("conexionBD.php");
+
+	$idFormulario=952;
+	$idRegistro=1;
+	if(isset($_POST["idRegistro"]))
+		$idRegistro=$_POST["idRegistro"];
+	else
+		if(isset($_GET["idRegistro"]))
+			$idRegistro=$_GET["idRegistro"];	
+
+	$libro=new cExcel($baseDir."/modulosEspeciales_SIUGJ/plantillas/formatoCompensacion.xlsx",true,"Excel2007");		
+	
+	
+	$consulta="SELECT * FROM _952_tablaDinamica WHERE id__952_tablaDinamica=".$idRegistro;
+
+	$fRegistroBase=$con->obtenerPrimeraFilaAsoc($consulta);
+	
+	$habilitarConJuez=false;
+	$consulta="SELECT nombreUnidad FROM _17_tablaDinamica WHERE claveUnidad='".$fRegistroBase["codigoInstitucion"]."'";
+	$despachoEnvia=$con->obtenerValor($consulta);
+	$despachoAsignado="";
+	if($fRegistroBase["despachoAsignado"]=="0000000000")
+	{
+		$despachoAsignado="Sin Candidato a Despacho Destino";
+		$habilitarConJuez=true;
+	}
+	else
+	{
+		$consulta="SELECT nombreUnidad FROM _17_tablaDinamica WHERE claveUnidad='".$fRegistroBase["despachoAsignado"]."'";
+		$despachoAsignado=$con->obtenerValor($consulta);
+	}
+	$carpetaAdministrativa=$fRegistroBase["carpetaAdministrativa"];
+	
+	$arrCarpetas=array();
+	obtenerCarpetasPadre($carpetaAdministrativa,$arrCarpetas);
+	if(sizeof($arrCarpetas)==0)
+	{
+		array_push($arrCarpetas,$carpetaAdministrativa);
+	}
+	
+	$carpetaAdministrativa=$arrCarpetas[0];
+	
+	$consulta="SELECT idActividad FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa."'";
+	$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+	
+	
+	$nombreDocumento=$baseDir."/archivosTemporales/envioApelacionTribunalSuperior_".$fRegistroBase["carpetaAdministrativa"].".html";
+	
+	$numFilas=6;
+	$partes="";
+	$query="SELECT CONCAT(if( apellidoPaterno IS NULL,'',apellidoPaterno),' ',if(apellidoMaterno IS NULL,'',apellidoMaterno) ) AS apellido,
+			if (nombre IS NULL,'',nombre) as nombre,i.folioIdentificacion
+			 FROM _47_tablaDinamica i,7005_relacionFigurasJuridicasSolicitud r,_5_tablaDinamica f WHERE r.idActividad=".$fRegistro["idActividad"]."
+			and r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='A') AND r.idParticipante=i.id__47_tablaDinamica 
+			AND f.id__5_tablaDinamica=r.idFiguraJuridica ORDER BY nombre,apellidoPaterno,apellidoMaterno";
+	$rParte=$con->obtenerFilas($query);
+	while($fParte=mysql_fetch_assoc($rParte))
+	{
+		$libro->setValor("A".$numFilas,$fParte["folioIdentificacion"]);
+		$libro->setValor("B".$numFilas,$fParte["nombre"]);
+		$libro->setValor("C".$numFilas,$fParte["apellido"]);
+		$numFilas++;
+	}
+	
+	$numFilas=13;
+	$partes="";
+	$query="SELECT CONCAT(if( apellidoPaterno IS NULL,'',apellidoPaterno),' ',if(apellidoMaterno IS NULL,'',apellidoMaterno) ) AS apellido,
+			if (nombre IS NULL,'',nombre) as nombre,i.folioIdentificacion
+			FROM _47_tablaDinamica i,7005_relacionFigurasJuridicasSolicitud r,_5_tablaDinamica f WHERE r.idActividad=".$fRegistro["idActividad"]."
+			and r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='D') AND r.idParticipante=i.id__47_tablaDinamica 
+			AND f.id__5_tablaDinamica=r.idFiguraJuridica ORDER BY nombre,apellidoPaterno,apellidoMaterno";
+	$rParte=$con->obtenerFilas($query);
+	while($fParte=mysql_fetch_assoc($rParte))
+	{
+		$libro->setValor("A".$numFilas,$fParte["folioIdentificacion"]);
+		$libro->setValor("B".$numFilas,$fParte["nombre"]);
+		$libro->setValor("C".$numFilas,$fParte["apellido"]);
+		$numFilas++;
+	}
+
+	$fechaReparto=strtotime($fRegistroBase["fechaRecepcionReasignacionProcesoJudicial"]);
+	$lblfechaReparto=mb_strtoupper($arrMesLetra[(date("m",$fechaReparto)*1)-1]."-".date("d",$fechaReparto)."-".date("Y",$fechaReparto));
+
+
+	$libro->setValor("A1",$despachoAsignado);
+	$libro->setValor("A19",$despachoEnvia);
+	$libro->setValor("A22",$carpetaAdministrativa);
+	$libro->setValor("C22",$lblfechaReparto);
+	$libro->setValor("A39","POR IMPEDIMENTO DEL ".mb_strtoupper($despachoEnvia)." PASA AL ".mb_strtoupper($despachoAsignado));
+	$libro->setValor("B44",mb_strtoupper(obtenerNombreUsuario($_SESSION["idUsr"])));
+	
+	$nombreArchivoFinal="actaRepartoReasignacionApelacionTS_".$idFormulario.$idRegistro;
+	$directorioDestino=$baseDir."/archivosTemporales/".$nombreArchivoFinal;
+	
+	$archivoFinal=$directorioDestino.".pdf";
+	$libro->generarArchivoServidor("PDF",$directorioDestino);
+	
+
+	if(file_exists($archivoFinal))
+	{
+		
+		$idDocumentoRegistrado=registrarDocumentoServidorRepositorio($nombreArchivoFinal.".pdf",$nombreArchivoFinal.".pdf",97,"");
+		
+		registrarDocumentoCarpetaAdministrativa($fRegistroBase["carpetaAdministrativa"],$idDocumentoRegistrado,$idFormulario,$idRegistro);
+		registrarDocumentoResultadoProceso($idFormulario,$idRegistro,$idDocumentoRegistrado);
+
+		header("Content-type:application/pdf"); 
+		header("Content-length: ".filesize($archivoFinal)); 
+		header("Content-Disposition: inline; filename=".$nombreArchivoFinal.".pdf");
+		echo obtenerCuerpoDocumentoB64($idDocumentoRegistrado,false);
+		
+		if(!$habilitarConJuez)
+			cambiarEtapaFormulario($idFormulario,$idRegistro,2,"",-1,"NULL","NULL",0);	
+		else
+			cambiarEtapaFormulario($idFormulario,$idRegistro,2.5,"",-1,"NULL","NULL",0);			
+		
+
+	}
+	else
+	{
+		echo "NO existe";	
+	}
+	
+	
+		
+?>

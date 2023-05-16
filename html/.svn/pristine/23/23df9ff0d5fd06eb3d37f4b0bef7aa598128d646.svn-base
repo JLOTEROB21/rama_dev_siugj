@@ -1,0 +1,21 @@
+<?php
+include("conexionBD.php");
+
+if(isset($_GET['Id'])) 
+{	
+	$sql = "SELECT Nombre,Binario,Tipo,Tamano FROM 806_fotos WHERE idUsuario=".$_GET['Id'];
+	$res=$con->obtenerRegistros($sql);
+	if($res[1]!="")
+	{
+	header("Content-type: ".$res[2]);
+    header("Content-length: ".$res[3]); 
+    header("Content-Disposition: inline; filename=".$res[0]);
+	echo $res[1];
+	}
+	else
+	{
+		$resp = file_get_contents('../images/No_foto.png'); 
+		echo $resp;
+	}
+}
+?> 

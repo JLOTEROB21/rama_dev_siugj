@@ -1,0 +1,39 @@
+<?php session_start();
+ini_set("memory_limit","3000M");
+set_time_limit(999000);
+error_reporting(E_ALL);
+include("conexionBD.php");
+include("SIUGJ/cFirmaConsejo.php");
+
+
+$c=new cFirmaConsejo();
+/*$nombreArchivo="pruebaDocumento.pdf";
+$cuerpoArchivo=leerContenidoArchivo($baseDir."/archivosTemporales/".$nombreArchivo);
+$resultado=$c->firmarElectronicamenteDocumento(bE($cuerpoArchivo),$nombreArchivo,"Documento de prueba");
+if($resultado->resultado==1)
+{
+	escribirContenidoArchivo($baseDir."/archivosTemporales/pruebaDocumento_1.pdf",bD($resultado->datosComplementarios[0]->archivo));
+}*/
+
+/*$nombreArchivo="pruebaDocumento_1.pdf";
+$cuerpoArchivo=leerContenidoArchivo($baseDir."/archivosTemporales/".$nombreArchivo);
+$resultado=$c->firmarElectronicamenteDocumento(bE($cuerpoArchivo),$nombreArchivo,"Documento de prueba");
+if($resultado->resultado==1)
+{
+	escribirContenidoArchivo($baseDir."/archivosTemporales/pruebaDocumento_2.pdf",bD($resultado->datosComplementarios[0]->archivo));
+}
+return;*/
+$nombreArchivo="pruebaDocumento_3.pdf";
+$cuerpoArchivo=leerContenidoArchivo($baseDir."/archivosTemporales/".$nombreArchivo);
+$resultado=$c->firmarElectronicamenteDocumento(bE($cuerpoArchivo),$nombreArchivo,"Documento de prueba");
+if($resultado->resultado==1)
+{
+	escribirContenidoArchivo($baseDir."/archivosTemporales/pruebaDocumento_4.pdf",bD($resultado->datosComplementarios[0]->archivo));
+}
+
+
+//header("Content-type: application/pdf");
+//header("Content-Disposition: inline;");
+//echo leerContenidoArchivo($baseDir."/archivosTemporales/pruebaDocumento_3.pdf");
+
+?>

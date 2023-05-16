@@ -1,0 +1,28 @@
+<?php
+session_start();
+
+include_once("cConectoresGestorContenido/cOneDrive.php");
+
+
+$nombreDocumento=$_POST["nombreDocumento"];
+$printer=isset($_POST["printer"])?true:false;
+
+$infoComp["idConexion"]=35;
+$cDrive=new cOneDrive("","","","",$infoComp);
+$cDrive->conectar();
+$cuerpoDocumento=$documento=$cDrive->obtenerDocumentoPDF("/".$nombreDocumento,false);
+
+$arrDocumento=explode(".",$nombreDocumento);
+
+
+header("Content-type: application/pdf");
+
+if($printer)
+	$modo="inline";
+else
+	$modo="attachment";			
+		
+header("Content-Disposition: ".$modo."; filename=".$arrDocumento[0].".pdf");
+echo $cuerpoDocumento;
+
+?>

@@ -1,0 +1,28 @@
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	new Ext.Button (
+                                {
+                                    icon:'../images/icon_big_tick.gif',
+                                    cls:'x-btn-text-icon',
+                                    text:'Guardar',
+                                    width:110,
+                                    height:30,
+                                    id:'btnGuardarForm',
+                                    renderTo:'contenedor1',
+                                    handler:function()
+                                            {
+                                                validarFrm('frmEnvio')
+                                            }
+                                    
+                                }
+                            )
+	
+}
+
+
+function validarFrm()
+{
+	gE('frmEnvio').submit();
+}

@@ -1,0 +1,25 @@
+.x-grid3-row-alt 
+{
+    background-color: #DFEFFF;/*CEE7FF*/
+	color: #000;
+	font-family:Lato-Regular;
+	
+}
+
+.x-grid3-row-over {
+    border-color: #ddd;
+    background-color: #09C !important;
+    background-image: url(../images/default/grid/row-over.gif);
+	color: #FFF;
+}
+.x-grid3-row-selected {
+    background-color: #003761 !important;
+    background-image: none;
+    border-color: #ACACAC;
+	color: #FFF;
+}
+
+.x-grid3-cell-inner
+{
+	font-family:Lato-Regular !important;
+}

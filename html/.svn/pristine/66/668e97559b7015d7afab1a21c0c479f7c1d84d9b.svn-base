@@ -1,0 +1,461 @@
+<?php session_start();
+	include("conexionBD.php"); 
+
+	include("funcionesPortal.php");
+	include("configurarIdioma.php");
+
+	
+	
+	$consulta="SELECT Nombre FROM 800_usuarios WHERE idUsuario=".$_SESSION["idUsr"];
+	$nUsuario=$con->obtenerValor($consulta);
+
+	$nomPagina="inicio";
+	
+	$idUsuario="-1";
+	if(isset($_SESSION['idUsr']))
+		$idUsuario=$_SESSION['idUsr'];
+	$sql="SELECT Login,Password FROM 800_usuarios WHERE idUsuario=".$idUsuario;
+	
+		
+	$cInfo=$con->obtenerRegistros($sql);
+	$consulta="SELECT tituloSistema FROM 903_variablesSistema";
+	$fSistema=$con->obtenerPrimeraFila($consulta);
+	
+?>
+
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title><?php echo $fSistema[0]?></title>
+
+<link rel="stylesheet" type="text/css" href="../Scripts/ext/resources/css/ext-all.css.cgz"/>
+<script type="text/javascript" src="../Scripts/ext/adapter/ext/ext-base.js.jgz"></script>
+<script type="text/javascript" src="../Scripts/ext/ext-all.js.jgz"></script>
+<script type="text/javascript" src="../Scripts/ext/idioma/ext-lang-es.js"></script>
+<link rel="stylesheet" type="text/css" href="../css/hayas.css.php" media="screen" />
+<link rel="stylesheet" type="text/css" href="../estilos/estilos.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="../css/estilos2016.css"/>
+<link rel="stylesheet" type="text/css" href="../principalPortal/css/controlesFrameWork.css"/>
+<link rel="stylesheet" type="text/css" href="../principalPortal/css/estiloSIUGJ.css"/>
+
+
+<script type="text/javascript" src="../Scripts/base64.js"></script>
+<script type="text/javascript" src="../Scripts/funcionesAjaxV2.js"></script>
+<script type="text/javascript" src="../Scripts/funcionesUtiles.js.php"></script>
+<script type="text/javascript" src="../Scripts/funcionesValidacion.js"></script>
+<script type="text/javascript" src="../Scripts/funcionesAjax.js"></script>
+<script type="text/javascript" src="../cuentasUsuario/Scripts/nUsuariosTSJCDMX.js.php"></script>
+
+
+
+</head>
+<style>
+.ttw-notification-menu 
+{
+    font-family: Arial, sans-serif;
+    height: 28px;
+    padding: 0;
+    border: 1px solid #d1d1d1;
+    border-radius: 3px !important; 
+    -moz-border-radius: 3px !important;
+    -webkit-border-radius: 3px !important;
+    /*background: #f2f2f2 url(../images/notification-menu-bg.png) repeat 0 0 scroll;*/
+    /* display: block; */
+}
+
+.notification-menu-item {
+    display: block;
+    position: relative;
+    float: left;
+    border-right: 1px solid #d1d1d1;
+    /*background: transparent url(../images/item-bg.png) no-repeat left top scroll;*/
+}
+
+.first-item, .notification-menu-item:first-child 
+{
+    background: none;
+    border-radius: 3px 0 0 3px !important;
+    -moz-border-radius: 3px 0 0 3px !important;
+    -webkit-border-radius: 3px 0 0 3px !important;
+}
+
+.notification-menu-item:last-child {
+    border-right: none;
+    border-radius: 0 3px 3px 0 !important;
+    -moz-border-radius: 0 3px 3px 0 !important;
+    -webkit-border-radius: 0 3px 3px 0 !important;
+}
+
+.notification-menu-item.last-item {
+    border-right: none;
+}
+
+.notification-menu-item a {
+    /*display: block;*/
+    color: #666;
+    text-shadow: 0 1px 0 #fff;
+    font-size: 11px;
+    font-weight: bold;
+    text-decoration: none;
+    /*line-height: 28px;*/
+    padding: 0px;
+}
+
+.notification-menu-item:hover a {
+    color: #333;
+}
+
+.burbujaNotificacion
+{
+	height: 18px;
+	width: 18px;
+	/*background: #f56c7e url(../images/notification-bg-clear.png) no-repeat center center scroll;*/
+	background-image: none\9;
+	color: #fff;
+	text-shadow: 1px 1px 0 rgba(0, 0, 0, .2);
+	text-align: center;
+	font-size: 12px;
+	vertical-align:bottom;
+	line-height:18px;	
+	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .17), 0 1px 1px rgba(0, 0, 0, .2);
+	-moz-box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .17), 0 1px 1px rgba(0, 0, 0, .2);
+	-webkit-box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .17), 0 1px 1px rgba(0, 0, 0, .2);
+	border-radius: 9px;
+	font-weight: bold;
+	cursor: pointer;
+	
+}
+
+
+.letraMenuBarra
+{
+	color: #666;
+	text-shadow: 0 1px 0 #fff;
+	font-size: 11px;
+	font-weight: bold;
+	text-decoration: none;
+	
+}
+
+
+#nottys .notty 
+{
+	/*background: rgba(207,210,178,0.8) !important;*/
+	background: -webkit-linear-gradient(transparent, rgba(207,210,178, 0.9)), -webkit-linear-gradient(rgba(207,210,178, 0.4), rgba(207,210,178, 0.7));
+	color:#033;
+	text-shadow:none;
+	font-size:14px;
+	box-shadow: rgba(207,210,178,0.8) 0px 2px 13px, rgba(207,210,178,0.6) 0px -3px 13px, rgba(255,255,255,0.5) 0px 1px 0px inset;
+ }
+
+#nottys 
+{
+	z-index:2000000;
+	width:400px;
+}
+
+#nottys .notty .hide 
+{
+	
+	background: -webkit-linear-gradient(rgba(180, 180, 180, 0.5), #CCC);
+	color:#006;
+}
+
+.bannerAdolescentes
+{
+	font-size:27px;
+	color:#002F03;
+	font-weight:bold;
+	
+}
+ 
+ 
+ nav {
+   
+    min-height: 2px;
+}
+</style>
+
+<?php
+	$colorBoton="";
+	switch($tipoMateria)
+	{
+		case "P":
+			$tituloSistema=" Sistema Penal";
+			$colorBoton="868E3C";
+		break;
+		case "SW":
+			$tituloSistema=" Sistema Integral de Gestión Judicial";
+			$colorBoton="075576";
+		break;
+		case "F":
+			$tituloSistema=" Sistema Familiar Oral";
+			$colorBoton="126B5A";
+		break;
+		case "C":
+			$tituloSistema=" Sistema Civil Oral";
+			$colorBoton="2A569C";
+		break;
+		case "SC":
+			$tituloSistema=" Sistema Integral de Gestión Judicial";
+			$colorBoton="003377";
+		break;
+		
+		case "PT":
+			$tituloSistema=" Sistema de Agenda de Audiencias";
+			$colorBoton="7986A5";
+		break;
+	}
+	
+	
+	$nConfiguracion=0;
+
+?>	
+
+<body style="background-color:#FFF">
+	<table width="100%" cellspacing="0" style="padding:0px; border:0px">
+    <tr>
+        <td colspan="6" align="center">
+            <table width="95%">
+                <tr>
+                    <td align="left"  style="padding-left:60px; padding-top:20px">
+                         <img src="../principalPortal/imagesSIUGJ/Paleta_SIUGJ_Mesa_de_trabajo_1.png" width="300" height="80" >
+                    </td>  
+                    <input type="hidden" id="versionSistema" value="<?php echo bE($cInfo[1])?>" />
+                    <?php
+					
+					if(existeRol("'117_0'"))
+					{
+						?>
+                        
+                    <td align="left" class="bannerAdolescentes">Sistema de Gestión Judicial en Materia 
+                    de Justicia para Adolescentes
+                    </td>   
+                        
+                        <?php
+					}
+					?>
+                                   
+                    
+                </tr>
+                <tr>
+                	<td colspan="2"  align="right"  style="padding-right:25px;padding-left:25px">
+                    	<table  width="100%">
+                       		<tr>
+                            	<td align="right">
+                            		<table width="100%">
+                            			<tr>
+                            				
+                           					<td align="right">
+												<table class="ttw-notification-menu" >
+													<tr >
+														<td style="display: none" class="notification-menu-item first-item" height="24" width="130">
+
+															<a href="javascript:mostrarVentanaDudaUsuario()"><img src="../images/question3.png" width="16" height="16"> Soporte técnico</a>
+
+														</td>
+														<td class="notification-menu-item first-item" height="24" style="vertical-align:middle;width:290px;">
+
+														<b>&nbsp;<span class="letraMenuBarra" style="color:#000">Bienvenido:</span></b>&nbsp; <span class="letraMenuBarra" style="color:#900"><?php echo $nUsuario?></span>&nbsp;
+														</td>
+
+														<td class="notification-menu-item last-item" height="24" width="70">
+
+															<a href="javascript:cerrarSesionPrincipal()"><img src="../images/Exit.png" width="16" height="16"> Salir</a>
+
+														</td>
+													</tr>
+												</table>
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+                        	<tr>
+                            	<td align="left">
+                            		<table width="100%">
+                            			
+									</table>
+                                </td>
+                                
+                            </tr>
+                            
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+    	<td colspan="8" valign="top" align="center">
+        	
+        <div >
+        	<div class="wrap">
+            	<nav>
+                <ul class="menu" >
+                	
+       	</ul>
+        		<div class="clearfix"></div>
+        		</nav>
+        	</div>	
+        </div>
+        
+        	
+        </td>
+    </tr>
+  
+    <tr>
+    	
+    	<td align="center" colspan="8">
+        	
+            
+            
+            
+            <table width="100%">
+            <tr>
+            	
+            	<td align="center" style="vertical-align:top">
+                	<table width="800">
+                    	<tr>
+                        	<td>
+									<?php
+										
+										$consulta="SELECT * FROM 903_variablesSistema WHERE idVariable=1";
+										$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+										
+										$lblEtiqueta="Estimado <b>".$nUsuario."</b>, por políticas de seguridad es necesario que usted cambie su contraseña de acceso; para ésto debera considerar los siguiente:<br><br>
+										- La longitud de la contrase&ntilde;a debera ser de almenos ".$fRegistro["logitudMinimaContrasena"]." caracteres<br>
+										- La longitud de la contrase&ntilde;a debera ser m&aacute;ximo de ".$fRegistro["logitudMaximaContrasena"]." caracteres<br>";
+										if($fRegistro["minLetrasMinusculas"]>0)
+										{
+											$lblEtiqueta.="- La contrase&ntilde;a deberá contener almenos ".($fRegistro["minLetrasMinusculas"]==1?" 1 letra min&uacute;scula":($fRegistro["minLetrasMinusculas"]." letras min&uacute;sculas"))."<br>";
+										}
+										
+										if($fRegistro["minLetrasMayusculas"]>0)
+										{
+											$lblEtiqueta.="- La contrase&ntilde;a deberá contener almenos ".($fRegistro["minLetrasMayusculas"]==1?" 1 letra may&uacute;scula":($fRegistro["minLetrasMayusculas"]." letras letra may&uacute;scula"))."<br>";
+										}
+										
+										if($fRegistro["minCaracteresEspeciales"]>0)
+										{
+											$lblEtiqueta.="- La contrase&ntilde;a deberá contener almenos ".($fRegistro["minCaracteresEspeciales"]==1?" 1 caracter especial":($fRegistro["minCaracteresEspeciales"]." caracteres especial"))." (! \" # $ % & ( ) = ¿ ? [ ] ' + - * / _ ; @ . , ;)<br>";
+										}
+										
+										if($fRegistro["minCaracteresNumericos"]>0)
+										{
+											$lblEtiqueta.="- La contrase&ntilde;a deberá contener almenos ".($fRegistro["minCaracteresNumericos"]==1?" 1 caracter num&eacute;rico":($fRegistro["minCaracteresNumericos"]." caracteres num&eacute;ricos"))."<br>";
+										}
+									
+										$fecha=date('Y-m-d');
+										
+										
+									?>
+                            	<input type="hidden" id="lblLogin" value="<?php echo $cInfo[0]?>" />
+                            	
+                                <form id='nUsuario' name='nUsuario' action="actualizaDataTSJCDMX.php" method='post'  >
+                                
+                                <table width="800" border='0' cellspacing='1' cellpadding='1' align='center'>
+                                <tr>
+                                    <td align="right"><span class="SeparadorSeccion" style="background-color:#<?php echo $colorBoton?> !important">ACTUALIZACI&Oacute;N DE DATOS DE USUARIO</span><br /></td>
+                                </tr>
+                                
+                                <tr class="corpo8">
+                                    <td width="800" align="left">
+                                    <fieldset class="0 " style="padding:10px"><legend><b>DATOS DE LA CUENTA</b></legend>
+                                    
+                                        <table border='0'  align='center' >
+                                        	<tr class="">
+                                                 <td align="left" colspan="14">
+                                                    <span class="letraMenuBarra"><font color="#FF0000">*</font> <?php echo $lblEtiqueta?><br /><br />
+                                                 </td>
+                                        	</tr>
+                                          <tr height="25" valign="top">
+                                             <td></td>
+                                            <td>
+                                            
+                                            <input type="hidden" name="fechaActualiza" id="fechaActualiza" value='<?php echo $fecha;?>'/></td>
+                                            <td style="display:none"><label><b>Usuario:</b></label><font color="#FF0000">*</font></td>
+                                            <td style="display:none">
+                                            
+                                                <label> ------
+                                                <?php //echo $cInfo[0]?>
+                                                </label>
+                                                <input type="hidden" name="cmbLogin" id="hLogin" value="<?php echo $cInfo[0]?>" />
+                                            
+                                            </td>
+                                            
+                                            <td><label><b>Contraseña:</b></label><font color="#FF0000">*</font></td>
+                                            <td>&nbsp;</td>
+                                            <td><input size="20" type="password"  id="Contrasena" val="obl" campo="Contrase&ntilde;a" value='<?php echo ($cInfo[1]);?>' size="10"/></td>
+                                            <td>
+                                                &nbsp;&nbsp;&nbsp;
+                                            </td>
+                                            <td><label><b>Confirmar&nbsp;Contraseña:</b></label><font color="#FF0000">*</font></td>
+                                            <td>&nbsp;</td>
+                                            <td><input  size="20" type="password" id="Contrasena2" val="obl" campo="Confirmar Contrase&ntilde;a" value='<?php echo ($cInfo[1]);?>' size="10"/></td><br />
+                                            </tr>
+                                        </table>
+                                        
+                                    </fieldset>
+                                    <input type="hidden" name="Contrasena" id="pContrasena" value="">
+    
+                                    </td>
+                                </tr>	
+                                <tr>
+                                    <td>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <table width="630">
+                                        <tr>
+                                            <td align="left"><br /></td>
+                                            <td align="right" ><br />
+                                            <table>
+                                            <tr>
+                                                <td>
+                                                
+                                                <input type="button" class="btnAceptar" name="btnGuardar" id="btnGuardar" value='Actualizar' onclick="guardarUsuario('nUsuario')"/>
+                                               </td>
+                                               <td  width="15">
+                                               </td>
+                                               <td>
+                                                <input type="button" class="btnCancelar" name="btnCancelar" id="btnCancelar" value='Cancelar' onclick="cancelar()"/>
+                                                </td>
+                                            </tr>
+                                            </table>
+                                            </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                </table>
+                                </form>
+                            </td>
+                        </tr>
+                    </table>
+                
+                
+                </td>
+            </tr>
+            </table>
+        	
+        </td>
+    </tr>
+</table><br><br>
+       <form method="post"	action="" id='frmEnvioDatos'>
+        <input type="hidden" name="confReferencia" value="<?php echo $nConfiguracion ?>" />
+        
+      	<input type="hidden" id="tipoFormato" value="" />
+		<input type="hidden" id="idRegistroFormato" value="" />
+		<input type="hidden" id="idFormulario" name="idFormulario" value="" />
+		<input type="hidden" id="idRegistro" value="" />
+		<input type="hidden" id="idReferencia" value="" />
+		<input type="hidden" id="sL" value="" />
+		<input type="hidden" id="idFormularioProceso" value="-1" />
+        
+    </form>
+    
+</body>
+</html>

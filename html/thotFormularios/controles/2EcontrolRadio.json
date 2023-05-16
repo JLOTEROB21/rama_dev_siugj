@@ -1,0 +1,7 @@
+{
+	"id":"btnAddRadio",
+	"funcion":"mostrarVentanaPreguntasOpciones()",
+	"titulo":"Insertar campo de opci&oacute;n",
+	"icono":"radio.png",
+	"script":"combo.js.php"
+}

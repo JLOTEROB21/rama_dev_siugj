@@ -1,0 +1,18 @@
+<?php session_start();
+ini_set("memory_limit","3000M");
+set_time_limit(999000);
+error_reporting(E_ALL);
+include_once("conexionBD.php");
+//include("SIUGJ/cFirmaConsejo.php");
+
+esDestinatarioNotificacionDemandante(665,5809);
+return;
+varDUmp($_SESSION);
+registrarDocumentoCarpetaAdministrativa("660013105001-20220000201",7778,696,1970,-1);
+$nomPagina=$_SERVER["PHP_SELF"];
+$arrPagina=	explode("/",$nomPagina);
+$nElementos=sizeof($arrPagina);
+$nomPagina=$arrPagina[$nElementos-1];
+$rutaNomPagina=$arrPagina[$nElementos-2]."/".$arrPagina[$nElementos-1];
+echo $rutaNomPagina;
+?>

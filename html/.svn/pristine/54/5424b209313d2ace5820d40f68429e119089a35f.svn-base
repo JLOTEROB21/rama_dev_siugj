@@ -1,0 +1,32 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+	
+?>
+
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	var arrDimensiones=obtenerDimensionesNavegador();
+    
+    if(gE('totalPublicaciones').value!='0')
+    {
+        $('#carousel').infiniteCarousel	(
+                                            {
+                                                imagePath:'../Scripts/infiniteCarousel/images/',
+                                                autoPilot :true
+                                            }
+                                        );       
+	}
+    
+    /*if(window.location.href!=window.parent.location.href)
+    {
+    	obtenerVentanaPadre(window,location.href);  
+	}
+    */
+    
+
+    
+}

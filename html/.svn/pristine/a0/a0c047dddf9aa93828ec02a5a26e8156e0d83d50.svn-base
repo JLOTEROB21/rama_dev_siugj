@@ -1,0 +1,77 @@
+/* CSS Document */
+
+.fc-axis span
+{
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 20px;
+	color: #2B2B2B;
+}
+
+.fc-unthemed .fc-today
+{
+	/*background-color:#FFF;*/
+}
+
+.fc-slats table tbody tr
+{
+	height:50px;
+}
+
+.fc-ltr .fc-axis 
+{
+    text-align: center !important;
+}
+
+
+.filaHoraCero
+{
+	border-bottom-style: dashed;
+    border-bottom-width: 1.5px;
+}
+
+.fc-day-grid
+{
+	
+}
+
+.fc-divider
+{
+	
+}
+
+.tituloCalendarioDia
+{
+	font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+    color: #2B2B2B;
+}
+
+.tituloCalendarioFechaDia
+{
+	font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 300;
+    font-size: 30px;
+    line-height: 37px;
+    color: #2B2B2B;
+}
+
+
+.fc-state-default 
+{
+	background-color: transparent;
+	background-image:none;
+	border-color: #E6EFFD;
+}
+
+.fc-button-group
+{
+	background: #E6EFFD;
+	border-radius: 50px;
+}

@@ -1,0 +1,7 @@
+{
+	"id":"btnAddParametro",
+	"funcion":"mostrarVentanaParametro()",
+	"titulo":"Campo de par&aacute;metro",
+	"icono":"hidden.png",
+	"script":"campoParametro.js.php"
+}

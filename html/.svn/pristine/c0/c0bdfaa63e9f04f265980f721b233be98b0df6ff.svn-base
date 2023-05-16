@@ -1,0 +1,102 @@
+ <?php
+	//session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+?>
+
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	new Ext.Button (
+                                {
+                                    cls:'btnSIUGJ',
+                                    text:'Guardar',
+                                    width:150,
+                                    height:50,
+                                    id:'btnGuardarForm',
+                                    renderTo:'contenedor1',
+                                    handler:function()
+                                            {
+                                                validarFrm('frmEnvio')
+                                            }
+                                    
+                                }
+                            )
+	asignarEvento(gE('_tipoAutenticacionint'),'change',function()
+         												{
+                                                        	var _ipServidorLDAPvch=gE('_ipServidorLDAPvch');
+                                                            var _puertoServidorLDAPint=gE('_puertoServidorLDAPint');
+                                                        	var valSeleccionado=gE('_tipoAutenticacionint').options[gE('_tipoAutenticacionint').selectedIndex].value;
+                                                            if(valSeleccionado=='1')
+                                                            {
+                                                            	_ipServidorLDAPvch.value='';
+                                                                _puertoServidorLDAPint.value='';
+                                                                
+                                                                _ipServidorLDAPvch.disabled=true;
+                                                                _puertoServidorLDAPint.disabled=true;
+                                                                
+                                                                _ipServidorLDAPvch.setAttribute('val','');
+                                                                _puertoServidorLDAPint.setAttribute('val','');
+                                                            
+                                                            }
+                                                            else
+                                                            {
+                                                            	
+                                                                _ipServidorLDAPvch.disabled=false;
+                                                                _puertoServidorLDAPint.disabled=false;
+                                                                
+                                                                _ipServidorLDAPvch.setAttribute('val','obl');
+                                                                _puertoServidorLDAPint.setAttribute('val','obl');
+                                                                
+                                                                
+                                                                
+                                                            }
+                                                            
+                                                        }
+                       )
+
+	lanzarEvento('_tipoAutenticacionint','change');
+}
+
+
+function validarFrm()
+{
+	if(validarFormularios('frmEnvio'))
+    {
+    	var valSeleccionado=gE('_tipoAutenticacionint').options[gE('_tipoAutenticacionint').selectedIndex].value;
+    	if(valSeleccionado=='1')
+        {
+        	gE('frmEnvio').submit();
+        }
+        else
+        {
+            function funcAjax()
+            {
+                var resp=peticion_http.responseText;
+                arrResp=resp.split('|');
+                if(arrResp[0]=='1')
+                {
+                    switch(arrResp[1])
+                    {
+                    	case '1':
+                        	gE('frmEnvio').submit();
+                        break;
+                        case '0':
+                        	function resp1()
+                            {
+                            	gE('_ipServidorLDAPvch').focus();
+                            }
+                        	msgBox('No se pudo establecer la conexi&oacute;n con el servidor LDAP / Active Directory',resp1);
+                        break;
+                    }
+                }	
+                else
+                {
+                    msgBox('<?php echo $etj["errOperacion"]?>'+' <br />'+arrResp[0]);
+                }
+            }
+        	obtenerDatosWeb('../paginasFunciones/funciones.php',funcAjax, 'POST','funcion=10&ip='+gE('_ipServidorLDAPvch').value+'&port='+gE('_puertoServidorLDAPint').value,true);
+        }
+    }
+}

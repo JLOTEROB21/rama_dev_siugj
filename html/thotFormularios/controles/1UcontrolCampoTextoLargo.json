@@ -1,0 +1,7 @@
+{
+	"id":"btnAddTextoLargo",
+	"funcion":"mostrarVentanaPreguntasUnicas(9)",
+	"titulo":"Insertar campo de texto largo",
+	"icono":"page_white_text.png",
+	"script":"campoTextoLargo.js.php"
+}

@@ -1,0 +1,774 @@
+<?php session_start();
+	include("conexionBD.php"); 
+	
+//	include_once("SIUGJ/libreriaFuncionesIntegraciones.php"); 
+	
+	$parametros="";
+	if(isset($_POST["funcion"]))
+	{
+		$funcion=$_POST["funcion"];
+		if(isset($_POST["param"]))
+		{
+			$p=$_POST["param"];
+			$parametros=json_decode($p,true);
+			
+		}
+		
+	}	
+	
+	switch($funcion)
+	{
+		case 1: 
+			registrarPerfilLiquidacion();
+		break;
+		case 2:
+			agregarCalculoLiquidador();
+		break;
+		case 3:
+			obtenerListadoCalculoPerfil();
+		break;
+		case 4:
+			asignarValorCalculoPerfil();
+		break;
+		case 5:
+			asignarFuncionAplicacionCalculoPerfil();
+		break;
+		case 6:
+			asignarAfectacionCalculoPerfil();
+		break;
+		case 7:
+			removerAsignarAfectacionCalculoPerfil();
+		break;
+		case 8:
+			asignarValorParametroCalculoPerfil();
+		break;
+		case 9:	
+			obtenerAmbitoAplicacionPerfil();
+		break;
+		case 10:	
+			obtenerParametrosPerfilLiquidador();
+		break;
+		case 11:	
+			calcularConceptoLiquidacion();
+		break;
+		case 12:	
+			obtenerValoresDivisaFecha();
+		break;
+		
+	}
+	
+	
+	function registrarPerfilLiquidacion()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		
+		
+		
+		$x=0;
+		$query[$x]="begin";
+		$x++;
+		if($obj->idRegistro==-1)
+		{
+			$query[$x]="INSERT INTO 20010_perfilesLiquidacion(cvePerfil,nombrePerfil,fechaCreacion,descripcion,situacionActual,ambitoGlobal) 
+						VALUES('".cv($obj->cvePerfil)."','".cv($obj->nombrePerfil)."','".date("Y-m-d H:i:s")."','".cv($obj->descripcion).
+						"',".$obj->situacionActual.",".$obj->ambitoGlobal.")";
+			$x++;
+			$query[$x]="select @idPerfil:=(select last_insert_id())";
+			$x++;
+		}
+		else
+		{
+			$query[$x]="update 20010_perfilesLiquidacion set cvePerfil='".cv($obj->cvePerfil)."',nombrePerfil='".cv($obj->nombrePerfil).
+						"',descripcion='".cv($obj->descripcion)."',situacionActual=".$obj->situacionActual.
+						",ambitoGlobal=".$obj->ambitoGlobal." where  idRegistro=".$obj->idRegistro;
+
+			$x++;
+			$query[$x]="select @idPerfil:=".$obj->idRegistro;
+			$x++;
+		}
+		
+		$query[$x]="DELETE FROM 20010_variablesGlobales WHERE idPerfilLiquidacion=@idPerfil";
+		$x++;
+		$query[$x]="DELETE FROM 20010_parametrosLiquidacion WHERE idPerfilLiquidacion=@idPerfil";
+		$x++;
+		
+		foreach($obj->arrVariables as $v)
+		{
+			$query[$x]="INSERT INTO 20010_variablesGlobales(idPerfilLiquidacion,nombreVariable) VALUES(@idPerfil,'".cv($v->nombreVariable)."')";
+			$x++;
+		}
+		
+		
+		foreach($obj->arrParametros as $p)
+		{
+			$arrOpciones="";
+			
+			foreach($p->opcionesFuncion as $opt)
+			{
+				$o='{"valorOpcion":"'.cv($opt->valorOpcion).'","etiqueta":"'.cv($opt->etiqueta).'"}';
+				
+				if($arrOpciones=="")
+					$arrOpciones=$o;
+				else	
+					$arrOpciones.=",".$o;
+			}
+			$query[$x]="INSERT INTO 20010_parametrosLiquidacion(idPerfilLiquidacion,etiquetaParametro,nombreParametro,
+						descripcion,tipoEntrada,fuenteDatos,funcionSistema,opcionesFuncion)
+						VALUES(@idPerfil,'".cv($p->etiquetaParametro)."','".cv($p->nombreParametro)."','".cv($p->descripcion).
+						"',".$p->tipoEntrada.",".($p->fuenteDatos==""?-1:$p->fuenteDatos).",".($p->funcionSistema==""?-1:$p->funcionSistema).
+						",'[".cv($arrOpciones)."]')";
+			$x++;
+		}
+		
+		$query[$x]="delete from 20010_ambitoAplicacionPerfillesLiquidacion where idPerfilLiquidacion=@idPerfil";
+		$x++;
+		
+		foreach($obj->arrDistritos as $e)
+		{
+			$query[$x]="INSERT INTO 20010_ambitoAplicacionPerfillesLiquidacion(idPerfilLiquidacion,tipoAmbito,cveElemento) VALUES(@idPerfil,1,'".$e->cveElemento."')";
+			$x++;
+		}
+		
+		
+		foreach($obj->arrCircuitos as $e)
+		{
+			$query[$x]="INSERT INTO 20010_ambitoAplicacionPerfillesLiquidacion(idPerfilLiquidacion,tipoAmbito,cveElemento) VALUES(@idPerfil,2,'".$e->cveElemento."')";
+			$x++;
+		}
+		
+		
+		foreach($obj->arrMunicipios as $e)
+		{
+			$query[$x]="INSERT INTO 20010_ambitoAplicacionPerfillesLiquidacion(idPerfilLiquidacion,tipoAmbito,cveElemento) VALUES(@idPerfil,3,'".$e->cveElemento."')";
+			$x++;
+		}
+		
+		
+		foreach($obj->arrDespachos as $e)
+		{
+			$query[$x]="INSERT INTO 20010_ambitoAplicacionPerfillesLiquidacion(idPerfilLiquidacion,tipoAmbito,cveElemento) VALUES(@idPerfil,4,'".$e->cveElemento."')";
+			$x++;
+		}
+		
+		$query[$x]="commit";
+		$x++;
+		
+		if($con->ejecutarBloque($query))
+		{
+			$consulta="select @idPerfil";
+			$idRegistro=$con->obtenerValor($consulta);
+			echo "1|".$idRegistro;
+		}
+	}
+	
+	
+	function agregarCalculoLiquidador()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		
+		$query="SELECT COUNT(*) FROM 20010_calculosPerfillesLiquidacion WHERE idPerfilLiquidacion=".$obj->idPerfil;
+		$numElementos=$con->obtenerValor($query);
+		$numElementos++;
+		$x=0;
+		$consulta[$x]="begin";
+		$x++;                                                                                                       
+		$consulta[$x]="INSERT INTO 20010_calculosPerfillesLiquidacion(idPerfilLiquidacion,idCalculo,orden,funcionAplicacion) 
+				VALUES(".$obj->idPerfil.",".$obj->idCalculo.",".$numElementos.",-1)";
+		$x++;
+		
+		$consulta[$x]="select @idAlineacion:=(select last_insert_id())";
+		$x++;
+		
+		$consulta[$x]="INSERT INTO 20010_parametrosCalculosLiquidacion(idAlineacionCalculo,parametro)
+						SELECT @idAlineacion,parametro 
+						FROM 993_parametrosConsulta WHERE idConsulta=".$obj->idCalculo;
+		$x++;	
+		$consulta[$x]="commit";
+		$x++;  
+		eB($consulta);
+	}
+	
+	function obtenerListadoCalculoPerfil()
+	{
+		global $con;
+		$idPerfil=$_POST["idPerfil"];
+		
+		$arrRegistros="";
+		$numReg=0;
+		$consulta="SELECT * FROM 20010_calculosPerfillesLiquidacion WHERE idPerfilLiquidacion=".$idPerfil." ORDER BY orden";		
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			$consulta="SELECT nombreConsulta FROM 991_consultasSql WHERE idConsulta=".$fila["idCalculo"];
+			$nombreCalculo=$con->obtenerValor($consulta);
+			
+
+			$consulta="SELECT nombreConsulta FROM 991_consultasSql WHERE idConsulta=".($fila["funcionAplicacion"]==""?-1:$fila["funcionAplicacion"]);
+			$lblFuncionAplicacion=$con->obtenerValor($consulta);
+			
+			$consulta="SELECT parametro,valorParametro,tipoValor FROM 20010_parametrosCalculosLiquidacion WHERE idAlineacionCalculo=".$fila["idRegistroAlineacionPerfil"]." ORDER BY parametro";
+			$arrParametros=$con->obtenerFilasArreglo($consulta);
+			
+			$consulta="SELECT variable,afectacion FROM 20010_afectacionVariablesCalculos WHERE idAlineacion=".$fila["idRegistroAlineacionPerfil"]." ORDER BY variable";
+			$arrVariablesAfecta=$con->obtenerFilasArreglo($consulta);
+			
+			$o='{"idRegistroCalculo":"'.$fila["idRegistroAlineacionPerfil"].'","idCalculo":"'.$fila["idCalculo"].'","nombreCalculo":"'.cv($nombreCalculo).
+				'","orden":"'.$fila["orden"].'","parametrosEntrada":'.$arrParametros.',"variablesAfecta":'.$arrVariablesAfecta.
+				',"funcionAplicacion":"'.$fila["funcionAplicacion"].
+				'","lblFuncionAplicacion":"'.cv($lblFuncionAplicacion).'","mostrarResultado":"'.$fila["mostrarResultado"].
+				'","etiquetaResultado":"'.$fila["etiquetaResultado"].'","formatoResultado":"'.$fila["formatoResultado"].
+				'","precisionResultado":"'.$fila["precisionResultado"].'","tipoPrecision":"'.$fila["tipoPrecision"].
+				'","precisionFormatoResultado":"'.$fila["precisionFormatoResultado"].'","tipoPrecisionResultado":"'.$fila["tipoPrecisionResultado"].'"}';
+			if($arrRegistros=="")
+				$arrRegistros=$o;
+			else
+				$arrRegistros.=",".$o;
+			$numReg++;
+		}
+		
+		echo '{"numReg":"'.$numReg.'","registros":['.$arrRegistros.']}';
+	}
+	
+	
+	function asignarValorCalculoPerfil()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		
+		
+		$x=0;
+		$query[$x]="begin";
+		$x++;
+		if($obj->campo=="orden")
+		{
+			$consulta="SELECT idPerfilLiquidacion,orden FROM 20010_calculosPerfillesLiquidacion WHERE idRegistroAlineacionPerfil=".$obj->idRegistro;
+			$fRegistroBase=$con->obtenerPrimeraFilaAsoc($consulta);
+			if($fRegistroBase["orden"]>$obj->valor)
+			{
+				$query[$x]="UPDATE 20010_calculosPerfillesLiquidacion SET orden=orden+1 WHERE idPerfilLiquidacion=".
+							$fRegistroBase["idPerfilLiquidacion"]." and orden>=".$obj->valor;
+				$x++;
+			}
+			else
+			{
+				$query[$x]="UPDATE 20010_calculosPerfillesLiquidacion SET orden=orden-1 WHERE idPerfilLiquidacion=".
+							$fRegistroBase["idPerfilLiquidacion"]." and orden>".$fRegistroBase["orden"]." and orden<=".$obj->valor;
+				$x++;
+			}
+			
+			
+		}
+		$query[$x]="UPDATE 20010_calculosPerfillesLiquidacion SET ".$obj->campo."='".cv($obj->valor)."' WHERE idRegistroAlineacionPerfil=".$obj->idRegistro;
+		$x++;
+		
+		$query[$x]="commit";
+		$x++;
+		
+		eB($query);
+		
+	}
+	
+	function asignarFuncionAplicacionCalculoPerfil()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		$consulta="UPDATE 20010_calculosPerfillesLiquidacion SET funcionAplicacion=".$obj->idCalculo." WHERE idRegistroAlineacionPerfil=".$obj->idAlineacionCalculo;
+		eC($consulta);
+	}
+	
+	function asignarAfectacionCalculoPerfil()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		$consulta="SELECT COUNT(*) FROM 20010_afectacionVariablesCalculos WHERE idAlineacion=".$obj->idRegistro." AND variable='".cv($obj->variable)."'";
+		$numReg=$con->obtenerValor($consulta);
+		if($numReg==0)
+		{
+			$consulta="INSERT INTO 20010_afectacionVariablesCalculos(idAlineacion,variable,afectacion) VALUES(".$obj->idRegistro.",'".cv($obj->variable)."','".$obj->afectacion."')";
+			eC($consulta);
+		}
+		else
+			echo "1|";
+	}
+	
+	function removerAsignarAfectacionCalculoPerfil()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		$consulta="DELETE FROM 20010_afectacionVariablesCalculos WHERE idAlineacion=".$obj->idRegistro." AND variable='".$obj->parametro."'";
+		eC($consulta);
+	}
+	
+	function asignarValorParametroCalculoPerfil()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		
+		$consulta="UPDATE 20010_parametrosCalculosLiquidacion SET tipoValor=".$obj->tipoValor.", valorParametro='".cv($obj->valor)."' WHERE idAlineacionCalculo=".$obj->idRegistro." AND parametro='".$obj->parametro."'";
+
+		eC($consulta);
+		
+	}
+	
+	function obtenerAmbitoAplicacionPerfil()
+	{
+		global $con;
+		$idRegistro=$_POST["iR"];
+		$tipoAmbito=$_POST["tA"];
+		
+		$consulta="";
+		switch($tipoAmbito)
+		{
+			case 1:
+				$consulta="SELECT codigoUnidad as cveElemento,unidad as nombreElemento FROM 817_organigrama WHERE  codigoUnidad  
+						in(SELECT cveElemento FROM 20010_ambitoAplicacionPerfillesLiquidacion WHERE idPerfilLiquidacion=".$idRegistro.
+					" AND tipoAmbito=1)ORDER BY unidad";
+			break;
+			case 2:
+				
+				$consulta="SELECT codigoUnidad as cveElemento,unidad as nombreElemento FROM 817_organigrama WHERE  codigoUnidad  
+					in(SELECT cveElemento FROM 20010_ambitoAplicacionPerfillesLiquidacion WHERE idPerfilLiquidacion=".$idRegistro.
+					" AND tipoAmbito=2)ORDER BY unidad";
+			break;
+			case 3:
+				$consulta="SELECT codigoUnidad as cveElemento,unidad as nombreElemento  FROM 817_organigrama WHERE  codigoUnidad  
+					in(SELECT cveElemento FROM 20010_ambitoAplicacionPerfillesLiquidacion WHERE idPerfilLiquidacion=".$idRegistro.
+					" AND tipoAmbito=3)ORDER BY unidad";	
+					
+			break;
+			case 4:
+			
+				$consulta="SELECT claveUnidad as cveElemento,nombreUnidad as nombreElemento FROM _17_tablaDinamica 
+					where claveUnidad in(SELECT cveElemento FROM 20010_ambitoAplicacionPerfillesLiquidacion WHERE idPerfilLiquidacion=".$idRegistro." AND 
+					tipoAmbito=4)  ORDER BY nombreUnidad";
+			
+			break;
+			
+		}
+		
+		$arrRegistros=$con->obtenerFilasJSON($consulta);
+		echo '{"numReg":"'.$con->filasAfectadas.'","registros":'.utf8_encode($arrRegistros).'}';
+	}
+	
+	function obtenerParametrosPerfilLiquidador()
+	{
+		global $con;
+		$idPerfil=$_POST["idPerfil"];
+		$idFormulario=-1;
+		if(isset($_POST["iF"]))
+			$idFormulario=$_POST["iF"];
+		$idRegistro=-1;
+		if(isset($_POST["iR"]))
+			$idRegistro=$_POST["iR"];
+		$arrOpciones="";
+		$numReg=0;
+		$arrRegistros="";
+		$consulta="SELECT * FROM 20010_parametrosLiquidacion WHERE idPerfilLiquidacion=".$idPerfil;
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			switch($fila["tipoEntrada"])
+			{
+				case 5:
+				case 6:
+					$arrOpciones="";
+					switch($fila["fuenteDatos"])
+					{
+						case 1:
+							$cacheCalculos=NULL;
+							$cadParametros='{"nombreParametro":"'.$fila["nombreParametro"].'","idRegistro":"'.$fila["idRegistro"].
+											'","iFormulario":"'.$idFormulario.'","iRegistro":"'.$idRegistro.'"}';
+							$objParametros=json_decode($cadParametros);
+							$aOpciones=resolverExpresionCalculoPHP($fila["funcionSistema"],$objParametros,$cacheCalculos);
+							foreach($aOpciones as $o)
+							{
+								$o="['".$o["clave"]."','".cv($o["valor"])."']";
+								if($arrOpciones=="")
+									$arrOpciones=$o;
+								else
+									$arrOpciones.=",".$o;
+							}
+							
+							
+							
+						break;
+						case 2:
+							$oOpciones=json_decode('{"registros":'.$fila["opcionesFuncion"].'}');
+							foreach($oOpciones->registros as $o)
+							{
+								$opt="['".$o->valorOpcion."','".$o->etiqueta."']";
+								if($arrOpciones=="")
+									$arrOpciones=$opt;
+								else
+									$arrOpciones.=",".$opt;
+							}
+						break;
+					}
+					
+				break;
+			}
+			
+			$o='{"nombreParametro":"'.cv($fila["nombreParametro"]).'","etiqueta":"'.cv($fila["etiquetaParametro"]).
+				'","valor":"","tipoEntrada":"'.$fila["tipoEntrada"].'","opciones":['.$arrOpciones.']}';
+			if($arrRegistros=="")
+				$arrRegistros=$o;
+			else
+				$arrRegistros.=",".$o;
+		}
+		echo '{"numReg":"'.$numReg.'","registros":['.$arrRegistros.']}';
+	}
+	
+	function calcularConceptoLiquidacion()
+	{
+		global $con;
+		$cadObj=$_POST["cadObj"];
+		$obj=json_decode($cadObj);
+		
+		
+		$arrVariables=array();
+		$consulta="SELECT nombreVariable FROM 20010_variablesGlobales WHERE idPerfilLiquidacion=".$obj->idPerfil." ORDER BY nombreVariable";
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			$arrVariables[$fila["nombreVariable"]]=0;
+		}
+		
+		$arrCalculos=array();
+		$consulta="SELECT * FROM 20010_calculosPerfillesLiquidacion WHERE idPerfilLiquidacion=".$obj->idPerfil." ORDER BY orden";
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			
+			$arrCalculos[$fila["idCalculo"]]=array();
+			$arrCalculos[$fila["idCalculo"]]["informacion"]=$fila;
+			$arrCalculos[$fila["idCalculo"]]["resultado"]=0;
+		}
+		
+		$cacheCalculos=NULL;
+		
+		foreach($arrCalculos as $idCalculo=>$resto)
+		{
+			$cadParametros='';	
+			
+			
+			$consulta="SELECT * FROM 20010_parametrosCalculosLiquidacion WHERE idAlineacionCalculo=".$resto["informacion"]["idRegistroAlineacionPerfil"]." ORDER BY parametro";
+			$rParametros=$con->obtenerFilas($consulta);
+			while($fParametro=mysql_fetch_assoc($rParametros))
+			{
+				$valorParametro="";
+				switch($fParametro["tipoValor"])
+				{
+					case 1: ///Variables Globales/Acumulares
+						$valorParametro=$arrVariables[$fParametro["valorParametro"]];
+					break;
+					case 2: //Valor de Sesi\xF3n
+						$valorParametro=$_SESSION[$fParametro["valorParametro"]];
+
+					break;
+					case 3:	//Valor de Par\xE1metro de Sistema
+						$valorParametro="";
+						switch($fParametro["valorParametro"])
+						{
+							case 8:
+								$valorParametro=date("Y-m-d");
+							break;
+							case 9:
+								$valorParametro=date("H:i");
+							break;
+						}
+					break;
+					case 4:	//Valor de Par\xE1metro de Perfil
+						eval('$valorParametro=$obj->'.$fParametro["valorParametro"].";");
+					break;
+				}
+				$oParam='"'.$fParametro["parametro"].'":"'.cv($valorParametro).'"';
+				if($cadParametros=="")
+					$cadParametros=$oParam;
+				else	
+					$cadParametros.=",".$oParam;
+			}
+			$objParametros=json_decode('{'.$cadParametros.'}');
+
+			$resultado=removerComillasLimite(resolverExpresionCalculoPHP($idCalculo,$objParametros,$cacheCalculos));
+			
+			
+			if(is_numeric($resultado))
+			{
+				switch($resto["informacion"]["tipoPrecision"])
+				{
+					case 1:
+						$resultado=truncarValor($resultado,($resto["informacion"]["precisionResultado"]==""?0:$resto["informacion"]["precisionResultado"]));
+					break;
+					case 2:
+						$resultado=str_replace(",","",number_format($resultado,$resto["informacion"]["precisionResultado"]==""?0:$resto["informacion"]["precisionResultado"]));
+					break;
+				}
+			}
+			$arrCalculos[$idCalculo]["resultado"]=$resultado;
+
+			$consulta="SELECT variable,afectacion FROM 20010_afectacionVariablesCalculos WHERE idAlineacion=".$resto["informacion"]["idRegistroAlineacionPerfil"];
+			$resVariables=$con->obtenerFilas($consulta);
+			while($fVariable=mysql_fetch_assoc($resVariables))
+			{
+				if($fVariable["afectacion"]=="+")
+				{
+					$arrVariables[$fVariable["variable"]]+=$resultado;
+				}
+				else
+				{
+					$arrVariables[$fVariable["variable"]]-=$resultado;
+				}
+			}
+			
+		}
+					
+		$arrRegistros="";
+		$numReg=0;
+		foreach($arrCalculos as $idCalculo=>$resto)
+		{
+			if($resto["informacion"]["mostrarResultado"]==1)
+			{
+				$etiquetaResultado=$resto["informacion"]["etiquetaResultado"];
+				if($etiquetaResultado=="")
+				{
+					$consulta="SELECT nombreConsulta FROM 991_consultasSql WHERE idConsulta=".$idCalculo;
+					$etiquetaResultado=$con->obtenerValor($consulta);
+				}
+				$resultado=$resto["resultado"];
+				
+				switch($resto["informacion"]["formatoResultado"])
+				{
+					case  '1':
+					case  '2':
+					case  '3':
+						switch($resto["informacion"]["tipoPrecisionResultado"])
+						{
+							case 1:
+								$resultado=truncarValor($resultado,($resto["informacion"]["precisionFormatoResultado"]==""?0:$resto["informacion"]["precisionFormatoResultado"]));
+							break;
+							case 2:
+								$resultado=str_replace(",","",number_format($resultado,$resto["informacion"]["precisionFormatoResultado"]==""?0:$resto["informacion"]["precisionFormatoResultado"]));
+							break;
+						}
+						
+						$resultado=number_format($resultado,$resto["informacion"]["precisionFormatoResultado"]==""?0:$resto["informacion"]["precisionFormatoResultado"]);
+						if(	$resto["informacion"]["formatoResultado"]==3)
+							$resultado="$ ".$resultado;					
+						
+					break;
+					case  '4':
+						$resultado=date("d/m/Y",$resultado);
+					break;
+					
+				}
+				
+				$aDivisasResultado='';
+				foreach($obj->cambiosDivisas as $divisa)
+				{
+					if($resto["informacion"]["formatoResultado"]==3)
+					{
+						
+						$resultadoDivisa=normalizarValor($divisa->tipoCambio)*1==0?0:(normalizarValor($resultado)/normalizarValor($divisa->tipoCambio));
+						$aDivisasResultado.=',"moneda_'.$divisa->tipoMoneda.'":"'.$resultadoDivisa.'"';
+					}
+					else
+					{
+						$aDivisasResultado.=',"moneda_'.$divisa->tipoMoneda.'":"---"';
+					}
+				}
+				
+				
+				
+				$o='{"idCalculo":"'.$idCalculo.'","etiqueta":"'.cv($etiquetaResultado).'","resultado":"'.cv($resultado).'","formatoPresentacion":"'.$resto["informacion"]["formatoResultado"].'"'.$aDivisasResultado.'}';
+				if($arrRegistros=="")
+				{
+					$arrRegistros=$o;
+				}
+				else
+				{
+					$arrRegistros.=",".$o;
+				}
+				$numReg++;
+			}
+		}
+		
+		
+		$x=0;
+		$query[$x]="begin";
+		$x++;
+
+		if($obj->idFormulario!=-1)
+		{
+			
+			$reflectionClase = new ReflectionObject($obj);
+			foreach ($reflectionClase->getProperties() as $property => $value) 
+			{
+				$nombre=$value->getName();
+				$valor=$value->getValue($obj);
+				
+				if(($nombre!="idFormulario")&&($nombre!="idRegistro")&&($nombre!="cambiosDivisas"))
+				{
+					$consulta="SELECT idRegistro FROM 20010_ejecucionLiquidacionParametros WHERE idFormulario=".$obj->idFormulario.
+							" AND idReferencia=".$obj->idRegistro." and nombreParametro='".$nombre."'";
+					$idRegistro=$con->obtenerValor($consulta);
+					
+					if($idRegistro=="")
+					{
+						$query[$x]="INSERT INTO 20010_ejecucionLiquidacionParametros(idFormulario,idReferencia,nombreParametro,valor) VALUES(".
+									$obj->idFormulario.",".$obj->idRegistro.",'".cv($nombre)."','".cv($valor)."')";
+						$x++;
+					}
+					else
+					{
+						$query[$x]="update 20010_ejecucionLiquidacionParametros  set nombreParametro='".cv($nombre)."',valor='".cv($valor).
+									"' where idRegistro=".$idRegistro;
+						$x++;
+					}
+				}
+			}
+			
+			foreach($obj->cambiosDivisas as $divisa)
+			{
+				$consulta="SELECT idRegistro FROM 20010_ejecucionLiquidacionParametros WHERE idFormulario=".$obj->idFormulario.
+							" AND idReferencia=".$obj->idRegistro." and nombreParametro='[".$divisa->tipoMoneda."]'";
+				$idRegistro=$con->obtenerValor($consulta);
+				
+				if($idRegistro=="")
+				{
+					$query[$x]="INSERT INTO 20010_ejecucionLiquidacionParametros(idFormulario,idReferencia,nombreParametro,valor) VALUES(".
+								$obj->idFormulario.",".$obj->idRegistro.",'[".$divisa->tipoMoneda."]','".normalizarValor($divisa->tipoCambio)."')";
+					$x++;
+				}
+				else
+				{
+					$query[$x]="update 20010_ejecucionLiquidacionParametros  set nombreParametro='[".$divisa->tipoMoneda."]',valor='".normalizarValor($divisa->tipoCambio).
+								"' where idRegistro=".$idRegistro;
+					$x++;
+				}
+			}
+			
+			
+			
+			$consulta="SELECT idRegistro FROM 20010_ejecucionLiquidacionParametros WHERE idFormulario=".$obj->idFormulario.
+						" AND idReferencia=".$obj->idRegistro." and nombreParametro='[FechaBaseCambioDivisa]'";
+			$idRegistro=$con->obtenerValor($consulta);
+			
+			if($idRegistro=="")
+			{
+				$query[$x]="INSERT INTO 20010_ejecucionLiquidacionParametros(idFormulario,idReferencia,nombreParametro,valor) VALUES(".
+							$obj->idFormulario.",".$obj->idRegistro.",'[FechaBaseCambioDivisa]','".$obj->fechaCambioDivisa."')";
+				$x++;
+			}
+			else
+			{
+				$query[$x]="update 20010_ejecucionLiquidacionParametros  set valor='".$obj->fechaCambioDivisa.
+							"' where idRegistro=".$idRegistro;
+				$x++;
+			}
+			
+			
+			
+			$cadObjAux='{"registros":['.$arrRegistros.']}';
+			$objRegistros=json_decode($cadObjAux);
+			
+			foreach($objRegistros->registros as $o)
+			{
+				if($o->formatoPresentacion==3)
+				{
+					$o->resultado=trim(str_replace(",","",str_replace("$","",$o->resultado)));
+				}
+				
+				
+				$consulta="SELECT idRegistro FROM 20010_ejecucionLiquidacionResultados WHERE idFormulario=".$obj->idFormulario.
+							" AND idReferencia=".$obj->idRegistro." and idCalculo='".$o->idCalculo."'";
+							
+				$idRegistro=$con->obtenerValor($consulta);
+				if($idRegistro=="")
+				{
+					$query[$x]="INSERT INTO 20010_ejecucionLiquidacionResultados(idFormulario,idReferencia,idCalculo,etiquetaResultado,resultado,formatoPresentacion)
+							 VALUES(".$obj->idFormulario.",".$obj->idRegistro.",".$o->idCalculo.",'".cv($o->etiqueta)."','".cv($o->resultado)."','".$o->formatoPresentacion."')";
+					$x++;
+				}
+				else
+				{
+					$query[$x]="update 20010_ejecucionLiquidacionResultados set etiquetaResultado='".cv($o->etiqueta).
+								"',resultado='".cv($o->resultado)."',formatoPresentacion='".$o->formatoPresentacion."' where idRegistro=".$idRegistro;
+
+					$x++;
+				}
+				
+				if($o->formatoPresentacion==3)
+				{
+					foreach($obj->cambiosDivisas as $divisa)
+					{
+					
+						$consulta="SELECT idRegistro FROM 20010_ejecucionLiquidacionResultados WHERE idFormulario=".$obj->idFormulario.
+							" AND idReferencia=".$obj->idRegistro." and idCalculo='".$o->idCalculo."' and etiquetaResultado='[".$divisa->tipoMoneda."]'";
+						$valor=	normalizarValor($o->resultado)*normalizarValor($divisa->tipoCambio);
+						$idRegistro=$con->obtenerValor($consulta);
+						if($idRegistro=="")
+						{
+							$query[$x]="INSERT INTO 20010_ejecucionLiquidacionResultados(idFormulario,idReferencia,idCalculo,etiquetaResultado,resultado,formatoPresentacion)
+									 VALUES(".$obj->idFormulario.",".$obj->idRegistro.",".$o->idCalculo.",'[".$divisa->tipoMoneda."]','".$valor."','-3')";
+							$x++;
+						}
+						else
+						{
+							$query[$x]="update 20010_ejecucionLiquidacionResultados set resultado='".$valor."' where idRegistro=".$idRegistro;
+		
+							$x++;
+						}
+					
+						
+					}
+				}
+				
+			}
+			
+			
+		}
+		
+		$query[$x]="commit";
+		$x++;
+		if($con->ejecutarBloque($query))
+			echo '1|['.$arrRegistros.']';
+	}
+	
+	
+	function obtenerValoresDivisaFecha()
+	{
+		global $con;
+		$fechaBase=$_POST["fechaBase"];
+		$arrDivisas="";
+		$consulta="SELECT valor,contenido FROM 902_opcionesFormulario WHERE idGrupoElemento=16388 ORDER BY valor";
+		$res=$con->obtenerFilas($consulta);
+		
+		while($fDivisa=mysql_fetch_assoc($res))
+		{
+			
+			$consulta="SELECT tipoCambio FROM _1283_tablaDinamica WHERE fechaAplicacion<='".$fechaBase."' AND cmbMoneda=".$fDivisa["valor"]." ORDER BY fechaAplicacion DESC";
+			$monedaCambio=$con->obtenerValor($consulta);
+			if($monedaCambio=="")
+				$monedaCambio=0;
+			
+			
+			$oDivisa='{"idDivisa":"'.$fDivisa["valor"].'","valorCambio":"'.$monedaCambio.'"}';
+			if($arrDivisas=="")
+				$arrDivisas=$oDivisa;
+			else
+				$arrDivisas.=",".$oDivisa;
+		}
+		echo "1|[".$arrDivisas."]";
+		
+		
+	}
+?>

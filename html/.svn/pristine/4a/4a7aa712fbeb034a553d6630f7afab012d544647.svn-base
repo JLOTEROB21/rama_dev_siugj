@@ -1,0 +1,277 @@
+{
+  "ReportGuid": "261fdefddb233b48624f7d94a976a0bb",
+  "ReportName": "Report",
+  "ReportAlias": "Report",
+  "ReportFile": "HistorgramaUsuarios.mrt",
+  "ReportCreated": "/Date(1636941984000-0500)/",
+  "ReportChanged": "/Date(1636950446000-0500)/",
+  "EngineVersion": "EngineV2",
+  "CalculationMode": "Interpretation",
+  "ReportUnit": "Centimeters",
+  "PreviewSettings": 260039167,
+  "Dictionary": {
+    "DataSources": {
+      "0": {
+        "Ident": "StiCustomSource",
+        "Name": "800_usuarios",
+        "Alias": "800_usuarios",
+        "Key": "e7ddc4b0dfc65e42ee445ab5dd9fee6b",
+        "Columns": {
+          "0": {
+            "Name": "FechaActualiza",
+            "Index": -1,
+            "NameInSource": "FechaActualiza",
+            "Alias": "FechaActualiza",
+            "Type": "System.DateTime"
+          },
+          "1": {
+            "Name": "FechaCambio",
+            "Index": -1,
+            "NameInSource": "FechaCambio",
+            "Alias": "FechaCambio",
+            "Type": "System.DateTime"
+          },
+          "2": {
+            "Name": "Login",
+            "Index": -1,
+            "NameInSource": "Login",
+            "Alias": "Login",
+            "Type": "System.String"
+          },
+          "3": {
+            "Name": "Nombre",
+            "Index": -1,
+            "NameInSource": "Nombre",
+            "Alias": "Nombre",
+            "Type": "System.String"
+          },
+          "4": {
+            "Name": "Password",
+            "Index": -1,
+            "NameInSource": "Password",
+            "Alias": "Password",
+            "Type": "System.String"
+          },
+          "5": {
+            "Name": "Status",
+            "Index": -1,
+            "NameInSource": "Status",
+            "Alias": "Status",
+            "Type": "System.String"
+          },
+          "6": {
+            "Name": "cambiarDatosUsr",
+            "Index": -1,
+            "NameInSource": "cambiarDatosUsr",
+            "Alias": "cambiarDatosUsr",
+            "Type": "System.String"
+          },
+          "7": {
+            "Name": "cuentaActiva",
+            "Index": -1,
+            "NameInSource": "cuentaActiva",
+            "Alias": "cuentaActiva",
+            "Type": "System.String"
+          },
+          "8": {
+            "Name": "fechaCreacion",
+            "Index": -1,
+            "NameInSource": "fechaCreacion",
+            "Alias": "fechaCreacion",
+            "Type": "System.DateTime"
+          },
+          "9": {
+            "Name": "idIdioma",
+            "Index": -1,
+            "NameInSource": "idIdioma",
+            "Alias": "idIdioma",
+            "Type": "System.String"
+          },
+          "10": {
+            "Name": "idUsuario",
+            "Index": -1,
+            "NameInSource": "idUsuario",
+            "Alias": "idUsuario",
+            "Type": "System.String"
+          },
+          "11": {
+            "Name": "paso",
+            "Index": -1,
+            "NameInSource": "paso",
+            "Alias": "paso",
+            "Type": "System.String"
+          },
+          "12": {
+            "Name": "registradoEnPlantel",
+            "Index": -1,
+            "NameInSource": "registradoEnPlantel",
+            "Alias": "registradoEnPlantel",
+            "Type": "System.String"
+          },
+          "13": {
+            "Name": "responsableCreacion",
+            "Index": -1,
+            "NameInSource": "responsableCreacion",
+            "Alias": "responsableCreacion",
+            "Type": "System.String"
+          }
+        },
+        "NameInSource": "NombreConexion",
+        "SqlCommand": "800_usuarios",
+        "ServiceName": "Latis"
+      },
+      "1": {
+        "Ident": "StiDataTransformation",
+        "Name": "Data",
+        "Alias": "Data",
+        "Key": "5232e5479413778976732e05f9af36e5",
+        "Columns": {
+          "0": {
+            "Name": "fechaCreacion",
+            "Index": -1,
+            "NameInSource": "fechaCreacion",
+            "Alias": "fechaCreacion",
+            "Type": "System.String",
+            "Key": "5ae31268af9535853b344ada22fe39eb",
+            "Ident": "Transform",
+            "Expression": "\" \"+Day([800_usuarios.fechaCreacion])+\"/\"+Month([800_usuarios.fechaCreacion])+\"/\"+Year([800_usuarios.fechaCreacion])"
+          },
+          "1": {
+            "Name": "idUsuario",
+            "Index": -1,
+            "NameInSource": "idUsuario",
+            "Alias": "idUsuario",
+            "Type": "System.Decimal",
+            "Key": "89c556488f9deebe90c307d415194b4e",
+            "Ident": "Transform",
+            "Expression": "Count([800_usuarios.idUsuario])",
+            "Mode": "Measure"
+          }
+        },
+        "NameInSource": "Categoría"
+      }
+    },
+    "Databases": {
+      "0": {
+        "Ident": "StiCustomDatabase",
+        "Name": "NombreConexion",
+        "Alias": "AliasConexion",
+        "ConnectionStringEncrypted": "xW71C8hZo83iS6XEZ3CkP4vEzUhGWUu8b1z9vepwJRffcNEIxQ==",
+        "ServiceName": "Latis"
+      }
+    }
+  },
+  "Pages": {
+    "0": {
+      "Ident": "StiPage",
+      "Name": "Page1",
+      "Guid": "e65165762209ab8e8ff9813923793460",
+      "Interaction": {
+        "Ident": "StiInteraction"
+      },
+      "Border": ";;2;;;;;solid:Black",
+      "Brush": "solid:",
+      "Components": {
+        "0": {
+          "Ident": "StiChart",
+          "Name": "Chart1",
+          "ClientRectangle": "2.2,1.2,22,14",
+          "Interaction": {
+            "Ident": "StiInteraction"
+          },
+          "Border": ";;;;;;;solid:Black",
+          "Brush": "solid:255,255,255",
+          "EditorType": "Simple",
+          "Series": {
+            "0": {
+              "Ident": "StiPieSeries",
+              "ShowShadow": false,
+              "SeriesLabels": {
+                "Ident": "StiCenterAxisLabels",
+                "MarkerSize": {
+                  "Width": 8,
+                  "Height": 6
+                },
+                "ValueTypeSeparator": "-",
+                "LabelColor": "88,86,75",
+                "BorderColor": "88,86,75",
+                "Brush": "solid:238,238,236,225"
+              },
+              "ValueDataColumn": "Data.idUsuario",
+              "ArgumentDataColumn": "Data.fechaCreacion",
+              "Title": {
+                "Value": "Series 1"
+              },
+              "BorderColor": "0,29,89",
+              "Brush": "gradient:79,129,189:29,79,139:"
+            }
+          },
+          "Area": {
+            "Ident": "StiPieArea",
+            "BorderColor": "88,86,75",
+            "Brush": "gradient:255,255,255::90"
+          },
+          "Table": {
+            "Visible": true,
+            "GridLineColor": "88,86,75",
+            "Header": {
+              "Brush": "solid:White"
+            },
+            "DataCells": {
+              "TextColor": "88,86,75"
+            }
+          },
+          "SeriesLabels": {
+            "Ident": "StiCenterPieLabels",
+            "MarkerSize": {
+              "Width": 8,
+              "Height": 6
+            },
+            "ValueType": "ArgumentValue",
+            "ValueTypeSeparator": "-",
+            "Format": "P2",
+            "LabelColor": "88,86,75",
+            "BorderColor": "88,86,75",
+            "Brush": "solid:238,238,236,225",
+            "WordWrap": true,
+            "ShowInPercent": true
+          },
+          "Legend": {
+            "ShowShadow": false,
+            "BorderColor": "88,86,75",
+            "Brush": "gradient:255,255,255:255,255,245:90",
+            "TitleColor": "88,86,75",
+            "LabelsColor": "88,86,75",
+            "Visible": false,
+            "MarkerSize": {
+              "Width": 10,
+              "Height": 10
+            },
+            "Size": "0,0",
+            "Title": "TITULO"
+          },
+          "Title": {
+            "Text": "DISTRIBUCION DE USUARIOS POR FECHA DE CREACION",
+            "Brush": "solid:88,86,75",
+            "Visible": true
+          },
+          "Style": {
+            "Ident": "StiStyle09"
+          }
+        }
+      },
+      "Orientation": "Landscape",
+      "PageWidth": 29.69,
+      "PageHeight": 21.01,
+      "Watermark": {
+        "TextBrush": "solid:50,0,0,0"
+      },
+      "Margins": {
+        "Left": 1,
+        "Right": 1,
+        "Top": 1,
+        "Bottom": 1
+      }
+    }
+  }
+}

@@ -1,0 +1,3274 @@
+{
+  "ReportGuid": "73fb916029147cc225b033f07c7f9816",
+  "ReportName": "Report",
+  "ReportAlias": "Report",
+  "ReportFile": "formulario2021_3.mrt",
+  "ReportCreated": "/Date(1639454567000-0600)/",
+  "ReportChanged": "/Date(1647400963000-0600)/",
+  "EngineVersion": "EngineV2",
+  "CalculationMode": "Interpretation",
+  "ReportUnit": "Centimeters",
+  "PreviewSettings": 260039167,
+  "Styles": {
+    "0": {
+      "Ident": "StiStyle",
+      "Name": "Titulo1",
+      "HorAlignment": "Right",
+      "VertAlignment": "Center",
+      "Font": ";19;;",
+      "Border": ";193,152,89;;;;;;solid:0,0,0",
+      "Brush": "solid:",
+      "TextBrush": "solid:193,152,89",
+      "NegativeTextBrush": "solid:255,0,0",
+      "AllowUseBorderSides": false
+    },
+    "1": {
+      "Ident": "StiStyle",
+      "Name": "Titulo2",
+      "VertAlignment": "Center",
+      "Font": ";9;;",
+      "Border": ";102,77,38;;;;;;solid:0,0,0",
+      "Brush": "solid:",
+      "TextBrush": "solid:102,77,38",
+      "NegativeTextBrush": "solid:255,0,0",
+      "AllowUseBorderSides": false
+    },
+    "2": {
+      "Ident": "StiStyle",
+      "Name": "Encabezado1",
+      "VertAlignment": "Center",
+      "Font": ";19;;",
+      "Border": ";193,152,89;;;;;;solid:0,0,0",
+      "Brush": "solid:",
+      "TextBrush": "solid:193,152,89",
+      "NegativeTextBrush": "solid:255,0,0",
+      "AllowUseBorderSides": false
+    },
+    "3": {
+      "Ident": "StiStyle",
+      "Name": "Encabezado2",
+      "HorAlignment": "Center",
+      "VertAlignment": "Center",
+      "Font": ";12;Bold;",
+      "Border": ";193,152,89;;;;;;solid:0,0,0",
+      "Brush": "solid:",
+      "TextBrush": "solid:193,152,89",
+      "NegativeTextBrush": "solid:255,0,0",
+      "AllowUseBorderSides": false
+    },
+    "4": {
+      "Ident": "StiStyle",
+      "Name": "Encabezado3",
+      "HorAlignment": "Center",
+      "VertAlignment": "Center",
+      "Font": ";9;Bold;",
+      "Border": "All;193,152,89;;;;;;solid:0,0,0",
+      "Brush": "solid:242,234,221",
+      "TextBrush": "solid:193,152,89",
+      "NegativeTextBrush": "solid:255,0,0",
+      "AllowUseBorderSides": false
+    },
+    "5": {
+      "Ident": "StiStyle",
+      "Name": "Datos1",
+      "VertAlignment": "Center",
+      "Font": ";9;;",
+      "Border": ";193,152,89;;;;;;solid:0,0,0",
+      "Brush": "solid:",
+      "TextBrush": "solid:102,77,38",
+      "NegativeTextBrush": "solid:255,0,0",
+      "AllowUseBorderSides": false
+    },
+    "6": {
+      "Ident": "StiStyle",
+      "Name": "Datos2",
+      "Font": ";9;;",
+      "Border": ";;;;;;;solid:0,0,0",
+      "Brush": "solid:240,237,232",
+      "TextBrush": "solid:0,0,0",
+      "NegativeTextBrush": "solid:255,0,0",
+      "AllowUseFont": false,
+      "AllowUseBorderFormatting": false,
+      "AllowUseBorderSides": false,
+      "AllowUseTextBrush": false
+    },
+    "7": {
+      "Ident": "StiStyle",
+      "Name": "Datos3",
+      "VertAlignment": "Center",
+      "Font": ";9;;",
+      "Border": ";193,152,89;;;;;;solid:0,0,0",
+      "Brush": "solid:240,237,232",
+      "TextBrush": "solid:102,77,38",
+      "NegativeTextBrush": "solid:255,0,0",
+      "AllowUseBorderSides": false
+    },
+    "8": {
+      "Ident": "StiStyle",
+      "Name": "Pie1",
+      "VertAlignment": "Center",
+      "Font": ";9;;",
+      "Border": "Top;193,152,89;;;;;;solid:0,0,0",
+      "Brush": "solid:",
+      "TextBrush": "solid:102,77,38",
+      "NegativeTextBrush": "solid:255,0,0",
+      "AllowUseBorderSides": false
+    },
+    "9": {
+      "Ident": "StiStyle",
+      "Name": "Pie2",
+      "HorAlignment": "Right",
+      "VertAlignment": "Center",
+      "Font": ";12;Bold;",
+      "Border": ";193,152,89;;;;;;solid:0,0,0",
+      "Brush": "solid:",
+      "TextBrush": "solid:193,152,89",
+      "NegativeTextBrush": "solid:255,0,0",
+      "AllowUseBorderSides": false
+    }
+  },
+  "Dictionary": {
+    "DataSources": {
+      "0": {
+        "Ident": "StiMySqlSource",
+        "Name": "_625_reportePrueba",
+        "Alias": "_625_reportePrueba",
+        "Columns": {
+          "0": {
+            "Name": "dato1",
+            "Index": -1,
+            "NameInSource": "dato1",
+            "Alias": "dato1",
+            "Type": "System.Int32"
+          },
+          "1": {
+            "Name": "dato10",
+            "Index": -1,
+            "NameInSource": "dato10",
+            "Alias": "dato10",
+            "Type": "System.Int32"
+          },
+          "2": {
+            "Name": "dato11",
+            "Index": -1,
+            "NameInSource": "dato11",
+            "Alias": "dato11",
+            "Type": "System.Int32"
+          },
+          "3": {
+            "Name": "dato12",
+            "Index": -1,
+            "NameInSource": "dato12",
+            "Alias": "dato12",
+            "Type": "System.Int32"
+          },
+          "4": {
+            "Name": "dato13",
+            "Index": -1,
+            "NameInSource": "dato13",
+            "Alias": "dato13",
+            "Type": "System.Int32"
+          },
+          "5": {
+            "Name": "dato14",
+            "Index": -1,
+            "NameInSource": "dato14",
+            "Alias": "dato14",
+            "Type": "System.Int32"
+          },
+          "6": {
+            "Name": "dato15",
+            "Index": -1,
+            "NameInSource": "dato15",
+            "Alias": "dato15",
+            "Type": "System.Int32"
+          },
+          "7": {
+            "Name": "dato16",
+            "Index": -1,
+            "NameInSource": "dato16",
+            "Alias": "dato16",
+            "Type": "System.Int32"
+          },
+          "8": {
+            "Name": "dato17",
+            "Index": -1,
+            "NameInSource": "dato17",
+            "Alias": "dato17",
+            "Type": "System.Int32"
+          },
+          "9": {
+            "Name": "dato18",
+            "Index": -1,
+            "NameInSource": "dato18",
+            "Alias": "dato18",
+            "Type": "System.Int32"
+          },
+          "10": {
+            "Name": "dato19",
+            "Index": -1,
+            "NameInSource": "dato19",
+            "Alias": "dato19",
+            "Type": "System.Int32"
+          },
+          "11": {
+            "Name": "dato2",
+            "Index": -1,
+            "NameInSource": "dato2",
+            "Alias": "dato2",
+            "Type": "System.Int32"
+          },
+          "12": {
+            "Name": "dato20",
+            "Index": -1,
+            "NameInSource": "dato20",
+            "Alias": "dato20",
+            "Type": "System.Int32"
+          },
+          "13": {
+            "Name": "dato21",
+            "Index": -1,
+            "NameInSource": "dato21",
+            "Alias": "dato21",
+            "Type": "System.Int32"
+          },
+          "14": {
+            "Name": "dato22",
+            "Index": -1,
+            "NameInSource": "dato22",
+            "Alias": "dato22",
+            "Type": "System.Int32"
+          },
+          "15": {
+            "Name": "dato23",
+            "Index": -1,
+            "NameInSource": "dato23",
+            "Alias": "dato23",
+            "Type": "System.Int32"
+          },
+          "16": {
+            "Name": "dato24",
+            "Index": -1,
+            "NameInSource": "dato24",
+            "Alias": "dato24",
+            "Type": "System.Int32"
+          },
+          "17": {
+            "Name": "dato25",
+            "Index": -1,
+            "NameInSource": "dato25",
+            "Alias": "dato25",
+            "Type": "System.Int32"
+          },
+          "18": {
+            "Name": "dato26",
+            "Index": -1,
+            "NameInSource": "dato26",
+            "Alias": "dato26",
+            "Type": "System.Int32"
+          },
+          "19": {
+            "Name": "dato27",
+            "Index": -1,
+            "NameInSource": "dato27",
+            "Alias": "dato27",
+            "Type": "System.Int32"
+          },
+          "20": {
+            "Name": "dato28",
+            "Index": -1,
+            "NameInSource": "dato28",
+            "Alias": "dato28",
+            "Type": "System.Int32"
+          },
+          "21": {
+            "Name": "dato29",
+            "Index": -1,
+            "NameInSource": "dato29",
+            "Alias": "dato29",
+            "Type": "System.Int32"
+          },
+          "22": {
+            "Name": "dato3",
+            "Index": -1,
+            "NameInSource": "dato3",
+            "Alias": "dato3",
+            "Type": "System.Int32"
+          },
+          "23": {
+            "Name": "dato30",
+            "Index": -1,
+            "NameInSource": "dato30",
+            "Alias": "dato30",
+            "Type": "System.Int32"
+          },
+          "24": {
+            "Name": "dato31",
+            "Index": -1,
+            "NameInSource": "dato31",
+            "Alias": "dato31",
+            "Type": "System.Int32"
+          },
+          "25": {
+            "Name": "dato32",
+            "Index": -1,
+            "NameInSource": "dato32",
+            "Alias": "dato32",
+            "Type": "System.Int32"
+          },
+          "26": {
+            "Name": "dato33",
+            "Index": -1,
+            "NameInSource": "dato33",
+            "Alias": "dato33",
+            "Type": "System.Int32"
+          },
+          "27": {
+            "Name": "dato34",
+            "Index": -1,
+            "NameInSource": "dato34",
+            "Alias": "dato34",
+            "Type": "System.Int32"
+          },
+          "28": {
+            "Name": "dato35",
+            "Index": -1,
+            "NameInSource": "dato35",
+            "Alias": "dato35",
+            "Type": "System.Int32"
+          },
+          "29": {
+            "Name": "dato36",
+            "Index": -1,
+            "NameInSource": "dato36",
+            "Alias": "dato36",
+            "Type": "System.Int32"
+          },
+          "30": {
+            "Name": "dato37",
+            "Index": -1,
+            "NameInSource": "dato37",
+            "Alias": "dato37",
+            "Type": "System.Int32"
+          },
+          "31": {
+            "Name": "dato38",
+            "Index": -1,
+            "NameInSource": "dato38",
+            "Alias": "dato38",
+            "Type": "System.Int32"
+          },
+          "32": {
+            "Name": "dato39",
+            "Index": -1,
+            "NameInSource": "dato39",
+            "Alias": "dato39",
+            "Type": "System.Int32"
+          },
+          "33": {
+            "Name": "dato4",
+            "Index": -1,
+            "NameInSource": "dato4",
+            "Alias": "dato4",
+            "Type": "System.Int32"
+          },
+          "34": {
+            "Name": "dato40",
+            "Index": -1,
+            "NameInSource": "dato40",
+            "Alias": "dato40",
+            "Type": "System.Int32"
+          },
+          "35": {
+            "Name": "dato41",
+            "Index": -1,
+            "NameInSource": "dato41",
+            "Alias": "dato41",
+            "Type": "System.Int32"
+          },
+          "36": {
+            "Name": "dato42",
+            "Index": -1,
+            "NameInSource": "dato42",
+            "Alias": "dato42",
+            "Type": "System.Int32"
+          },
+          "37": {
+            "Name": "dato43",
+            "Index": -1,
+            "NameInSource": "dato43",
+            "Alias": "dato43",
+            "Type": "System.Int32"
+          },
+          "38": {
+            "Name": "dato44",
+            "Index": -1,
+            "NameInSource": "dato44",
+            "Alias": "dato44",
+            "Type": "System.Int32"
+          },
+          "39": {
+            "Name": "dato45",
+            "Index": -1,
+            "NameInSource": "dato45",
+            "Alias": "dato45",
+            "Type": "System.Int32"
+          },
+          "40": {
+            "Name": "dato46",
+            "Index": -1,
+            "NameInSource": "dato46",
+            "Alias": "dato46",
+            "Type": "System.Int32"
+          },
+          "41": {
+            "Name": "dato47",
+            "Index": -1,
+            "NameInSource": "dato47",
+            "Alias": "dato47",
+            "Type": "System.Int32"
+          },
+          "42": {
+            "Name": "dato48",
+            "Index": -1,
+            "NameInSource": "dato48",
+            "Alias": "dato48",
+            "Type": "System.Int32"
+          },
+          "43": {
+            "Name": "dato49",
+            "Index": -1,
+            "NameInSource": "dato49",
+            "Alias": "dato49",
+            "Type": "System.Int32"
+          },
+          "44": {
+            "Name": "dato5",
+            "Index": -1,
+            "NameInSource": "dato5",
+            "Alias": "dato5",
+            "Type": "System.Int32"
+          },
+          "45": {
+            "Name": "dato50",
+            "Index": -1,
+            "NameInSource": "dato50",
+            "Alias": "dato50",
+            "Type": "System.Int32"
+          },
+          "46": {
+            "Name": "dato51",
+            "Index": -1,
+            "NameInSource": "dato51",
+            "Alias": "dato51",
+            "Type": "System.Int32"
+          },
+          "47": {
+            "Name": "dato52",
+            "Index": -1,
+            "NameInSource": "dato52",
+            "Alias": "dato52",
+            "Type": "System.Int32"
+          },
+          "48": {
+            "Name": "dato53",
+            "Index": -1,
+            "NameInSource": "dato53",
+            "Alias": "dato53",
+            "Type": "System.Int32"
+          },
+          "49": {
+            "Name": "dato54",
+            "Index": -1,
+            "NameInSource": "dato54",
+            "Alias": "dato54",
+            "Type": "System.Int32"
+          },
+          "50": {
+            "Name": "dato55",
+            "Index": -1,
+            "NameInSource": "dato55",
+            "Alias": "dato55",
+            "Type": "System.Int32"
+          },
+          "51": {
+            "Name": "dato56",
+            "Index": -1,
+            "NameInSource": "dato56",
+            "Alias": "dato56",
+            "Type": "System.Int32"
+          },
+          "52": {
+            "Name": "dato57",
+            "Index": -1,
+            "NameInSource": "dato57",
+            "Alias": "dato57",
+            "Type": "System.Int32"
+          },
+          "53": {
+            "Name": "dato58",
+            "Index": -1,
+            "NameInSource": "dato58",
+            "Alias": "dato58",
+            "Type": "System.Int32"
+          },
+          "54": {
+            "Name": "dato6",
+            "Index": -1,
+            "NameInSource": "dato6",
+            "Alias": "dato6",
+            "Type": "System.Int32"
+          },
+          "55": {
+            "Name": "dato7",
+            "Index": -1,
+            "NameInSource": "dato7",
+            "Alias": "dato7",
+            "Type": "System.Int32"
+          },
+          "56": {
+            "Name": "dato8",
+            "Index": -1,
+            "NameInSource": "dato8",
+            "Alias": "dato8",
+            "Type": "System.Int32"
+          },
+          "57": {
+            "Name": "dato9",
+            "Index": -1,
+            "NameInSource": "dato9",
+            "Alias": "dato9",
+            "Type": "System.Int32"
+          },
+          "58": {
+            "Name": "idRegistro",
+            "Index": -1,
+            "NameInSource": "idRegistro",
+            "Alias": "idRegistro",
+            "Type": "System.Int32"
+          },
+          "59": {
+            "Name": "situacion",
+            "Index": -1,
+            "NameInSource": "situacion",
+            "Alias": "situacion",
+            "Type": "System.Int32"
+          },
+          "60": {
+            "Name": "tipoProceso",
+            "Index": -1,
+            "NameInSource": "tipoProceso",
+            "Alias": "tipoProceso",
+            "Type": "System.String"
+          }
+        },
+        "NameInSource": "Conexión_SIUGJ",
+        "SqlCommand": "select * from `_625_reportePrueba`"
+      }
+    },
+    "Databases": {
+      "0": {
+        "Ident": "StiMySqlDatabase",
+        "Name": "Conexión_SIUGJ",
+        "Alias": "Conexión_SIUGJ",
+        "ConnectionStringEncrypted": "43SdCM4Ko81FX/nMZhB3EtUUzetPfLOA7Hj9hGotpC/Z0NkoTXqDheEb2TR3PfXjxFS5yUhXY810RT3c6VwicsRo1WBicqmh4hrtwE0RsWPU6MfCYU7TncMFrcDxceB3yXDDwsZNQ9lrRNCEw0D1N8VUgYNNCUtg"
+      }
+    }
+  },
+  "Pages": {
+    "0": {
+      "Ident": "StiPage",
+      "Name": "Pagina1",
+      "Guid": "6a275d35f49784444f7ab11400a35c4a",
+      "Interaction": {
+        "Ident": "StiInteraction"
+      },
+      "Border": ";;2;;;;;solid:Black",
+      "Brush": "solid:",
+      "Components": {
+        "0": {
+          "Ident": "StiReportTitleBand",
+          "Name": "Título_Informe1",
+          "ClientRectangle": "0,0.4,128,14",
+          "Interaction": {
+            "Ident": "StiInteraction"
+          },
+          "Border": ";;;;;;;solid:Black",
+          "Brush": "solid:",
+          "Components": {
+            "0": {
+              "Ident": "StiText",
+              "Name": "Texto1",
+              "ClientRectangle": "1,0,12.6,2",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "Consejo Superior de la Judicatura\r\nSala administrativa\r\nUnidad de Desarrollo y Análisis Estadístico\r\nReporte Gestión en el Sistema Estadistico de la Rama Judicial SIERJU\r\n"
+              },
+              "Font": ";10;;",
+              "Border": ";;;;;;;solid:Black",
+              "Brush": "solid:",
+              "TextBrush": "solid:Black",
+              "Type": "Expression"
+            },
+            "1": {
+              "Ident": "StiText",
+              "Name": "Texto2",
+              "ClientRectangle": "1,2.2,3,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "Formulario:"
+              },
+              "Font": ";10;;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "2": {
+              "Ident": "StiText",
+              "Name": "Texto3",
+              "ClientRectangle": "1,2.8,3,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "Periodo Desde:"
+              },
+              "Font": ";10;;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "3": {
+              "Ident": "StiText",
+              "Name": "Texto4",
+              "ClientRectangle": "1,3.4,3,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "Despacho:"
+              },
+              "Font": ";10;;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "4": {
+              "Ident": "StiText",
+              "Name": "Texto5",
+              "ClientRectangle": "1,4,3,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "Distrito Judicial:"
+              },
+              "Font": ";10;;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "5": {
+              "Ident": "StiText",
+              "Name": "Texto6",
+              "ClientRectangle": "1,4.6,3,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "Consejo Seccional:"
+              },
+              "Font": ";10;;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "6": {
+              "Ident": "StiText",
+              "Name": "Texto7",
+              "ClientRectangle": "1,5.2,3,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "Circuito:"
+              },
+              "Font": ";10;;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "7": {
+              "Ident": "StiText",
+              "Name": "Texto8",
+              "ClientRectangle": "1,5.8,3,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "Municipio:"
+              },
+              "Font": ";10;;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "8": {
+              "Ident": "StiText",
+              "Name": "Texto9",
+              "ClientRectangle": "1,6.4,3,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "Funcionario:"
+              },
+              "Font": ";10;;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "9": {
+              "Ident": "StiText",
+              "Name": "Texto10",
+              "ClientRectangle": "1,8.4,6,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "Primera y Única Instancia LAboral"
+              },
+              "Font": ";10;;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "10": {
+              "Ident": "StiText",
+              "Name": "Texto11",
+              "ClientRectangle": "4.4,2.2,9.2,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "SIERJU_Juzgado Laboral Circuito - 2020"
+              },
+              "Font": ";10;;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "11": {
+              "Ident": "StiText",
+              "Name": "Texto12",
+              "ClientRectangle": "4.4,2.8,9.2,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "01-07-2021 Hasta 30-09-2021"
+              },
+              "Font": ";10;;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "12": {
+              "Ident": "StiText",
+              "Name": "Texto13",
+              "ClientRectangle": "4.4,3.4,9.2,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "630013105002 - JUZGADO 002 LABORAL DE ARMERIA"
+              },
+              "Font": ";10;;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "13": {
+              "Ident": "StiText",
+              "Name": "Texto14",
+              "ClientRectangle": "4.4,4,9.2,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "ARMENIA"
+              },
+              "Font": ";10;;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "14": {
+              "Ident": "StiText",
+              "Name": "Texto15",
+              "ClientRectangle": "4.4,4.6,9.2,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "QUINDIO"
+              },
+              "Font": ";10;;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "15": {
+              "Ident": "StiText",
+              "Name": "Texto16",
+              "Guid": "2649f48969ccbbf579a304485752a10d",
+              "ClientRectangle": "4.4,5.2,9.2,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "ARMENIA"
+              },
+              "Font": ";10;;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "16": {
+              "Ident": "StiText",
+              "Name": "Texto17",
+              "Guid": "73e1551a99e33012b3d3241644707ade",
+              "ClientRectangle": "4.4,5.8,9.2,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "ARMENIA"
+              },
+              "Font": ";10;;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "17": {
+              "Ident": "StiText",
+              "Name": "Texto18",
+              "ClientRectangle": "4.4,6.4,9.2,0.4",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "ANA CRISTINA VARGAS GUZMAN Cédula: 59820894"
+              },
+              "Font": ";10;;",
+              "Border": ";;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "18": {
+              "Ident": "StiText",
+              "Name": "Texto19",
+              "ClientRectangle": "0,10.6,2.6,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "TIPOS\r\nPROCESOS"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Font": ";;Bold;",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "19": {
+              "Ident": "StiText",
+              "Name": "Texto20",
+              "ClientRectangle": "2.6,10.6,4,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "INVENTARIO INICIAL \r\nDE PROCESOS SIN \r\nSENTENCIA O DECISIÓN \r\nQUE PONGA FIN A LA \r\nINSTANCIA"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "20": {
+              "Ident": "StiText",
+              "Name": "Texto21",
+              "ClientRectangle": "4.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "INVENTARIO \r\nAL INICIAR \r\nEL PERIODO \r\nCON TRÁMITE"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "21": {
+              "Ident": "StiText",
+              "Name": "Texto22",
+              "ClientRectangle": "2.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "INVENTARIO \r\nAL  INICIAR \r\nEL PERIODO\r\nSIN TRAMITE"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "22": {
+              "Ident": "StiText",
+              "Name": "Texto24",
+              "ClientRectangle": "6.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "POR\r\nREPARTO"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "23": {
+              "Ident": "StiText",
+              "Name": "Texto25",
+              "ClientRectangle": "8.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DESCON-\r\nGESTION"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "24": {
+              "Ident": "StiText",
+              "Name": "Texto26",
+              "ClientRectangle": "10.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "REINGRESO"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "25": {
+              "Ident": "StiText",
+              "Name": "Texto27",
+              "ClientRectangle": "12.6,12.2,3,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "RECIBIDO DE\r\nOTROS DESPACHOS\r\nSIN FALLO O\r\nDECISIÓN DEFINITIVA"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "26": {
+              "Ident": "StiText",
+              "Name": "Texto28",
+              "ClientRectangle": "15.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "OTRAS\r\nENTRADAS\r\nNO\r\nEFECTIVAS"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "27": {
+              "Ident": "StiText",
+              "Name": "Texto29",
+              "ClientRectangle": "6.6,10.6,11,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "ENTRADAS ESPECIALIDAD LABORAL"
+              },
+              "HorAlignment": "Center",
+              "Font": ";;Bold;",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "28": {
+              "Ident": "StiText",
+              "Name": "Texto30",
+              "ClientRectangle": "17.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "PROCESOS\r\nREACTIVADOS"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "29": {
+              "Ident": "StiText",
+              "Name": "Texto32",
+              "ClientRectangle": "17.6,10.6,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "PROCESOS\r\nREACTIVADOS"
+              },
+              "HorAlignment": "Center",
+              "Font": ";;Bold;",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "30": {
+              "Ident": "StiText",
+              "Name": "Texto33",
+              "ClientRectangle": "19.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "PARA\r\nDESCON-\r\nGESTION"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "31": {
+              "Ident": "StiText",
+              "Name": "Texto34",
+              "ClientRectangle": "21.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "REMITIDOS\r\nA OTROS\r\nDESPACHOS"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "32": {
+              "Ident": "StiText",
+              "Name": "Texto35",
+              "ClientRectangle": "23.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "RECHAZADOS\r\nO\r\nRETIRADOS"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "33": {
+              "Ident": "StiText",
+              "Name": "Texto36",
+              "ClientRectangle": "25.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "AUTOS\r\nPAGOS"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "34": {
+              "Ident": "StiText",
+              "Name": "Texto37",
+              "ClientRectangle": "27.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "AUTOS\r\nTRANSACCION"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "35": {
+              "Ident": "StiText",
+              "Name": "Texto38",
+              "ClientRectangle": "29.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "AUTOS\r\nAPRUEBA\r\nCONCILIA-\r\nCION\r\nJUDICIAL"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "36": {
+              "Ident": "StiText",
+              "Name": "Texto39",
+              "ClientRectangle": "19.6,10.6,28.8,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "SALIDAS ESPECIALIDAD LABORAL"
+              },
+              "HorAlignment": "Center",
+              "Font": ";;Bold;",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "37": {
+              "Ident": "StiText",
+              "Name": "Texto40",
+              "ClientRectangle": "31.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "AUTOS\r\nDESISTIMI-\r\nENTO"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "38": {
+              "Ident": "StiText",
+              "Name": "Texto41",
+              "ClientRectangle": "33.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DESISTI-\r\nMIENTO\r\nTÁCITO"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "39": {
+              "Ident": "StiText",
+              "Name": "Texto42",
+              "ClientRectangle": "35.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "AUTOS\r\nORDENA\r\nSEGUIR\r\nEJECUCIÓN"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "40": {
+              "Ident": "StiText",
+              "Name": "Texto43",
+              "ClientRectangle": "37.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "SENTENCIAS"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "41": {
+              "Ident": "StiText",
+              "Name": "Texto44",
+              "ClientRectangle": "39.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "AUTOS\r\nEXCEPCIÓN\r\nPREVIA"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "42": {
+              "Ident": "StiText",
+              "Name": "Texto45",
+              "ClientRectangle": "41.6,12.2,2.4,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "AUTOS\r\nAPRUEBA\r\nCONCILIACIÓN\r\nEXTRAJUDICIAL"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "43": {
+              "Ident": "StiText",
+              "Name": "Texto46",
+              "ClientRectangle": "44,12.2,2.4,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "AUTO\r\nIMPRUEBA\r\nCONCILIACIÓN\r\nEXTRAJUDICIAL"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "44": {
+              "Ident": "StiText",
+              "Name": "Texto47",
+              "ClientRectangle": "46.4,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "OTRAS\r\nSALIDAS\r\nNO\r\nEFECTIVAS"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "45": {
+              "Ident": "StiText",
+              "Name": "Texto48",
+              "ClientRectangle": "48.4,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "OTRAS\r\nSALIDAS\r\nEFECTIVAS"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "46": {
+              "Ident": "StiText",
+              "Name": "Texto49",
+              "Guid": "0c8efd3fca6630798435962ce2b58b2d",
+              "ClientRectangle": "48.4,10.6,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "OTRAS\r\nSALIDAS\r\nEFECTIVAS"
+              },
+              "HorAlignment": "Center",
+              "Font": ";;Bold;",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "47": {
+              "Ident": "StiText",
+              "Name": "Texto31",
+              "ClientRectangle": "50.4,10.6,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "PROCESOS\r\nSIN TRAMITE\r\nDURANTE EL\r\nPERIODO"
+              },
+              "HorAlignment": "Center",
+              "Font": ";;Bold;",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "48": {
+              "Ident": "StiText",
+              "Name": "Texto50",
+              "ClientRectangle": "50.4,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "PROCESOS\r\nSIN TRAMITE\r\nDURANTE EL\r\nPERIODO"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "49": {
+              "Ident": "StiText",
+              "Name": "Texto51",
+              "ClientRectangle": "52.4,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "PROCESOS\r\nACUMULADOS"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "50": {
+              "Ident": "StiText",
+              "Name": "Texto52",
+              "Guid": "57269141c036d7a12cd1227303a16b3f",
+              "ClientRectangle": "52.4,10.6,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "PROCESOS\r\nACUMULADOS"
+              },
+              "HorAlignment": "Center",
+              "Font": ";;Bold;",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "51": {
+              "Ident": "StiText",
+              "Name": "Texto53",
+              "ClientRectangle": "54.4,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "INVENTARIO\r\nAL FINAL\r\nDEL PERIODO\r\nCON TRAMITE"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "52": {
+              "Ident": "StiText",
+              "Name": "Texto54",
+              "ClientRectangle": "56.4,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "INVENTARIO\r\nAL FINAL\r\nDEL PERIODO\r\nSIN TRAMITE"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "53": {
+              "Ident": "StiText",
+              "Name": "Texto55",
+              "ClientRectangle": "54.4,10.6,4,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "INVENTARIO FINAL DE \r\nPROCESO SIN SENTENCIA \r\nO DECISIÓN QUE PONGA \r\nFIN A  LA INSTANCIA"
+              },
+              "HorAlignment": "Center",
+              "Font": ";;Bold;",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "54": {
+              "Ident": "StiText",
+              "Name": "Texto56",
+              "ClientRectangle": "58.4,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "PROCESO\r\nPARA EL\r\nFALLO"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "55": {
+              "Ident": "StiText",
+              "Name": "Texto57",
+              "ClientRectangle": "58.4,10.6,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "PROCESOS\r\nPARA EL\r\nFALLO"
+              },
+              "HorAlignment": "Center",
+              "Font": ";;Bold;",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "56": {
+              "Ident": "StiText",
+              "Name": "Texto58",
+              "ClientRectangle": "60.4,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDANTE\r\nMASCULINO"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "57": {
+              "Ident": "StiText",
+              "Name": "Texto59",
+              "ClientRectangle": "62.4,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDANTE\r\nFEMENINO"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "58": {
+              "Ident": "StiText",
+              "Name": "Texto60",
+              "ClientRectangle": "64.4,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDANTE\r\nINTERSEXUAL"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "59": {
+              "Ident": "StiText",
+              "Name": "Texto61",
+              "ClientRectangle": "66.4,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "SIN\r\nINFORMACIÓN\r\nDEL SEXO\r\nDEMANDANTE"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "60": {
+              "Ident": "StiText",
+              "Name": "Texto62",
+              "ClientRectangle": "60.4,10.6,8,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "IDENTIFICACIÓN SEXUAL DEL DEMANDANTE\r\n(DE LOS PROCESOS TERMINADOS)"
+              },
+              "HorAlignment": "Center",
+              "Font": ";;Bold;",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "61": {
+              "Ident": "StiText",
+              "Name": "Texto63",
+              "ClientRectangle": "68.4,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDANTE\r\nMENOR DE 18\r\nAÑOS"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "62": {
+              "Ident": "StiText",
+              "Name": "Texto64",
+              "ClientRectangle": "70.4,12.2,2.2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDANTE\r\nMAYOR O IGUAL\r\nDE 18 AÑOS Y\r\nMENOR DE 60\r\n AÑOS"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "63": {
+              "Ident": "StiText",
+              "Name": "Texto65",
+              "ClientRectangle": "72.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDANTE\r\nMAYOR O\r\nIGUAL DE 60\r\nAÑOS"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "64": {
+              "Ident": "StiText",
+              "Name": "Texto66",
+              "ClientRectangle": "74.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "SIN\r\nINFORMACIÓN\r\nDE GRUPO\r\nETARIO\r\nDEMANDANTE"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "65": {
+              "Ident": "StiText",
+              "Name": "Texto67",
+              "ClientRectangle": "68.4,10.6,8.2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "GRUPO ETARIO DEMANDANTE\r\n(DE LOS PROCESOS TERMINADOS)"
+              },
+              "HorAlignment": "Center",
+              "Font": ";;Bold;",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "66": {
+              "Ident": "StiText",
+              "Name": "Texto68",
+              "ClientRectangle": "76.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDANTE\r\nINDÍGENA"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "67": {
+              "Ident": "StiText",
+              "Name": "Texto69",
+              "ClientRectangle": "78.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDANTE\r\nAFRO-\r\nCOLOMBIANO"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "68": {
+              "Ident": "StiText",
+              "Name": "Texto70",
+              "ClientRectangle": "80.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDANTE\r\nPALENQUERO\r\n/ RAIZAL"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "69": {
+              "Ident": "StiText",
+              "Name": "Texto71",
+              "ClientRectangle": "82.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDANTE\r\nROM O\r\nGITANO"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "70": {
+              "Ident": "StiText",
+              "Name": "Texto72",
+              "ClientRectangle": "84.6,12.2,2.2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDANTE\r\nSIN PERTENEN-\r\nCIA A ALGUN\r\nGRUPO ETNICO"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "71": {
+              "Ident": "StiText",
+              "Name": "Texto73",
+              "ClientRectangle": "86.8,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "SIN\r\nINFORMACIÓN\r\nDE GRUPO\r\nETNICO\r\nDEMANDANTE"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "72": {
+              "Ident": "StiText",
+              "Name": "Texto74",
+              "ClientRectangle": "76.6,10.6,12.2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "GRUPO ETNICO DEMANDANTE\r\n(DE LOS PROCESOS TERMINADOS)"
+              },
+              "HorAlignment": "Center",
+              "Font": ";;Bold;",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "73": {
+              "Ident": "StiText",
+              "Name": "Texto75",
+              "ClientRectangle": "88.8,12.2,2.6,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDANTE\r\nEN SITUACIÓN\r\nDE\r\nDISCAPACIDAD"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "74": {
+              "Ident": "StiText",
+              "Name": "Texto76",
+              "ClientRectangle": "88.8,10.6,2.6,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "SITUACIÓN DE\r\nDISCAPACIDAD\r\nDEMANDANTE (DE\r\nLOS PROCESOS\r\nTERMINADOS)"
+              },
+              "HorAlignment": "Center",
+              "Font": ";;Bold;",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "75": {
+              "Ident": "StiText",
+              "Name": "Texto77",
+              "ClientRectangle": "91.4,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDADO\r\nINDIGENA"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "76": {
+              "Ident": "StiText",
+              "Name": "Texto78",
+              "ClientRectangle": "93.4,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDADO\r\nAFRO-\r\nCOLOMBIANO"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "77": {
+              "Ident": "StiText",
+              "Name": "Texto79",
+              "ClientRectangle": "95.4,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDADO\r\nPALENQUERO\r\n/ RAIZAL"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "78": {
+              "Ident": "StiText",
+              "Name": "Texto80",
+              "ClientRectangle": "97.4,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDADO\r\nROM O\r\nGITANO"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "79": {
+              "Ident": "StiText",
+              "Name": "Texto81",
+              "ClientRectangle": "99.4,12.2,2.2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDADO\r\nSIN PERTENEN-\r\nCIA A ALGUN\r\nGRUPO ETNICO"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "80": {
+              "Ident": "StiText",
+              "Name": "Texto82",
+              "ClientRectangle": "101.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "SIN\r\nINFORMACIÓN\r\nDE GRUPO\r\nETNICO\r\nDEMANDADO"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "81": {
+              "Ident": "StiText",
+              "Name": "Texto83",
+              "ClientRectangle": "91.4,10.6,12.2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "GRUPO ÉTNICO DEL DEMANDADO\r\n(DE LOS PROCESOS TERMINADOS)"
+              },
+              "HorAlignment": "Center",
+              "Font": ";;Bold;",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "82": {
+              "Ident": "StiText",
+              "Name": "Texto84",
+              "ClientRectangle": "103.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDADO\r\nFEMENINO"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "83": {
+              "Ident": "StiText",
+              "Name": "Texto85",
+              "ClientRectangle": "105.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDADO\r\nMASCULINO"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "84": {
+              "Ident": "StiText",
+              "Name": "Texto86",
+              "ClientRectangle": "107.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDADO\r\nINTERSEXUAL"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "85": {
+              "Ident": "StiText",
+              "Name": "Texto87",
+              "ClientRectangle": "109.6,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "SIN\r\nINFORMACIÓN\r\nDEL SEXO\r\nDEMANDADO"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "86": {
+              "Ident": "StiText",
+              "Name": "Texto88",
+              "ClientRectangle": "103.6,10.6,8,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "IDENTIFICACIÓN SEXUAL DEL DEMANDADO\r\n(DE LOS PROCESOS TERMINADOS)"
+              },
+              "HorAlignment": "Center",
+              "Font": ";;Bold;",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "87": {
+              "Ident": "StiText",
+              "Name": "Texto89",
+              "ClientRectangle": "111.6,12.2,2.5,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDADO\r\nEN SITUACIÓN\r\nDE\r\nDISCAPCIADAD"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "88": {
+              "Ident": "StiText",
+              "Name": "Texto90",
+              "ClientRectangle": "111.6,10.6,2.5,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "SITUACIÓN DE\r\nDISCAPACIDAD\r\nDE DEMANDADO\r\n(DE LOS PROCESOS\r\nTERMINADOS)\r\n"
+              },
+              "HorAlignment": "Center",
+              "Font": ";;Bold;",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "89": {
+              "Ident": "StiText",
+              "Name": "Texto91",
+              "ClientRectangle": "114.1,12.2,2.2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDADO\r\nMAYOR O\r\nIGUAL DE 18\r\nAÑOS Y MENOR\r\nDE 60 AÑOS"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "90": {
+              "Ident": "StiText",
+              "Name": "Texto92",
+              "ClientRectangle": "116.3,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDADO\r\nMAYOR O\r\nIGUAL DE\r\n60 AÑOS"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "91": {
+              "Ident": "StiText",
+              "Name": "Texto93",
+              "ClientRectangle": "118.3,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "SIN\r\nINFORMACIÓN\r\nDE GRUPO \r\nETARIO\r\nDEMANDADO\r\n"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "92": {
+              "Ident": "StiText",
+              "Name": "Texto94",
+              "ClientRectangle": "120.3,12.2,2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "DEMANDADO\r\nMENOR DE\r\n18 AÑOS"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            },
+            "93": {
+              "Ident": "StiText",
+              "Name": "Texto95",
+              "ClientRectangle": "114.1,10.6,8.2,1.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "GRUPO ETARIO DEL DEMANDADO\r\n(DE LOS PROCESOS TERMINADOS)"
+              },
+              "HorAlignment": "Center",
+              "Font": ";;Bold;",
+              "Border": "All;;2;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "Expression"
+            }
+          }
+        },
+        "1": {
+          "Ident": "StiDataBand",
+          "Name": "Datos1",
+          "ClientRectangle": "0,15.2,128,0.6",
+          "Interaction": {
+            "Ident": "StiBandInteraction"
+          },
+          "Border": ";;;;;;;solid:Black",
+          "Brush": "solid:",
+          "Components": {
+            "0": {
+              "Ident": "StiText",
+              "Name": "Texto23",
+              "ClientRectangle": "0,0,2.6,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.tipoProceso}"
+              },
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "Type": "DataColumn"
+            },
+            "1": {
+              "Ident": "StiText",
+              "Name": "Texto96",
+              "ClientRectangle": "2.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato1}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "2": {
+              "Ident": "StiText",
+              "Name": "Texto97",
+              "ClientRectangle": "4.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato2}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "3": {
+              "Ident": "StiText",
+              "Name": "Texto98",
+              "ClientRectangle": "6.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato3}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "4": {
+              "Ident": "StiText",
+              "Name": "Texto99",
+              "ClientRectangle": "8.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato4}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "5": {
+              "Ident": "StiText",
+              "Name": "Texto100",
+              "ClientRectangle": "10.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato5}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "6": {
+              "Ident": "StiText",
+              "Name": "Texto101",
+              "ClientRectangle": "12.6,0,3,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato6}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "7": {
+              "Ident": "StiText",
+              "Name": "Texto102",
+              "ClientRectangle": "15.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato7}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "8": {
+              "Ident": "StiText",
+              "Name": "Texto103",
+              "ClientRectangle": "17.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato8}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "9": {
+              "Ident": "StiText",
+              "Name": "Texto104",
+              "ClientRectangle": "19.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato9}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "10": {
+              "Ident": "StiText",
+              "Name": "Texto105",
+              "ClientRectangle": "21.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato10}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "11": {
+              "Ident": "StiText",
+              "Name": "Texto106",
+              "ClientRectangle": "23.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato11}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "12": {
+              "Ident": "StiText",
+              "Name": "Texto107",
+              "ClientRectangle": "25.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato12}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "13": {
+              "Ident": "StiText",
+              "Name": "Texto108",
+              "ClientRectangle": "27.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato13}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "14": {
+              "Ident": "StiText",
+              "Name": "Texto109",
+              "ClientRectangle": "29.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato14}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "15": {
+              "Ident": "StiText",
+              "Name": "Texto110",
+              "ClientRectangle": "31.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato15}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "16": {
+              "Ident": "StiText",
+              "Name": "Texto111",
+              "ClientRectangle": "33.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato16}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "17": {
+              "Ident": "StiText",
+              "Name": "Texto112",
+              "ClientRectangle": "35.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato17}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "18": {
+              "Ident": "StiText",
+              "Name": "Texto113",
+              "ClientRectangle": "37.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato18}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "19": {
+              "Ident": "StiText",
+              "Name": "Texto114",
+              "ClientRectangle": "39.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato19}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "20": {
+              "Ident": "StiText",
+              "Name": "Texto115",
+              "ClientRectangle": "41.6,0,2.4,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato20}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "21": {
+              "Ident": "StiText",
+              "Name": "Texto116",
+              "ClientRectangle": "44,0,2.4,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato21}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "22": {
+              "Ident": "StiText",
+              "Name": "Texto117",
+              "ClientRectangle": "46.4,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato22}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "23": {
+              "Ident": "StiText",
+              "Name": "Texto118",
+              "ClientRectangle": "48.4,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato23}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "24": {
+              "Ident": "StiText",
+              "Name": "Texto119",
+              "ClientRectangle": "50.4,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato24}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "25": {
+              "Ident": "StiText",
+              "Name": "Texto120",
+              "ClientRectangle": "52.4,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato25}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "26": {
+              "Ident": "StiText",
+              "Name": "Texto121",
+              "ClientRectangle": "54.4,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato26}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "27": {
+              "Ident": "StiText",
+              "Name": "Texto122",
+              "ClientRectangle": "56.4,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato27}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "28": {
+              "Ident": "StiText",
+              "Name": "Texto123",
+              "ClientRectangle": "58.4,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato28}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "29": {
+              "Ident": "StiText",
+              "Name": "Texto124",
+              "ClientRectangle": "60.4,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato29}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "30": {
+              "Ident": "StiText",
+              "Name": "Texto125",
+              "ClientRectangle": "62.4,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato30}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "31": {
+              "Ident": "StiText",
+              "Name": "Texto126",
+              "ClientRectangle": "64.4,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato31}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "32": {
+              "Ident": "StiText",
+              "Name": "Texto127",
+              "ClientRectangle": "66.4,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato32}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "33": {
+              "Ident": "StiText",
+              "Name": "Texto128",
+              "ClientRectangle": "68.4,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato33}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "34": {
+              "Ident": "StiText",
+              "Name": "Texto129",
+              "ClientRectangle": "70.4,0,2.2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato34}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "35": {
+              "Ident": "StiText",
+              "Name": "Texto130",
+              "ClientRectangle": "72.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato35}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "36": {
+              "Ident": "StiText",
+              "Name": "Texto131",
+              "ClientRectangle": "74.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato36}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "37": {
+              "Ident": "StiText",
+              "Name": "Texto132",
+              "ClientRectangle": "76.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato37}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "38": {
+              "Ident": "StiText",
+              "Name": "Texto133",
+              "ClientRectangle": "78.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato38}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "39": {
+              "Ident": "StiText",
+              "Name": "Texto134",
+              "ClientRectangle": "80.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato39}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "40": {
+              "Ident": "StiText",
+              "Name": "Texto135",
+              "ClientRectangle": "82.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato40}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "41": {
+              "Ident": "StiText",
+              "Name": "Texto136",
+              "ClientRectangle": "84.6,0,2.2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato41}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "42": {
+              "Ident": "StiText",
+              "Name": "Texto137",
+              "ClientRectangle": "86.8,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato42}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "43": {
+              "Ident": "StiText",
+              "Name": "Texto138",
+              "ClientRectangle": "88.8,0,2.6,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato43}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "44": {
+              "Ident": "StiText",
+              "Name": "Texto139",
+              "ClientRectangle": "91.4,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato44}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "45": {
+              "Ident": "StiText",
+              "Name": "Texto140",
+              "ClientRectangle": "93.4,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato45}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "46": {
+              "Ident": "StiText",
+              "Name": "Texto141",
+              "ClientRectangle": "95.4,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato46}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "47": {
+              "Ident": "StiText",
+              "Name": "Texto142",
+              "ClientRectangle": "97.4,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato47}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "48": {
+              "Ident": "StiText",
+              "Name": "Texto143",
+              "ClientRectangle": "99.4,0,2.2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato48}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "49": {
+              "Ident": "StiText",
+              "Name": "Texto144",
+              "ClientRectangle": "101.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato49}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "50": {
+              "Ident": "StiText",
+              "Name": "Texto145",
+              "ClientRectangle": "103.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato50}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "51": {
+              "Ident": "StiText",
+              "Name": "Texto146",
+              "ClientRectangle": "105.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato51}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "52": {
+              "Ident": "StiText",
+              "Name": "Texto147",
+              "ClientRectangle": "107.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato52}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "53": {
+              "Ident": "StiText",
+              "Name": "Texto148",
+              "ClientRectangle": "109.6,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato53}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "54": {
+              "Ident": "StiText",
+              "Name": "Texto149",
+              "ClientRectangle": "111.6,0,2.5,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato54}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "55": {
+              "Ident": "StiText",
+              "Name": "Texto150",
+              "ClientRectangle": "114.1,0,2.2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato55}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "56": {
+              "Ident": "StiText",
+              "Name": "Texto151",
+              "ClientRectangle": "116.3,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato56}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "57": {
+              "Ident": "StiText",
+              "Name": "Texto152",
+              "ClientRectangle": "118.3,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato57}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            },
+            "58": {
+              "Ident": "StiText",
+              "Name": "Texto153",
+              "ClientRectangle": "120.3,0,2,0.6",
+              "Interaction": {
+                "Ident": "StiInteraction"
+              },
+              "Text": {
+                "Value": "{_625_reportePrueba.dato58}"
+              },
+              "HorAlignment": "Center",
+              "VertAlignment": "Center",
+              "Border": "All;;;;;;;solid:0,0,0",
+              "Brush": "solid:",
+              "TextBrush": "solid:0,0,0",
+              "NullValue": "-",
+              "Type": "DataColumn"
+            }
+          },
+          "DataSourceName": "_625_reportePrueba"
+        }
+      },
+      "Orientation": "Landscape",
+      "PageWidth": 130,
+      "PageHeight": 21.01,
+      "Watermark": {
+        "TextBrush": "solid:50,0,0,0"
+      },
+      "Margins": {
+        "Left": 1,
+        "Right": 1,
+        "Top": 1,
+        "Bottom": 1
+      }
+    }
+  }
+}

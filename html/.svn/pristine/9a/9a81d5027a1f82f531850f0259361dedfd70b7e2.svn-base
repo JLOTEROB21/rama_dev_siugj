@@ -1,0 +1,897 @@
+<?php
+
+function llenarConstanciaBase($idDocumento,$idReferencia,$idRegistro,$idFormulario,$idFormularioBase,$idRegistroBase)
+{
+	global $arrMesLetra;
+	global $con;
+	$arrValores=array();
+	$fechaRecepcion="";
+	
+	$arrValores["leyendaTerminoProcesal"]="dentro del término legal";
+	$carpetaAdministrativa=obtenerCarpetaAdministrativaProceso($idFormularioBase,$idRegistroBase);
+
+	switch($idFormularioBase)
+	{
+		
+		case 677:	
+			$consulta="SELECT fechaCreacion as fechaRecepcion,fechaCreacion FROM _".$idFormularioBase."_tablaDinamica WHERE id__".$idFormularioBase."_tablaDinamica=".$idRegistroBase;
+			$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+
+			$fechaRecepcion=$fRegistro["fechaRecepcion"];
+			
+			
+		break;
+		case 930:	
+			$consulta="SELECT fechaRecepcion,horaRecepcion,autoRecurso,tipoApelacion FROM _".$idFormularioBase."_tablaDinamica WHERE id__".$idFormularioBase."_tablaDinamica=".$idRegistroBase;
+			$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+
+			$fechaRecepcion=$fRegistro["fechaRecepcion"];
+			
+			if($fRegistro["tipoApelacion"]==1)
+			{
+			
+				$consulta="SELECT nomArchivoOriginal FROM 908_archivos WHERE idArchivo=".$fRegistro["autoRecurso"];
+				$autoApelacion=$con->obtenerValor($consulta);
+				$arrValores["nombreAuto"]=" sobre el auto ".$autoApelacion;
+			}
+			else
+			{
+				$arrValores["nombreAuto"]=" sobre sentencia";
+			}
+		break;
+		default:
+		
+			$arrValores["leyendaTerminoProcesal"]="dentro del término legal";	
+			$consulta="SELECT campoFechaRecepcion,campoHoraRecepcion,terminoProcesal,campoInterviniente FROM _1044_tablaDinamica WHERE formularioAsociado=".$idFormularioBase;
+
+			$fCampos=$con->obtenerPrimeraFilaAsoc($consulta);
+
+			if(!$fCampos)
+			{
+				$fCampos=array();
+				$fCampos["campoFechaRecepcion"]="fechaRecepcion";
+				$fCampos["campoHoraRecepcion"]="horaRecepcion";
+				$fCampos["terminoProcesal"]="promovente";
+			}
+			$consulta="SELECT ".$fCampos["campoFechaRecepcion"].",".$fCampos["campoHoraRecepcion"].",".$fCampos["campoInterviniente"]." FROM _".$idFormularioBase.
+						"_tablaDinamica WHERE id__".$idFormularioBase."_tablaDinamica=".$idRegistroBase;
+			$fRecepcion=$con->obtenerPrimeraFila($consulta);
+			$fechaRecepcion=$fRecepcion[0];
+			
+			$terminoProcesal=$fCampos["terminoProcesal"];
+			
+			if(($terminoProcesal!="")&&($terminoProcesal!="-1"))
+			{
+				$idUsuarioAsignacion=$fRecepcion[2];
+				if($idUsuarioAsignacion=="")
+				{
+					$idUsuarioAsignacion=-1;
+					
+					
+				}
+				
+				$consulta="SELECT idCuentaAcceso FROM 7005_relacionFigurasJuridicasSolicitud WHERE idParticipante=".$idUsuarioAsignacion." limit 0,1";
+				$idUsuarioAsignacion=$con->obtenerValor($consulta);
+				if($idUsuarioAsignacion=="")
+				{
+					$idUsuarioAsignacion=-1;
+				}
+				
+				$consulta="SELECT fechaMaximaAtencion FROM 00013_registrosMacroProceso WHERE carpetaAdministrativa='".$carpetaAdministrativa."' AND idRegistroElemento=".$terminoProcesal.
+						" AND idUsuarioAsignacion=".$idUsuarioAsignacion;
+				$fechaLimite=$con->obtenerValor($consulta);
+				
+				if($fechaLimite!="")
+				{
+					$fechaLimiteTme=strtotime($fechaLimite);
+					$fechaRegistro=strtotime($fRecepcion[0]." ".$fRecepcion[1]);
+					
+					
+					if($fechaRegistro>$fechaLimiteTme)
+					{
+					
+						$arrValores["leyendaTerminoProcesal"]=" de manera extemporánea (".date("d/m/Y H:i",$fechaLimiteTme)." hrs.)";	
+					}
+				}
+				
+			}
+			
+		break;
+		
+	}
+	$fechaRecepcion=strtotime($fechaRecepcion);
+	$arrValores["fecha"]=$arrMesLetra[date("m",$fechaRecepcion)-1]." ".date("d",$fechaRecepcion)." de ".date("Y",$fechaRecepcion);
+	$arrValores["nombreUsuario"]=mb_strtoupper(obtenerNombreUsuario($_SESSION["idUsr"]));
+	$arrValores["carpetaAdministrativa"]=$carpetaAdministrativa;
+	
+	foreach($arrValores as $llave=>$valor)
+	{
+		$arrValores[$llave]=limpiarCadenaSerializacion($valor);
+	}
+	return $arrValores;
+}
+
+
+function funcionLlenadoAcuerdoMedidasCautelares($idFormularioBase,$idRegistroBase)
+{
+	global $arrMesLetra;
+	global $con;
+	global $arrMesLetra;
+	global $leyendaTribunal;
+	
+	
+	
+	$carpetaAdministrativo=obtenerCarpetaAdministrativaProceso($idFormularioBase,$idRegistroBase);
+	$consulta="SELECT carpetaAdministrativa,unidadGestion,idActividad,carpetaAdministrativaBase FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativo."'";
+	$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+	
+	$arrValores=array();
+	$consulta="SELECT upper(nombreUnidad) FROM _17_tablaDinamica WHERE claveUnidad='".$fRegistro["unidadGestion"]."'";
+	$nombreDespacho=$con->obtenerValor($consulta);
+	$fechaActual=date("Y-m-d");
+
+	$codigoUnicoProcesoTribunalSuperior="";
+	$codigoUnicoProcesoCorteSuprema="";
+	
+
+
+	$demantante="";
+	$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+				FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+				AND r.idActividad=".$fRegistro["idActividad"]." AND r.idFiguraJuridica in(2,7) ORDER BY nombre,nombre,apellidoMaterno";
+	
+	$res=$con->obtenerFilas($consulta);
+	while($filaImputado=mysql_fetch_row($res))
+	{
+		$nombre=trim($filaImputado[0]);
+		if($demantante=="")
+			$demantante=$nombre;
+		else
+			$demantante.=", ".$nombre;
+	}
+	
+	$demandados="";
+	$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+				FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+				AND r.idActividad=".$fRegistro["idActividad"]." AND r.idFiguraJuridica in(4,8) ORDER BY nombre,nombre,apellidoMaterno";
+	
+	$res=$con->obtenerFilas($consulta);
+	while($filaImputado=mysql_fetch_row($res))
+	{
+		$nombre=trim($filaImputado[0]);
+		if($demandados=="")
+			$demandados=$nombre;
+		else
+			$demandados.=", ".$nombre;
+	}
+	
+	$noMedida=1;
+	$medidasCautelares="";
+	$consulta="SELECT cM.medidaCautelar,g.detalles FROM _856_gMedidasCautelares g,_856_tablaDinamica fM,_857_tablaDinamica cM WHERE g.idReferencia=fM.id__856_tablaDinamica
+			AND fM.idReferencia=".$idRegistroBase." AND cM.id__857_tablaDinamica=g.medidaCautelar";
+	$rMedidas=$con->obtenerFilas($consulta);
+	while($fMedida=mysql_fetch_assoc($rMedidas))
+	{
+		$m="<b>".$noMedida.")</b> ".$fMedida["medidaCautelar"];
+		
+		if(trim($fMedida["detalles"])!="")
+		{
+			$m.=". ".$fMedida["detalles"];
+		}
+		
+		if($medidasCautelares=="")
+			$medidasCautelares=$m;
+		else
+			$medidasCautelares.="<br><br>".$m;
+		$noMedida++;
+	}
+
+	$arrValores["nombreDespacho"]=trim($nombreDespacho);
+	$arrValores["fechaActual"]=convertirFechaLetra($fechaActual,false,false);
+	$arrValores["demandante"]=$demantante;
+	$arrValores["demandado"]=$demandados;
+	$arrValores["codigoUnicoProceso"]=$carpetaAdministrativo;
+	$arrValores["medidasCautelares"]=$medidasCautelares;
+	
+	foreach($arrValores as $llave=>$valor)
+	{
+		$arrValores[$llave]=limpiarCadenaSerializacion($valor);
+	}
+	return $arrValores;
+}
+
+
+
+function convertirPDFDocumentoModulo($idFormulario,$idRegistro)
+{
+	global $con;
+	$consulta="SELECT idRegistro FROM 7035_informacionDocumentos WHERE idFormulario=".$idFormulario." AND idReferencia=".$idRegistro;
+	$idRegistro=$con->obtenerValor($consulta);
+	if($idRegistro!="")
+	{
+		$consulta="SELECT idRegistroFormato FROM 3000_formatosRegistrados WHERE idFormulario=-2 AND idRegistro=".$idRegistro;
+	
+		$idRegistroFormato=$con->obtenerValor($consulta);
+		
+		
+		return generarDocumentoPDFFormato($idRegistroFormato,false,1,-1);
+	}
+	
+	return true;
+}
+
+function funcionLlenadoDocumentoOficioBaseGeneral($idFormularioBase,$idRegistroBase)
+{
+	global $arrMesLetra;
+	global $con;
+	global $arrMesLetra;
+	global $leyendaTribunal;
+	
+	
+
+	/*$consulta="SELECT * FROM _632_tablaDinamica WHERE id__632_tablaDinamica=".$idRegistroBase;
+	$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);	*/
+	
+	$carpetaAdministrativo=obtenerCarpetaAdministrativaProceso($idFormularioBase,$idRegistroBase);
+	$consulta="SELECT carpetaAdministrativa,unidadGestion,idActividad,carpetaAdministrativaBase FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativo."'";
+
+	$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+
+	
+	$arrValores=array();
+	$consulta="SELECT upper(nombreUnidad) FROM _17_tablaDinamica WHERE claveUnidad='".$fRegistro["unidadGestion"]."'";
+	$nombreDespacho=$con->obtenerValor($consulta);
+	$fechaActual=date("Y-m-d");
+
+	$codigoUnicoProcesoTribunalSuperior="";
+	$codigoUnicoProcesoCorteSuprema="";
+	if($idFormularioBase==672)
+	{
+		$consulta="SELECT carpetaAdministrativa2aInstancia,despachoAsignado FROM _672_tablaDinamica WHERE id__672_tablaDinamica=".$idRegistroBase;
+		$fRegistroApelacion=$con->obtenerPrimeraFilaAsoc($consulta);
+		$codigoUnicoProcesoTribunalSuperior=$fRegistroApelacion["carpetaAdministrativa2aInstancia"];
+		
+		$consulta="SELECT nombreUnidad FROM _17_tablaDinamica WHERE claveUnidad='".$fRegistroApelacion["despachoAsignado"]."'";
+		$nombreDespacho=$con->obtenerValor($consulta);
+	}
+	
+	switch($idFormularioBase)
+	{
+		case 682:
+		case 677:
+			$codigoUnicoProcesoTribunalSuperior=$carpetaAdministrativo;
+			
+			$arrCarpetas=array();
+			obtenerCarpetasPadre($carpetaAdministrativo,$arrCarpetas);
+			
+			if(sizeof($arrCarpetas)==0)
+			{
+				array_push($arrCarpetas,$carpetaAdministrativo);
+			}
+			
+	
+			
+			$carpetaAdministrativo=$arrCarpetas[0];	
+		break;
+		
+	}
+	
+
+
+	$demantante="";
+	$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+				FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+				AND r.idActividad=".$fRegistro["idActividad"]." AND r.idFiguraJuridica in(2,7) ORDER BY nombre,nombre,apellidoMaterno";
+	
+	$res=$con->obtenerFilas($consulta);
+	while($filaImputado=mysql_fetch_row($res))
+	{
+		$nombre=trim($filaImputado[0]);
+		if($demantante=="")
+			$demantante=$nombre;
+		else
+			$demantante.=", ".$nombre;
+	}
+	
+	$demandados="";
+	$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+				FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+				AND r.idActividad=".$fRegistro["idActividad"]." AND r.idFiguraJuridica in(4,8) ORDER BY nombre,nombre,apellidoMaterno";
+	
+	$res=$con->obtenerFilas($consulta);
+	while($filaImputado=mysql_fetch_row($res))
+	{
+		$nombre=trim($filaImputado[0]);
+		if($demandados=="")
+			$demandados=$nombre;
+		else
+			$demandados.=", ".$nombre;
+	}
+
+	$arrValores["nombreDespacho"]=trim($nombreDespacho);
+	$arrValores["fechaActual"]=convertirFechaLetra($fechaActual,false,false);
+	$arrValores["demandante"]=$demantante;
+	$arrValores["demandado"]=$demandados;
+	$arrValores["codigoUnicoProceso"]=$carpetaAdministrativo;
+	$arrValores["codigoUnicoProcesoTribunalSuperior"]=$codigoUnicoProcesoTribunalSuperior;
+	$arrValores["codigoUnicoProcesoCorteSuprema"]=$codigoUnicoProcesoCorteSuprema;
+	
+	foreach($arrValores as $llave=>$valor)
+	{
+		$arrValores[$llave]=limpiarCadenaSerializacion($valor);
+	}
+	return $arrValores;
+}
+
+
+function convertirPDFModuloOficiosCarpetasJudiciales($idRegistrBitacora)
+{
+	global $con;
+	$consulta="SELECT * FROM 3000_bitacoraFormatos WHERE idRegistro=".$idRegistrBitacora;
+	$fBitacora=$con->obtenerPrimeraFilaAsoc($consulta);
+	
+	return generarDocumentoPDFFormato($fBitacora["idRegistroFormato"],false,1,-1);
+
+}
+
+
+function obtenerPlantillaProvidenciaJuez($idFormularioEvaluacion,$idFormulario,$idRegistro,$actor)
+{
+	global $con;
+	$consulta="SELECT providenciaAplicar FROM _899_tablaDinamica WHERE id__899_tablaDinamica=".$idRegistro;
+
+	$providenciaAplicar=$con->obtenerValor($consulta);
+	
+	$consulta="SELECT plantillaAsociada FROM _624_tablaDinamica WHERE id__624_tablaDinamica=".$providenciaAplicar;
+	$tipoDocumento=$con->obtenerValor($consulta);
+
+	if($providenciaAplicar==37)
+	{
+		$consulta="SELECT decretanMediasProvisionales FROM _1018_tablaDinamica WHERE idReferencia=".$idRegistro;
+		$decretanMediasProvisionales=$con->obtenerValor($consulta);
+		if($decretanMediasProvisionales==0)
+		{
+			return 654;
+		}
+	}
+	
+	return $tipoDocumento;
+}
+
+
+function funcionLlenadoDocumentoBaseGeneralSegundaInstancia($idFormularioBase,$idRegistroBase)
+{
+	global $arrMesLetra;
+	global $con;
+	global $arrMesLetra;
+	global $leyendaTribunal;	
+
+	
+	$consulta="SELECT * FROM _".$idFormularioBase."_tablaDinamica WHERE id__".$idFormularioBase."_tablaDinamica=".$idRegistroBase;
+	$fRegistroDatosBase=$con->obtenerPrimeraFilaAsoc($consulta);
+
+	$carpetaAdministrativo=obtenerCarpetaAdministrativaProceso($idFormularioBase,$idRegistroBase);
+	
+	
+	
+	$consulta="SELECT carpetaAdministrativa,unidadGestion,idActividad,carpetaAdministrativaBase,tipoProceso FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativo."' order by fechaCreacion desc";
+	$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+	
+	$arrValores=array();
+	$consulta="SELECT upper(nombreUnidad) FROM _17_tablaDinamica WHERE claveUnidad='".$fRegistro["unidadGestion"]."'";
+	$nombreDespacho=$con->obtenerValor($consulta);
+	$fechaActual=date("Y-m-d");
+
+	$codigoUnicoProcesoTribunalSuperior="";
+	$codigoUnicoProcesoCorteSuprema="";
+	if($idFormularioBase==672)
+	{
+		$consulta="SELECT carpetaAdministrativa2aInstancia,despachoAsignado FROM _".$idFormularioBase."_tablaDinamica WHERE id__".$idFormularioBase."_tablaDinamica=".$idRegistroBase;
+		$fRegistroApelacion=$con->obtenerPrimeraFilaAsoc($consulta);
+		$codigoUnicoProcesoTribunalSuperior=$fRegistroApelacion["carpetaAdministrativa2aInstancia"];
+		
+		$consulta="SELECT nombreUnidad FROM _17_tablaDinamica WHERE claveUnidad='".$fRegistroApelacion["despachoAsignado"]."'";
+		$nombreDespacho=$con->obtenerValor($consulta);
+	}
+	
+	if($idFormularioBase==944)
+	{
+		$consulta="SELECT carpetaAdministrativa2daInstancia,despachoAsignado FROM _".$idFormularioBase."_tablaDinamica WHERE id__".$idFormularioBase."_tablaDinamica=".$idRegistroBase;
+		$fRegistroApelacion=$con->obtenerPrimeraFilaAsoc($consulta);
+		$codigoUnicoProcesoTribunalSuperior=$fRegistroApelacion["carpetaAdministrativa2daInstancia"];
+		
+		$consulta="SELECT nombreUnidad FROM _17_tablaDinamica WHERE claveUnidad='".$fRegistroApelacion["despachoAsignado"]."'";
+		$nombreDespacho=$con->obtenerValor($consulta);
+	}
+	
+	
+	
+	switch($idFormularioBase)
+	{
+		case 682:
+		case 677:
+			$codigoUnicoProcesoTribunalSuperior=$carpetaAdministrativo;
+			
+			$arrCarpetas=array();
+			obtenerCarpetasPadre($carpetaAdministrativo,$arrCarpetas);
+			
+			if(sizeof($arrCarpetas)==0)
+			{
+				array_push($arrCarpetas,$carpetaAdministrativo);
+			}
+			
+	
+			
+			$carpetaAdministrativo=$arrCarpetas[0];	
+		break;
+		case 899:	
+			if($fRegistroDatosBase["providenciaAplicar"]==15)
+			{
+				$arrValores["sentidoFallo"]=$fRegistroDatosBase["sentidoFalloSentencia"]==1?"Confirma":"Revoca";
+			}
+			
+			if($fRegistroDatosBase["providenciaAplicar"]==19)
+			{
+				$arrValores["fechaAudiencia"]=convertirFechaLetra($fRegistroDatosBase["fechaAudiencia"],false,false);
+			}
+		break;
+		case 696:	
+			$consulta="SELECT * FROM _984_tablaDinamica WHERE idReferencia=".$idRegistroBase;
+			$fDatosAutos=$con->obtenerPrimeraFilaAsoc($consulta);
+			if($fRegistroDatosBase["tipoDocumento"]==608)
+			{
+				$arrValores["sentidoFallo"]=$fDatosAutos["sentidoFallo"]==1?"Confirma":"Revoca";
+			}
+			
+			
+		break;
+		
+	}
+	
+	$demantante="";
+	$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+				FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+				AND r.idActividad=".$fRegistro["idActividad"]." AND r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='A') ORDER BY nombre,nombre,apellidoMaterno";
+	
+	$res=$con->obtenerFilas($consulta);
+	while($filaImputado=mysql_fetch_row($res))
+	{
+		$nombre=trim($filaImputado[0]);
+		if($demantante=="")
+			$demantante=$nombre;
+		else
+			$demantante.=", ".$nombre;
+	}
+
+	$demandados="";
+	$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+				FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+				AND r.idActividad=".$fRegistro["idActividad"]." AND r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='D') ORDER BY nombre,nombre,apellidoMaterno";
+	
+	$res=$con->obtenerFilas($consulta);
+	while($filaImputado=mysql_fetch_row($res))
+	{
+		$nombre=trim($filaImputado[0]);
+		if($demandados=="")
+			$demandados=$nombre;
+		else
+			$demandados.=", ".$nombre;
+	}
+
+	$arrValores["nombreDespacho"]=trim($nombreDespacho);
+	$arrValores["fechaActual"]=convertirFechaLetra($fechaActual,false,false);
+	$arrValores["demandante"]=$demantante;
+	$arrValores["demandado"]=$demandados;
+	$arrValores["lblDemandado"]=$fRegistro["tipoProceso"]==6?"ACCIONADO":"DEMANDADO";
+	$arrValores["lblActor"]=$fRegistro["tipoProceso"]==6?"ACCIONANTE":"DEMANDANTE";
+	$arrValores["codigoUnicoProceso"]=$carpetaAdministrativo;
+	$arrValores["codigoUnicoProcesoTribunalSuperior"]=$codigoUnicoProcesoTribunalSuperior;
+	$arrValores["codigoUnicoProcesoCorteSuprema"]=$codigoUnicoProcesoCorteSuprema;
+	
+	if($fRegistro["carpetaAdministrativaBase"]!="")
+	{
+		$arrValores["codigoUnicoProceso"]=$fRegistro["carpetaAdministrativaBase"];
+		$arrValores["codigoUnicoProcesoTribunalSuperior"]=$carpetaAdministrativo;
+	}
+	
+	if($idFormularioBase==944)
+	{
+		if($fRegistroDatosBase["tipoApelacion"]==1)
+		{
+			$consulta="SELECT procedenciaRecurso,comentariosAdicionales FROM _966_tablaDinamica WHERE idReferencia=".$idRegistroBase;
+			$fRegistroProcedencia=$con->obtenerPrimeraFilaAsoc($consulta);
+			$consulta="SELECT medidaCautelar FROM _857_tablaDinamica WHERE id__857_tablaDinamica=".$fRegistroProcedencia["procedenciaRecurso"];
+			$arrValores["causal"]="​​​​​​​Cumpliendose la causal: ".$con->obtenerValor($consulta);
+			if($fRegistroProcedencia["comentariosAdicionales"]!="")
+			{
+				$arrValores["causal"].=". ".$fRegistroProcedencia["comentariosAdicionales"].".";
+			}
+		}
+		else
+		{
+			$arrValores["causal"]="";
+		}
+	}
+	
+	if($idFormularioBase==696)
+	{
+		
+		$nombreTablaBase=obtenerNombreTabla($idFormularioBase);
+		$consulta="SELECT tipoDocumento FROM ".$nombreTablaBase." WHERE id_".$nombreTablaBase."=".$idRegistroBase;
+		$tipoDocumento=$con->obtenerValor($consulta);
+		switch($tipoDocumento)
+		{
+			case 606:
+				$consulta="SELECT causalImpedimento,detallesAdicionales FROM _975_tablaDinamica WHERE idReferencia=".$idRegistroBase;
+				$fRegistroCausal=$con->obtenerPrimeraFilaAsoc($consulta);
+				$consulta="SELECT medidaCautelar FROM _857_tablaDinamica WHERE id__857_tablaDinamica=".$fRegistroCausal["causalImpedimento"];
+				$arrValores["causal"]=$con->obtenerValor($consulta);
+				if($fRegistroCausal["detallesAdicionales"]!="")
+				{
+					$arrValores["causal"].=". ".$fRegistroCausal["detallesAdicionales"].".";
+				}
+				
+			break;
+			case 611:
+			case 610:
+				$consulta="SELECT nombreUnidad FROM _17_tablaDinamica WHERE claveUnidad='".$fRegistroDatosBase["codigoInstitucion"]."'";
+				$nombreDespacho=$con->obtenerValor($consulta);
+				$arrValores["nombreDespacho"]=trim($nombreDespacho);
+			break;
+		}
+		
+		
+		
+	}
+	
+	foreach($arrValores as $llave=>$valor)
+	{
+		$arrValores[$llave]=limpiarCadenaSerializacion($valor);
+	}
+	return $arrValores;
+}
+
+function funcionLlenadoDocumentoBaseGeneralCorteConstitucional($idFormularioBase,$idRegistroBase)
+{
+	global $arrMesLetra;
+	global $con;
+	global $arrMesLetra;
+	global $leyendaTribunal;	
+
+	
+	$consulta="SELECT * FROM _".$idFormularioBase."_tablaDinamica WHERE id__".$idFormularioBase."_tablaDinamica=".$idRegistroBase;
+	$fRegistroDatosBase=$con->obtenerPrimeraFilaAsoc($consulta);
+
+	$carpetaAdministrativo=$fRegistroDatosBase["carpetaAdministrativa"];
+	
+	
+	
+	$consulta="SELECT carpetaAdministrativa,unidadGestion,idActividad,carpetaAdministrativaBase,tipoProceso FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativo."' order by fechaCreacion desc";
+	$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+	
+	$arrValores=array();
+	$consulta="SELECT upper(nombreUnidad) FROM _17_tablaDinamica WHERE claveUnidad='".$fRegistro["unidadGestion"]."'";
+	$nombreDespacho=$con->obtenerValor($consulta);
+	$fechaActual=date("Y-m-d");
+
+	
+	$demantante="";
+	$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+				FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+				AND r.idActividad=".$fRegistro["idActividad"]." AND r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='A') ORDER BY nombre,nombre,apellidoMaterno";
+	
+	$res=$con->obtenerFilas($consulta);
+	while($filaImputado=mysql_fetch_row($res))
+	{
+		$nombre=trim($filaImputado[0]);
+		if($demantante=="")
+			$demantante=$nombre;
+		else
+			$demantante.=", ".$nombre;
+	}
+
+	$demandados="";
+	$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+				FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+				AND r.idActividad=".$fRegistro["idActividad"]." AND r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='D') ORDER BY nombre,nombre,apellidoMaterno";
+	
+	$res=$con->obtenerFilas($consulta);
+	while($filaImputado=mysql_fetch_row($res))
+	{
+		$nombre=trim($filaImputado[0]);
+		if($demandados=="")
+			$demandados=$nombre;
+		else
+			$demandados.=", ".$nombre;
+	}
+	
+
+	$arrValores["demandante"]=$demantante;
+	$arrValores["demandado"]=$demandados;
+	$arrValores["nombreDespacho"]=trim($nombreDespacho);
+	$arrValores["fechaActual"]=convertirFechaLetra($fechaActual,false,false);
+	$arrValores["codigoUnicoProceso"]=$carpetaAdministrativo;
+	$arrValores["lblDemandado"]=$fRegistro["tipoProceso"]==6?"ACCIONADO":"DEMANDADO";
+	$arrValores["lblActor"]=$fRegistro["tipoProceso"]==6?"ACCIONANTE":"DEMANDANTE";
+	
+	if(isset($fRegistroDatosBase["fechaAudiencia"])&&($fRegistroDatosBase["fechaAudiencia"]!=""))
+	{
+		$arrValores["fechaAudiencia"]=convertirFechaLetra($fRegistroDatosBase["fechaAudiencia"],true,true);
+	}
+	if($idFormularioBase==899)
+	{
+		$consulta="SELECT providenciaAplicar FROM _899_tablaDinamica WHERE id__899_tablaDinamica=".$idRegistroBase;
+		$providenciaAplicar=$con->obtenerValor($consulta);
+		
+		switch($providenciaAplicar)
+		{
+			case 22:
+				$noMedida=1;
+				$medidasCautelares="";
+				$consulta="SELECT cM.medidaCautelar,g.detalles FROM _1018_gMedidasProvicionales g,_1018_tablaDinamica fM,_857_tablaDinamica cM WHERE g.idReferencia=fM.id__1018_tablaDinamica
+						AND fM.idReferencia=".$idRegistroBase." AND cM.id__857_tablaDinamica=g.medidaProvisional";
+				$rMedidas=$con->obtenerFilas($consulta);
+				while($fMedida=mysql_fetch_assoc($rMedidas))
+				{
+					$m="<b>".$noMedida.")</b> ".$fMedida["medidaCautelar"];
+					
+					if(trim($fMedida["detalles"])!="")
+					{
+						$m.=". ".$fMedida["detalles"];
+					}
+					
+					if($medidasCautelares=="")
+						$medidasCautelares=$m;
+					else
+						$medidasCautelares.="<br><br>".$m;
+					$noMedida++;
+				}
+				
+				$arrValores["lblMedidas"]=trim($medidasCautelares);
+			break;
+		}
+		
+	}
+	
+	foreach($arrValores as $llave=>$valor)
+	{
+		$arrValores[$llave]=limpiarCadenaSerializacion($valor);
+	}
+	
+	return $arrValores;
+}
+
+
+function funcionLlenadoDocumentoSeleccionTutela($idFormularioBase,$idRegistroBase)
+{
+	global $arrMesLetra;
+	global $con;
+	global $arrMesLetra;
+	global $leyendaTribunal;	
+
+	
+	$consulta="SELECT * FROM _".$idFormularioBase."_tablaDinamica WHERE id__".$idFormularioBase."_tablaDinamica=".$idRegistroBase;
+	$fRegistroDatosBase=$con->obtenerPrimeraFilaAsoc($consulta);
+
+	$carpetaAdministrativo=$fRegistroDatosBase["carpetaAdministrativa"];
+	
+	$consulta="SELECT id__990_tablaDinamica FROM _990_tablaDinamica WHERE codigo='".$carpetaAdministrativo."'";
+	$idReferenciaPaquete=$con->obtenerValor($consulta);
+	$consulta="SELECT carpetaAdministrativa,unidadGestion,idActividad,carpetaAdministrativaBase,tipoProceso,idRegistro FROM 7006_carpetasAdministrativas 
+				WHERE carpetaAdministrativa='".$carpetaAdministrativo."' order by fechaCreacion desc";
+	$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+	
+	$arrValores=array();
+	$consulta="SELECT upper(nombreUnidad) FROM _17_tablaDinamica WHERE claveUnidad='".$fRegistro["unidadGestion"]."'";
+	$nombreDespacho=$con->obtenerValor($consulta);
+	$fechaActual=date("Y-m-d");
+	
+	
+	$consulta="SELECT u.Nombre FROM 801_adscripcion ad,807_usuariosVSRoles r,800_usuarios u WHERE r.idUsuario=ad.idUsuario AND 
+				r.codigoRol='96_0' AND ad.Institucion='".$fRegistro["unidadGestion"]."' and u.idUsuario=ad.idUsuario";
+	
+	$arrValores["fechaAuto"]=utf8_encode(convertirFechaLetra($fechaActual,true,true));;
+	$arrValores["nombreMagistrado"]=$con->obtenerValor($consulta);
+	
+	$consulta="SELECT e.fechaEvento FROM 7007_contenidosCarpetaAdministrativa con,7000_eventosAudiencia e WHERE 
+				con.carpetaAdministrativa='".$carpetaAdministrativo."' AND con.tipoContenido=3 AND e.idRegistroEvento=con.idRegistroContenidoReferencia
+				AND e.tipoAudiencia=256";
+	
+	$arrValores["fechaAudiencia"]=convertirFechaLetra($con->obtenerValor($consulta),false,false);
+	
+	$consulta="SELECT folioCorteConstitucional FROM _917_tablaDinamica WHERE idReferencia=".$fRegistro["idRegistro"]." ORDER BY id__917_tablaDinamica ASC LIMIT 0,1";
+	$arrValores["rangoInicial"]=$con->obtenerValor($consulta);
+	
+	$consulta="SELECT folioCorteConstitucional FROM _917_tablaDinamica WHERE idReferencia=".$fRegistro["idRegistro"]." ORDER BY id__917_tablaDinamica DESC LIMIT 0,1";
+	$arrValores["rangoFinal"]=$con->obtenerValor($consulta);
+	
+	
+	$arrValores["listaTutelas"]="";
+	
+	$numReg=1;
+	$consulta="SELECT * FROM _917_tablaDinamica t,_996_tablaDinamica es WHERE t.idReferencia=".$idReferenciaPaquete." AND es.idReferencia=t.id__917_tablaDinamica AND es.tutelaSeleccionable=1 ORDER BY t.id__917_tablaDinamica";
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_assoc($res))
+	{
+		
+		$consulta="SELECT idActividad FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$fila["carpetaAdministrativa"]."'";
+		$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+		
+		
+		$query="SELECT CONCAT(if( apellidoPaterno IS NULL,'',apellidoPaterno),' ',if(apellidoMaterno IS NULL,'',apellidoMaterno) ) AS apellido,
+				if (nombre IS NULL,'',nombre) as nombre,i.folioIdentificacion
+				 FROM _47_tablaDinamica i,7005_relacionFigurasJuridicasSolicitud r,_5_tablaDinamica f WHERE r.idActividad=".$fRegistro["idActividad"]."
+				and r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='A') AND r.idParticipante=i.id__47_tablaDinamica 
+				AND f.id__5_tablaDinamica=r.idFiguraJuridica ORDER BY nombre,apellidoPaterno,apellidoMaterno";
+		
+		$accionado=$con->obtenerListaValores($query);
+		
+		
+		$query="SELECT CONCAT(if( apellidoPaterno IS NULL,'',apellidoPaterno),' ',if(apellidoMaterno IS NULL,'',apellidoMaterno) ) AS apellido,
+				if (nombre IS NULL,'',nombre) as nombre,i.folioIdentificacion
+				FROM _47_tablaDinamica i,7005_relacionFigurasJuridicasSolicitud r,_5_tablaDinamica f WHERE r.idActividad=".$fRegistro["idActividad"]."
+				and r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='D') AND r.idParticipante=i.id__47_tablaDinamica 
+				AND f.id__5_tablaDinamica=r.idFiguraJuridica ORDER BY nombre,apellidoPaterno,apellidoMaterno";
+		
+		$accionate=$con->obtenerListaValores($query);
+		
+		$arrValores["listaTutelas"].="<b>".$numReg.".-</b> <b>Folio Corte Constitucional:</b>".$fila["folioCorteConstitucional"].", <b>C&oacute;digo &Uacute;nico de Proceso:</b> ".$fila["carpetaAdministrativa"].", <b>Accionado:</b> ".$accionado.", <b>Accionante:</b> ".$accionate."<br><br>";
+		$numReg++;
+	}
+	$arrValores["nombreDespacho"]=trim($nombreDespacho);
+
+	foreach($arrValores as $llave=>$valor)
+	{
+		$arrValores[$llave]=limpiarCadenaSerializacion($valor);
+	}
+	return $arrValores;
+}
+
+
+function obtenerAcuerdoAceptacionSubsanacion($idFormulario,$idRegistro)
+{
+	global $con;
+	$consulta="SELECT carpetaAdministrativa FROM _757_tablaDinamica WHERE id__757_tablaDinamica=".$idRegistro;
+	$carpetaAdministrativa=$con->obtenerValor($consulta);
+	
+	$consulta="SELECT tipoProceso FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa."'";
+	$tipoProceso=$con->obtenerValor($consulta);
+	
+	
+	
+	switch($tipoProceso)
+	{
+		case 20:
+		case 1: //Ordinarios
+			return "'530'";
+		break;
+		case 8: //Accion Publica
+			return "'685'";
+		break;
+		case 7:
+		case 11:
+		case 10:
+		case 12:
+			return "'665'";
+		break;
+		case 6: //Tutela
+			return "'576'";
+		break;
+		case 19:
+			return "'691'";
+		break;
+		default:
+			return "'641'";
+		break;
+	}
+	
+}
+
+function obtenerAcuerdoRechazoSubsanacion($idFormulario,$idRegistro)
+{
+	global $con;
+	$consulta="SELECT carpetaAdministrativa FROM _757_tablaDinamica WHERE id__757_tablaDinamica=".$idRegistro;
+	$carpetaAdministrativa=$con->obtenerValor($consulta);
+	
+	$consulta="SELECT tipoProceso FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativa."'";
+	$tipoProceso=$con->obtenerValor($consulta);
+	
+	
+	
+	switch($tipoProceso)
+	{
+		case 19:
+			return "'693'";
+		break;	
+		case 10:
+			return "'668'";
+		break;
+		case 8: //Accion Publica
+			return "'687'";
+		break;
+		default:
+			return "'531'";
+		break;
+	}
+	
+}
+
+
+function funcionLlenadoDocumentoInformeSecretarialCasacion($idFormularioBase,$idRegistroBase)
+{
+	global $arrMesLetra;
+	global $con;
+	global $arrMesLetra;
+	global $leyendaTribunal;
+	
+	
+
+	$consulta="SELECT * FROM _".$idFormularioBase."_tablaDinamica WHERE id__".$idFormularioBase."_tablaDinamica=".$idRegistroBase;
+	$fRegistroDatosBase=$con->obtenerPrimeraFilaAsoc($consulta);	
+
+	$carpetaAdministrativo=$fRegistroDatosBase["carpetaAdministrativa2aInstancia"];
+	$consulta="SELECT carpetaAdministrativa,unidadGestion,idActividad,carpetaAdministrativaBase,tipoProceso FROM 7006_carpetasAdministrativas WHERE carpetaAdministrativa='".$carpetaAdministrativo."'";
+	$fRegistro=$con->obtenerPrimeraFilaAsoc($consulta);
+	$arrValores=array();
+	$consulta="SELECT upper(nombreUnidad) FROM _17_tablaDinamica WHERE claveUnidad='".$fRegistro["unidadGestion"]."'";
+	$nombreDespacho=$con->obtenerValor($consulta);
+	$fechaActual=date("Y-m-d");
+
+	$codigoUnicoProcesoTribunalSuperior="";
+	$codigoUnicoProcesoCorteSuprema="";
+
+	
+	$demantante="";
+	$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+				FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+				AND r.idActividad=".$fRegistro["idActividad"]." AND r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='A') ORDER BY nombre,nombre,apellidoMaterno";
+	
+	$res=$con->obtenerFilas($consulta);
+	while($filaImputado=mysql_fetch_row($res))
+	{
+		$nombre=trim($filaImputado[0]);
+		if($demantante=="")
+			$demantante=$nombre;
+		else
+			$demantante.=", ".$nombre;
+	}
+
+	$demandados="";
+	$consulta="SELECT upper(CONCAT(IF(nombre IS NULL,'',nombre),' ',IF(apellidoPaterno IS NULL,'',apellidoPaterno),' ',IF(apellidoMaterno IS NULL,'',apellidoMaterno))) 
+				FROM _47_tablaDinamica p,7005_relacionFigurasJuridicasSolicitud r WHERE r.idParticipante=p.id__47_tablaDinamica
+				AND r.idActividad=".$fRegistro["idActividad"]." AND r.idFiguraJuridica in(SELECT id__5_tablaDinamica FROM _5_tablaDinamica WHERE naturalezaFigura='D') ORDER BY nombre,nombre,apellidoMaterno";
+	
+	$res=$con->obtenerFilas($consulta);
+	while($filaImputado=mysql_fetch_row($res))
+	{
+		$nombre=trim($filaImputado[0]);
+		if($demandados=="")
+			$demandados=$nombre;
+		else
+			$demandados.=", ".$nombre;
+	}
+
+	$arrValores["nombreDespacho"]=limpiarCadenaSerializacion($nombreDespacho);
+	
+	
+	
+	$arrValores["fechaActual"]=convertirFechaLetra($fechaActual,false,false);
+	$arrValores["demandante"]=$demantante;
+	$arrValores["demandado"]=$demandados;
+	$arrValores["lblDemandado"]=$fRegistro["tipoProceso"]==6?"ACCIONADO":"DEMANDADO";
+	$arrValores["lblActor"]=$fRegistro["tipoProceso"]==6?"ACCIONANTE":"DEMANDANTE";
+	$arrValores["codigoUnicoProceso"]=$carpetaAdministrativo;
+	$arrValores["codigoUnicoProcesoTribunalSuperior"]=$codigoUnicoProcesoTribunalSuperior;
+	$arrValores["codigoUnicoProcesoCorteSuprema"]=$codigoUnicoProcesoCorteSuprema;
+	
+	foreach($arrValores as $llave=>$valor)
+	{
+		$arrValores[$llave]=limpiarCadenaSerializacion($valor);
+	}
+	
+	
+	
+	return $arrValores;
+}
+
+?>

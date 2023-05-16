@@ -1,0 +1,1854 @@
+
+/* CSS Document */
+@font-face
+{
+  	font-family:'Montserrat-Regular';
+  	src: url('../fuentes/Monserrat/Montserrat-Regular.ttf');
+	src: url('../../fuentes/Monserrat/Montserrat-Regular.ttf');
+ 
+
+  
+  
+}
+
+/*** Gñlobales Standar**/
+.logoGob
+{
+	height: 25px;
+	width: 103px;
+	left: 50px;
+	top: 15px;
+	border-radius: 0px;
+	
+}
+
+.rectangulo1
+{
+	position: relative;
+	left: 0%;
+	right: 0%;
+	top: 0%;
+	bottom: 83.33%;
+	height:40px;
+	
+	/* azul oscuro */
+	
+	background: #1A3E9A;
+	background-repeat: no-repeat;
+	
+}
+
+.imagenLogoGov
+{
+	position: absolute;
+	left: 60px;
+	top: 10px;
+	height: 25px;
+	width: 103px;
+}
+
+.rectangulo2
+{
+	position: relative;
+	left: 0%;
+	right: 0%;
+	bottom: 0%;
+	height:160px;
+	
+	background: #FFFFFF;
+	box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+}
+.rectangulo2Index
+{
+	position: relative;
+	left: 0%;
+	right: 0%;
+	bottom: 0%;
+	height:240px;
+	
+	background: #FFFFFF;
+	box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+}
+
+
+.letraLogin
+{
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: 500;
+	font-size: 12px;
+	line-height: 15px;
+	text-decoration:none;
+	/* identical to box height */
+	
+	
+	/* azul oscuro */
+	
+	color: #1A3E9A;
+}
+
+.tablaOpciones
+{
+	
+	position: absolute;
+	left: 300px;
+	top: 50%;
+	bottom: 86.25%;	
+	
+	
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: bold;
+	font-size: 18px;
+	line-height: 22px;
+	/* identical to box height */
+	
+	
+	/* azul oscuro */
+	
+	color: #1A3E9A;
+}
+
+.tablaOpciones a
+{
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: bold;
+	font-size: 18px;
+	line-height: 22px;
+	/* identical to box height */
+	
+	
+	/* azul oscuro */
+	
+	color: #1A3E9A;
+}
+
+
+.letraLogin:hover
+{
+	
+	text-decoration:underline;
+	
+}
+
+.rectangulo3
+{
+	border: 1px solid #E5E5E5;
+	box-sizing: border-box;
+	height: 50px;
+	vertical-align:middle;
+	background-color:#FFF;
+}
+
+.rectangulo4
+{
+	height: 270px;
+	vertical-align:middle;
+	background: #1A3E9A;
+}
+
+.areaCentral1
+{
+	height:400px;
+	background-color:#FFF;
+}
+
+.areaCentral2
+{
+	height:610px;
+	background-color:#FFF;
+}
+
+.areaCentral3
+{
+	height:610px;
+	background-color:#E5E5E5;
+	opacity: 0.25;
+}
+
+.tablaLogin
+{
+	position: absolute;
+	right:50px;
+	top: 64.58%;
+	bottom: 18.75%;
+}
+
+.imagenLogo
+{
+	position: absolute;
+	left: 3.47%;
+	right: 90.76%;
+	top: 20px;
+	bottom: 37.5%;
+	//width:95px;
+	height:80px;
+	
+	
+}
+
+.imagenLogo2
+{
+	position: absolute;
+	right: 50px;
+	top: 30px;
+	bottom: 41.67%;
+
+
+}
+
+.etiquetaBienvenido
+{
+	position: absolute;
+	left: 0%;
+	right: 80%;
+	top: 73%;
+	bottom: 14.58%;
+	
+	font-family: Montserrat;
+	font-style: normal;
+	font-weight: 600;
+	font-size: 14px;
+	line-height: 17px;
+	color: #004884;
+	width:650px;
+	text-align: left;
+    padding-left: 60px;
+}
+
+.etiquetaBienvenido .nombreUsuario
+{
+	color:#000;
+}
+
+.etiquetaSalir
+{
+	position: absolute;
+	left: 91.95%;
+	right: 5.27%;
+	top: 72%;
+	bottom: 15%;
+	
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 600;
+	font-size: 14px;
+	line-height: 17px;
+	text-align: center;
+	text-decoration-line: underline;
+	
+	/* azul oscuro */
+	
+	color: #1A3E9A;
+	
+}
+
+.etiquetaSalir a
+{
+	color: #1A3E9A;
+	text-decoration:none;
+}
+
+.iconoSalir
+{
+	position: absolute;
+	left: 0%;
+	right: -0.02%;
+	top: 0%;
+	bottom: 0%;
+	
+	/* azul oscuro */
+	
+
+}
+
+.wrap {
+    width: 100% !important;
+    padding: 0px;
+    border: 1px solid #d1d1d1;
+}
+
+nav {
+		background: -webkit-gradient(linear, center top, center bottom, from(#1A3E9A), to(#1A3E9A)) !important;
+		background-image: linear-gradient(#1A3E9A, #1A3E9A) !important;
+		padding: 0 10px;
+		position: relative;
+		min-height:50px;
+}
+
+.menu li 
+{
+    float: left;
+    position: relative;
+    text-align: left;
+    vertical-align: bottom;
+    padding-top: 13px !important;
+	background-image: linear-gradient(#1A3E9A, #1A3E9A);
+}
+
+.menu li:hover ul li a:hover 
+{
+	background-image: linear-gradient(#1A3E9A, #1A3E9A) !important;
+	box-shadow:none;
+}
+
+.menu li:hover ul 
+{
+	background-image: linear-gradient(#1A3E9A, #1A3E9A) !important;
+	background: #900;
+
+	
+}
+
+
+
+.menu li:hover
+{
+	box-shadow:none;
+	
+}
+
+
+.menu li:hover ul a
+{
+	box-shadow:none;
+	text-decoration:none;
+	
+}
+
+
+
+.menu li a {
+				font-family: Montserrat-Regular !important;
+				font-style: normal !important;
+				font-weight: 600 !important;
+				font-size: 18px !important;
+				line-height: 17px !important;
+				color:#FFF !important;
+				min-height:30px;
+				padding: 0px 25px 0px 25px !important
+			}
+			
+			
+.menu li:hover a 
+{
+    background: -webkit-gradient(linear, center top, center bottom, from(#1A3E9A), to(#1A3E9A)) !important;
+    background-image: linear-gradient(#1A3E9A, #1A3E9A) !important;
+	color:#FFF !important;
+	box-shadow:none;
+	text-decoration:underline;
+
+}
+
+.menu ul
+{
+   border: 1px solid #1A3E9A !important;
+}
+
+
+.menu ul li 
+{
+	float: none;
+	width:250px;
+	font-family:Lato-Regular;
+	border-bottom-style:dotted !important;
+	border-bottom-color:#FFF !important;
+	border-bottom-width:1px;
+	
+	
+}
+
+.menu ul li:last-child
+{
+	border-bottom-style:none !important;
+}
+
+
+.menu li:hover ul li a:hover 
+{
+	background: -webkit-gradient(linear, center top, center bottom, from(#c7558a), to(#c7558a));
+	background-image: linear-gradient(#c7558a, #c7558a);
+	/*border-radius: 12px;*/
+	border-radius: 0px;
+	box-shadow: none !important;
+	font-family:Lato-Regular;
+	text-decoration:underline;
+	
+}
+
+
+.tblNotificacionesBar
+{
+	padding-top: 10px;
+    padding-left: 25px;
+}
+
+.burbujaNotificacion
+{
+	background-image: none;
+    color: #FFF !important;
+    text-align: center;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 17%), 0 1px 1px rgb(0 0 0 / 20%);
+    -moz-box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .17), 0 1px 1px rgba(0, 0, 0, .2);
+    -webkit-box-shadow: inset 0 0 0 1px rgb(0 0 0 / 17%), 0 1px 1px rgb(0 0 0 / 20%);
+
+    cursor: pointer;
+    background: #920000;
+    border-radius: 60px;
+	
+	font-family: WorkSans;
+	font-style: normal;
+	font-weight: 600;
+	font-size: 12px;
+	line-height: 14px;
+	width:25px;
+	height:25px;
+	position:relative;
+	top:-10px;
+
+}
+
+.burbujaNotificacion div
+{
+	padding-top: 5px;
+}
+
+.letraBarraInferior
+{
+	font-family: Montserrat_Light;
+	font-style: normal;
+	font-weight: 300;
+	font-size: 16px;
+	line-height: 18px;
+	color: #FFFFFF;
+}
+
+.letraBarraInferior2
+{
+	font-family: Montserrat_Light;
+	font-style: normal;
+	font-weight: 300;
+	font-size: 14px;
+	line-height: 25px;
+	color: #FFFFFF;
+}
+
+.celdaInferior
+{
+	border-right:solid;
+	border-width: 1px;
+	border-color:#FFF;
+	
+}
+
+
+.celdaInferiorUltima
+{
+	border-style:none;
+	
+	
+}
+
+.tablaGlobal
+{
+	 background-color: #FFF;
+     border-spacing: 0px;
+}
+
+.etiquetaBarra
+{
+	font-family: Montserrat;
+	font-style: normal;
+	font-weight: 600;
+	font-size: 14px;
+	line-height: 17px;
+	color: #3E3E3E;
+}
+
+.letraNombreTablero
+{
+	font-family: 'Montserrat' !important;
+	font-style: normal !important;
+	font-weight: 600 !important;
+	font-size: 16px !important;
+	line-height: 20px !important;
+	color: #3E3E3E !important;
+}
+
+.buttonGral
+{
+	font-family: Montserrat-Regular !important;
+	font-style: normal  !important;
+	font-weight: 300  !important;
+	font-size: 16px  !important;
+	line-height: 18px  !important;
+	
+}
+
+.botonEliminarFiltro .x-btn-text
+{
+	width:30px !important;
+	height:30px !important;
+}
+
+.botonEliminarFiltro .x-btn-over
+{
+	background-image:none !important;
+	
+}
+
+
+.botonEliminarFiltro .x-btn-mc
+{
+	background-image:none !important;
+	
+}
+
+
+.divBusqueda
+{
+	position: absolute;
+	left: 35%;
+	right: 82.71%;
+	top: 65%;
+	bottom: 14.58%;
+	width:550px;
+	height:40px !important;
+	
+	
+}
+
+.campoFormulario
+{
+	background: #FFFFFF;
+	/* gris claro */
+	
+	border: 1px solid #E5E5E5;
+	box-sizing: border-box;
+	border-radius: 5px;
+	height:40px;
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: 300;
+	font-size: 16px;
+	line-height: 18px;
+	color: #BFBFBF;
+}
+
+
+.tituloSeccionIndex
+{
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: 600;
+	font-size: 30px;
+	line-height: 37px;
+	color: #1A3E9A;
+
+}
+
+.tituloSeccionIndex2
+{
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: 600;
+	font-size: 30px;
+	line-height: 37px;
+	color: #1A3E9A;
+	position: relative;
+	left: 280px;
+	top: 630px;
+	width:400px;
+	opacity:1;
+
+}
+
+.fancybox-skin {
+    position: relative;
+    background: #f9f9f9;
+    color: #444;
+    text-shadow: none;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 20px;
+}
+
+.fancybox-iframe
+{
+	-webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 20px;
+}
+
+.tdMenuVistaDTD
+{
+	height:80px;
+	vertical-align:middle;
+	background-color:transparent;
+	border-right: 0.2px solid #BFBFBF;
+	
+	
+	
+	/* identical to box height, or 139% */
+	
+	
+	/* azul oscuro */
+	
+	color: #1A3E9A;
+}
+
+.tdMenuVistaDTD a, .opcionSeleccionada a
+{
+	padding-left:25px;
+	padding-right:25px;
+	font-family: WorkSans-Regular;
+	font-style: normal;
+	font-weight: 600;
+	font-size: 18px;
+	line-height: 25px;
+}
+
+.opcionSeleccionada
+{
+	height:80px;
+	vertical-align:middle;
+	background-color:#1A3E9A;
+	border-right: 0.2px solid #BFBFBF;
+	
+	
+	/* identical to box height, or 139% */
+	
+	
+	/* azul oscuro */
+	
+	color: #FFFFFF;
+}
+
+.opcionSeleccionada a
+{
+	color: #FFFFFF;
+	font-family: WorkSans-Regular;
+	font-style: normal;
+	font-weight: 600;
+	font-size: 18px;
+	line-height: 25px;
+}
+
+
+
+.btnCerrarVentana {
+					position: absolute;
+					top: 22px;
+					right: 40px;
+					width: 32px;
+					height: 32px;
+					background-image:url(../imagesSIUGJ/close.png)
+				}
+
+.btnCerrarVentana:hover 
+{
+	position: absolute;
+	top: 22px;
+	right: 40px;
+	width: 32px;
+	height: 32px;
+	background-image:url(../imagesSIUGJ/closeOver.png)
+}				
+
+
+.SIUGJ_Control input
+{
+	background-color:#900 !important;
+}
+
+
+.SIUGJ_nombreDocumentoAdjunto
+{
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: 300;
+	font-size: 16px;
+	line-height: 18px;
+	/* identical to box height, or 112% */
+	
+	text-decoration-line: underline;
+	
+	/* azul oscuro */
+	
+	color: #1A3E9A;
+}
+
+
+.etiquetaSIUGDatosContacto
+{
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: 600;
+	font-size: 16px;
+	line-height: 18px;
+	/* identical to box height, or 112% */
+	
+	
+	/* casi negro */
+	
+	color: #3E3E3E;
+
+
+}
+
+.etiquetaSIUGJContacto
+{
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: 300;
+	font-size: 16px;
+	line-height: 18px;
+	/* identical to box height, or 112% */
+	
+	
+	/* casi negro */
+	
+	color: #3E3E3E;
+}
+
+
+/* Pagina de Regsitro */
+.letraTituloPagina
+{
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: 600;
+	font-size: 30px;
+	line-height: 30px;
+	text-align: right;
+	
+	color: #1A3E9A;
+}
+
+.letraTituloSeccion
+{
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: 600;
+	font-size: 22px;
+	line-height: 30px;
+	
+	
+	color: #1A3E9A;
+	
+}
+
+.letraTituloCampoRegistro
+{
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: normal;
+	font-size: 16px;
+	line-height: 20px;
+	color: #3F5878;
+}
+
+.letraPoliticasPrivacidad, .letraPoliticasPrivacidad label
+{
+	font-family: WorkSans-Regular;
+	font-style: normal;
+	font-weight: 300;
+	font-size: 13px;
+	line-height: 10px;
+	color: #3E3E3E;
+	
+}
+
+.btnSIUGJ
+{
+    background: #1A3E9A;
+    color: #FFF;
+    height: 45px;
+    border-radius: 6px;
+    border-color: #1A3E9A;
+    border-width: 1px;
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 21px;
+
+}
+
+
+.btnSIUGJ:hover
+{
+	background: #142E75;
+	cursor: pointer;
+}
+
+.btnSIUGJCancel
+{
+
+	background: #FFF;
+    color:#1A3E9A;
+    height: 45px;
+    border-radius: 6px;
+    border-color: #1A3E9A;
+    border-width: 1px;
+	border: 2px solid #1A3E9A;
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 21px;
+}
+
+.btnSIUGJCancel button
+{
+    font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: bold;
+	font-size: 16px;
+	line-height: 20px;
+	color: #1A3E9A;
+}
+
+.btnSIUGJCancel .x-btn-ml, .btnSIUGJCancel .x-btn-mr, .btnSIUGJCancel .x-btn-mc, .btnSIUGJCancel .x-btn-bl, .btnSIUGJCancel .x-btn-bc, .btnSIUGJCancel .x-btn-br, .btnSIUGJCancel .x-btn-tl, .btnSIUGJCancel .x-btn-tc, .btnSIUGJCancel .x-btn-tr
+{
+	background-image:none !important;
+}
+
+.btnSIUGJCancel:hover
+{
+	background: #EFEFEF;
+	cursor: pointer;
+	
+}
+
+
+
+/*Campos azules*/
+.campoFormularioAzul
+{
+	background: #E6EFFD;
+	border-radius: 5px 5px 0px 0px;
+	border: 1px solid #004884;
+	border-left-style:none;
+	border-right-style:none;
+	border-top-style:none;
+	height:30px !important;
+	font-family: WorkSans-Regular;
+	font-style: normal;
+	font-weight: 500;
+	font-size: 16px;
+	line-height: 19px;
+	/* identical to box height */
+	
+	text-align: justify;
+	
+	/* azul oscuro */
+	
+	color: #1A3E9A;
+	
+}
+
+.campoRadioAzul
+{
+	font-family: WorkSans-Regular;
+	font-style: normal;
+	font-weight: 500;
+	font-size: 16px;
+	line-height: 19px;
+	/* identical to box height */
+	
+	text-align: justify;
+	
+	/* azul oscuro */
+	
+	color: #1A3E9A;
+
+}
+
+
+
+.campoFechaSIUGJAzul
+{
+	background: #E6EFFD;
+	border-radius: 5px 5px 0px 0px;
+	border: 1px solid #004884;
+	border-left-style:none;
+	border-right-style:none;
+	border-top-style:none;
+	height:30px !important;
+
+	
+
+	
+}	
+
+
+.campoFechaSIUGJAzul .x-form-field-wrap .x-form-date-trigger 
+{
+    background-image: url(../imagesSIUGJ/btnDate.png) !important;
+	border: none;
+	background-position: 0px 5px;
+    height: 25px;
+	
+}
+
+.campoFechaSIUGJAzul input
+{
+	
+	border-color: transparent !important;
+	background-image: none !important; 
+    background-color: transparent !important;
+	
+	font-family: WorkSans-Regular;
+	font-style: normal;
+	font-weight: 500;
+	font-size: 16px;
+	line-height: 19px;
+	height:30px !important;
+	/* identical to box height */
+	
+	text-align: justify;
+	
+	/* azul oscuro */
+	
+	color: #1A3E9A;
+	
+	
+}	
+
+
+
+.comboWrapSIUGJAzul
+{
+	background: #E6EFFD;
+	border-radius: 5px 5px 0px 0px;
+	border: 1px solid #004884;
+	border-left-style:none;
+	border-right-style:none;
+	border-top-style:none;
+	height:30px !important;
+
+}
+
+.comboWrapSIUGJAzul input
+{
+	border-color: transparent !important;
+	background-image: none !important; 
+    background-color: transparent !important;
+	
+	font-family: WorkSans-Regular;
+	font-style: normal;
+	font-weight: 500;
+	font-size: 16px;
+	line-height: 19px;
+	height:30px !important;
+	/* identical to box height */
+	
+	text-align: justify;
+	
+	/* azul oscuro */
+	
+	color: #1A3E9A;
+	
+}
+
+.comboWrapSIUGJAzul .x-form-trigger
+{
+	background-image: url(../imagesSIUGJ/comboTriggersAzul.png) !important;
+	border-bottom-color: #FFF;
+	background-position: 0px 3px;
+	height:29px !important;
+	width:26px !important;
+	
+}
+	
+.comboWrapSIUGJAzul .x-form-trigger-over
+{
+	background-image: url(../imagesSIUGJ/comboTriggersAzulOver.png) !important;
+	border-bottom-color: #FFF;
+	background-position: 0px 3px;
+	height:29px !important;
+	width:26px !important;
+}
+	
+	
+
+
+
+.listComboSIUGJAzul .search-item
+{
+	font-family: Montserrat-Regular !important;
+	font-style: normal !important;
+	font-weight: 300 !important;
+	font-size: 16px !important;
+
+	/* identical to box height, or 112% 
+	line-height: 18px;	
+	
+	/* gray */
+	color: #656572 !important;
+	background-color:#FFF;
+	background-image:none;
+	padding-top:5px;
+	padding-bottom:5px;
+	padding-left:10px;
+    border-color: #3F5878 !important;
+	border:none !important;
+	border-bottom: 1px dotted !important;
+	
+}
+
+
+
+.listComboSIUGJAzul .x-combo-selected
+{
+	background-color:#E6EFFD !important;
+	color:#1A3E9A !important;
+	border:none !important;
+	border-bottom: 1px dotted !important;
+}
+
+.listComboSIUGJAzul .x-combo-list-inner
+{    overflow-y: auto;
+	
+}
+
+
+
+.gridSiugjCampoAzul .x-panel,  .gridSiugjCampoAzul .x-toolbar
+{
+	height:50px !important;
+	background-color:#FFF !important;
+	border-color: #FFF !important; 
+	background-image: none;
+	border-color:#F00;
+
+}
+
+
+.gridSiugjCampoAzul .x-grid3-cell
+{
+	vertical-align:middle;
+}
+	
+.gridSiugjCampoAzul .x-grid3-cell-inner
+{
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: 600;
+	font-size: 16px;
+	line-height: 18px;
+	text-transform: uppercase;
+	color: #3E3E3E;
+}
+
+
+.gridSiugjCampoAzul .x-grid3-row-body td
+{
+	font-family:WorkSans-Regular;
+	height:30px !important;
+	font-style: normal !important;
+	font-weight: 300 !important;
+	font-size: 14px !important;
+	
+	
+	color: #3E3E3E !important;
+}
+
+
+
+.gridSiugjCampoAzul .x-btn-text
+{
+	padding-left:30px !important; 
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: 600;
+	font-size: 16px;
+	line-height: 20px;
+	/* identical to box height */
+	
+	
+	/* casi negro */
+	
+	color: #3E3E3E;
+}
+
+.gridSiugjCampoAzul .x-toolbar-cell
+{
+	border-right: 0.5px solid #E5E5E5;
+	border-bottom: 0.5px solid #E5E5E5;
+	box-sizing: border-box;
+
+	border-right: 0.5px solid #E5E5E5;
+	box-sizing: border-box;
+    padding: 0px 10px 0px 10px;
+}
+
+
+.gridSiugjCampoAzul .x-grid3-hd-checker
+{
+	background-image: url(../imagesSIUGJ/checkBox_0.png);
+	height:30px;
+	background-position: 10px 10px;
+}
+
+.gridSiugjCampoAzul .x-grid3-hd-checker-on
+{
+	background-image: url(../imagesSIUGJ/checkBox_1.png);
+	height:30px;
+	background-position: 10px 10px;
+}
+
+.gridSiugjCampoAzul .x-grid3-td-checker
+{
+	background-image:none;
+}
+
+
+.gridSiugjCampoAzul .x-grid3-td-numberer
+{
+	background-color:#FFF;
+	background-image:none;
+}
+
+.gridSiugjCampoAzul .x-grid3-td-numberer .x-grid3-col-numberer
+{
+	padding-right:20px !important;
+	
+}
+
+.gridSiugjCampoAzul .x-grid3-row .x-grid3-row-checker
+{
+	background-image: url(../imagesSIUGJ/checkBox_0.png);
+	height:40px;
+	background-position: 10px 10px;
+	
+}
+
+.gridSiugjCampoAzul .x-grid3-row-selected .x-grid3-row-checker
+{
+	background-image: url(../imagesSIUGJ/checkBox_1.png);
+	height:40px;
+    background-position: 10px 10px;
+}
+
+
+
+
+.gridSiugjCampoAzul .x-grid3-hd
+{
+	height:40px;
+	background: #FFF !important;
+	border-right: 1px solid #E5E5E5;
+	
+
+	
+}
+
+
+.gridSiugjCampoAzul .x-grid3-hd-over
+{
+	height:40px;
+	background: #E6EFFD !important;
+	background-image:none;
+	border: 1px solid #FFFFFF !important;
+	
+}
+
+.gridSiugjCampoAzul .x-grid3-hd-inner
+{
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: 500;
+	font-size: 16px;
+	line-height: 18px;
+	
+	
+	color: #3E3E3E;
+}
+
+
+.gridSiugjCampoAzul .x-grid3-header
+{
+	height:40px;
+	background-color:#FFF;
+	background-image:none;
+	border: 1px solid #E5E5E5;
+}
+
+
+.gridSiugjCampoAzul .x-grid-group-hd
+{
+	height:80px;
+}
+
+.gridSiugjCampoAzul .x-grid-group-title
+{
+    padding: 30px 0px 0px 60px !important;
+	font-family: Montserrat-Regular !important;;
+	font-style: normal !important;;
+	font-weight: 600 !important;;
+	font-size: 16px !important;;
+	line-height: 18px !important;;
+
+	color: #656572 !important;
+	
+}
+
+.gridSiugjCampoAzul .x-grid-group-hd div.x-grid-group-title
+{
+	background-image: url(../imagesSIUGJ/groupLess.png); !important;
+	background-position: 10px 25px;
+}
+
+.gridSiugjCampoAzul .x-grid-group-collapsed .x-grid-group-hd div.x-grid-group-title
+{
+	background-image: url(../imagesSIUGJ/groupPlus.png); !important;
+	background-position: 10px 25px;
+}
+
+
+.gridSiugjCampoAzul .x-grid3-cell-inner .x-grid3-check-col
+{
+	background-image: url(../imagesSIUGJ/checkBox_0.png);
+	height:20px;
+	background-position: center center;
+}
+
+
+.gridSiugjCampoAzul .x-grid3-cell-inner .x-grid3-check-col-on
+{
+	background-image: url(../imagesSIUGJ/checkBox_1.png);
+	height:20px;
+	background-position: center center;
+}
+
+
+.campoDocumentoAzul .plupload_filelist
+{
+	background-color: transparent !important;
+}
+
+
+
+
+.campoDocumentoAzul 
+{
+	background: #E6EFFD;
+    border-radius: 5px 5px 0px 0px;
+    border: 1px solid #004884;
+    border-left-style: none;
+    border-right-style: none;
+    border-top-style: none;
+    height: 30px !important;
+    font-family: WorkSans-Regular;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    text-align: justify;
+    color: #1A3E9A;
+}
+
+
+.campoDocumentoAzul .x-panel-body 
+{
+    border-color: #d0d0d0;
+    background-color: transparent;
+}
+
+
+.campoDocumentoAzul .plupload_container
+{
+	background: none !important;
+	border-color:transparent !important;
+}
+
+.campoDocumentoAzul .x-btn-ml, .campoDocumentoAzul .x-btn-mr, .campoDocumentoAzul .x-btn-mc, .campoDocumentoAzul .x-btn-bl, .campoDocumentoAzul .x-btn-bc, .campoDocumentoAzul .x-btn-br, .campoDocumentoAzul .x-btn-tl, .campoDocumentoAzul .x-btn-tc, .campoDocumentoAzul .x-btn-tr
+{
+	background-image:none !important;
+	
+}
+
+.campoDocumentoAzul button
+{
+	background-size: 12px 20px !important;
+}
+
+
+.campoDocumentoAzul .plupload_filelist li {
+    padding: 10px 8px;
+    background: none;
+    border-bottom: none;
+	font-family: WorkSans-Regular;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    color: #1A3E9A;
+}
+
+
+.btnSIUGJ button
+{
+    font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: bold;
+	font-size: 16px;
+	line-height: 20px;
+	color: #FFFFFF;
+}
+
+.btnSIUGJ .x-btn-ml, .btnSIUGJ .x-btn-mr, .btnSIUGJ .x-btn-mc, .btnSIUGJ .x-btn-bl, .btnSIUGJ .x-btn-bc, .btnSIUGJ .x-btn-br, .btnSIUGJ .x-btn-tl, .btnSIUGJ .x-btn-tc, .btnSIUGJ .x-btn-tr
+{
+	background-image:none !important;
+}
+
+
+.gridSiugjCampoAzul .x-panel-tbar .x-toolbar .x-toolbar-left .x-toolbar-left-row .x-toolbar-cell
+{
+    border-right: none !important;
+	border-bottom: none !important;
+}
+
+.gridSiugjCampoAzul .x-panel-bwrap
+{
+	border: 0.5px solid #004884;
+	border-radius: 10px;
+}
+
+
+.etiquetaMsgBox
+{
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: bold;
+	font-size: 22px;
+	line-height: 27px;
+	text-align: center;
+	
+	/* azul oscuro */
+	
+	color: #1A3E9A;
+}
+
+/* Message Box */
+
+.msgBoxSIUGJ
+{
+	border-radius: 20px !important;
+}
+
+.msgBoxSIUGJ .x-window-tl
+{
+	display:none;
+}
+
+.msgBoxSIUGJ .x-plain-body
+{
+	background-color: #FFF !important;
+	
+}
+
+.msgBoxSIUGJ .x-window-body 
+{
+	border-color: #FFF;
+}
+
+.msgBoxSIUGJ .x-window-ml .x-window-mr .x-window-mc
+{
+	background-color: #FFF !important;
+	border:none !important;
+	
+}
+.msgBoxSIUGJ .x-window-tc
+{
+	background-color: #FFF !important;
+	background-image: none;
+}
+
+.msgBoxSIUGJ .x-window-mr, .msgBoxSIUGJ .x-window-bl, .msgBoxSIUGJ .x-window-bc, .msgBoxSIUGJ .x-window-ml, .msgBoxSIUGJ .x-window-br, .msgBoxSIUGJ .x-window-tl,  .msgBoxSIUGJ .x-window-tr  
+{
+    background-image: none;
+	background-color: #FFF !important;
+}
+
+
+.msgBoxSIUGJ .x-window-bwrap
+{
+	border-radius: 20px !important;
+}
+
+
+.msgBoxSIUGJ .x-panel-fbar
+{
+	height:80px !important;
+}
+
+
+
+
+
+/*Ventana Ayuda*/
+.msgHistorialSIUGJ
+{
+	border-bottom-radius: 20px !important;
+}
+
+
+
+.msgHistorialSIUGJ .x-window-tc 
+{
+    background-color: transparent !important;
+    background-image: none;
+}
+
+.msgHistorialSIUGJ .x-window-header-text
+{
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: 600;
+	font-size: 18px;
+	line-height: 22px;
+	color: #FFFFFF;
+	padding-left:20px;
+}
+
+.msgHistorialSIUGJ .x-plain-body
+{
+	background-color: #FFF !important;
+	
+}
+
+.msgHistorialSIUGJ .x-window-body 
+{
+	border-color: #FFF;
+}
+
+.msgHistorialSIUGJ .x-window-ml .x-window-mr .x-window-mc
+{
+	background-color: #FFF !important;
+	border:none !important;
+	
+}
+
+.msgHistorialSIUGJ .x-window-mr, .msgHistorialSIUGJ .x-window-bl, .msgHistorialSIUGJ .x-window-bc, .msgHistorialSIUGJ .x-window-ml, .msgHistorialSIUGJ .x-window-br, .msgHistorialSIUGJ .x-window-tl,  .msgHistorialSIUGJ .x-window-tr  
+{
+    background-image: none;
+	background-color: #FFF !important;
+}
+
+.msgHistorialSIUGJ .x-window-tr, .msgHistorialSIUGJ .x-window-tl
+{
+    border-top-right-radius: 20px !important;
+	border-top-left-radius: 20px !important;
+}
+
+.msgHistorialSIUGJ .x-window-bwrap
+{
+	border-bottom-left-radius: 20px !important;
+	border-bottom-right-radius: 20px !important;
+
+}
+
+.msgHistorialSIUGJ .x-window-body
+{
+	padding:0px !important;
+}
+
+.msgHistorialSIUGJ .x-panel-fbar
+{
+	height:55px !important;
+}
+
+
+.msgHistorialSIUGJ .x-window-tl, .msgHistorialSIUGJ .x-window-tr
+{
+	background-color: #1A3E9A !important;
+    background-image: none;
+}
+
+
+.letraInfoHistorialSIUGJ
+{
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: normal;
+	font-size: 14px;
+	line-height: 16px;
+	color: #3E3E3E;
+	word-wrap: break-word;
+	white-space: normal;
+}
+	
+
+
+#sticky 
+{
+    position:relative;
+    top: 5px;
+    width: 97%;
+    background-color: transparent !important;
+    z-index: 10000;
+    text-align: center;
+	padding-bottom:30px;
+}
+
+
+.letraContenidoPublicacion
+{
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: 300;
+	font-size: 16px;
+	line-height: 20px;
+	text-align: justify;
+	color: #3E3E3E;
+}
+
+
+/*
+Sede Judicial
+*/
+
+.letraFechaPublicacion
+{
+	font-family: WorkSans-Regular;
+	font-style: normal;
+	font-weight: 300;
+	font-size: 14px;
+	line-height: 18px;
+	color: #3E3E3E;
+	
+}
+
+.letraTituloPublicacion
+{
+	font-family: Montserrat-Regular;
+	font-style: normal;
+	font-weight: bold;
+	font-size: 18px;
+	line-height: 20px;
+	text-decoration-line: underline;
+	color: #1A3E9A;
+}
+
+
+.letraCuerpoPublicacion
+{
+	font-family: WorkSans-Regular;
+	font-style: normal;
+	font-weight: normal;
+	font-size: 16px;
+	line-height: 18px;
+	text-align: justify;
+	color: #656572;
+
+}
+
+
+.panelSiugjStandar .x-panel-tbar .x-btn-text 
+{
+    height: 45px !important;
+    color: #1A3E9A !important;
+	padding-left: 30px !important;
+    font-family: Montserrat-Regular !important;
+    font-style: normal !important;
+    font-weight: 300 !important;
+    font-size: 16px !important;
+    line-height: 18px !important;
+}
+
+
+
+
+
+.tabPanelSIUGJ .x-tab-strip-top
+{
+	background-image: none;
+    background-color: #FFF;
+}
+
+.tabPanelSIUGJ .x-tab-panel-header .x-tab-strip-wrap .x-tab-strip-top li .x-tab-right
+{
+	background-image: none;
+    background-color: #E5E5E5;
+	border-radius: 8px 8px 0px 0px;
+}
+
+.tabPanelSIUGJ .x-tab-panel-header .x-tab-strip-wrap .x-tab-strip-top li .x-tab-left
+{
+	background-image: none;
+    background-color: #E5E5E5;
+    border-radius: 8px 8px 0px 0px;
+}
+
+.tabPanelSIUGJ .x-tab-panel-header .x-tab-strip-wrap .x-tab-strip-top li .x-tab-strip-inner
+{
+	background-image: none;
+}
+
+
+.tabPanelSIUGJ .x-tab-panel-header .x-tab-strip-wrap .x-tab-strip-top  li .x-tab-strip-text 
+{
+	font-family: Montserrat-Regular;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 20px;
+    text-align: center;
+    color: #656572;
+	padding: 10px;
+}
+
+
+.tabPanelSIUGJ .x-tab-panel-header .x-tab-strip-wrap .x-tab-strip-top  .x-tab-strip-active .x-tab-right
+{
+	background-image: none;
+    background-color: #1A3E9A;
+	border-radius: 8px 8px 0px 0px;
+}
+
+.tabPanelSIUGJ .x-tab-panel-header .x-tab-strip-wrap .x-tab-strip-top  .x-tab-strip-active .x-tab-left
+{
+	background-image: none;
+    background-color: #1A3E9A;
+    border-radius: 8px 8px 0px 0px;
+}
+
+.tabPanelSIUGJ .x-tab-panel-header .x-tab-strip-wrap .x-tab-strip-top  .x-tab-strip-active .x-tab-strip-inner
+{
+	background-image: none;
+}
+
+
+.tabPanelSIUGJ .x-tab-panel-header .x-tab-strip-wrap .x-tab-strip-top  .x-tab-strip-active .x-tab-strip-text 
+{
+	font-family: Montserrat-Regular;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 20px;
+    text-align: center;
+    color: #FFFFFF;
+	padding: 10px;
+}
+
+.tabPanelSIUGJ .x-tab-panel-bwrap .x-tab-panel-tbar .x-btn-text 
+{
+    height: 45px !important;
+    color: #1A3E9A !important;
+    font-family: Montserrat-Regular !important;
+    font-style: normal !important;
+    font-weight: 300 !important;
+    font-size: 16px !important;
+    line-height: 18px !important;
+}
+
+
+.controlSIUGJ
+{
+	font-family: Montserrat-Regular !important;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16px !important;
+    line-height: 20px !important;
+    color: #3E3E3E !important;
+    padding: 5px 8px !important;
+	background-image:none !important;
+	
+}
+
+.comboSIUGJ
+{
+	border-color: #C1C1C1;
+	border-style:solid;
+	border-width:1px;
+}
+
+.comboSIUG .x-form-field-wrap input
+{
+	font-family: Montserrat-Regular !important;
+    font-style: normal !important;
+    font-weight: 300 !important;
+    font-size: 16px !important;
+    color: #656572 !important;
+    background-color: transparent;
+    background-image: none;
+    border-style: none !important;
+	padding-left: 10px;
+	padding-top: 4px;
+
+}
+
+
+.comboSIUG .x-form-field-wrap .x-form-trigger
+{
+	background-image: url(../imagesSIUGJ/comboTriggers.png) !important;
+	border-bottom-color: transparent;
+	background-position: 0px 10px;
+}
+	
+.comboSIUG .x-form-field-wrap .x-form-trigger-over
+{
+	background-image: url(../imagesSIUGJ/comboTriggersOver.png) !important;
+	border-bottom-color: transparent;
+	background-position: 0px 10px;
+}
+
+
+
+.listComboSIUG .search-item
+{
+	font-family: Montserrat-Regular !important;
+	font-style: normal !important;
+	font-weight: 300 !important;
+	font-size: 16px !important;
+
+	/* identical to box height, or 112% 
+	line-height: 18px;	
+	
+	/* gray */
+	color: #656572 !important;
+	background-color:#FFF;
+	background-image:none;
+	padding-top:5px;
+	padding-bottom:5px;
+	padding-left:10px;
+    border-color: #3F5878 !important;
+	border:none !important;
+	border-bottom: 1px dotted !important;
+	
+}
+
+
+
+.listComboSIUGJ .x-combo-selected
+{
+	background-color:#E6EFFD !important;
+	color:#1A3E9A !important;
+	border:none !important;
+	border-bottom: 1px dotted !important;
+}
+
+.listComboSIUGJ .x-combo-list-inner
+{    overflow-y: auto;
+	
+}
+
+.lblSIUGJ
+{
+    font-family: WorkSans-Regular;
+    font-style: normal !important;
+    font-weight: 300 !important;
+    font-size: 14px !important;
+    color: #3E3E3E !important;
+
+}
+
+.SIUGJ_Control select
+{
+    height: 40px;
+    border: 1px solid #E5E5E5;
+    box-sizing: border-box;
+    border-radius: 5px;
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 20px;
+    color: #3E3E3E;
+    text-indent: 15px;
+}
+
+
+.btnSIUGJCore
+{
+    background: #1A3E9A;
+    height: 40px;
+    border-radius: 6px;
+    border-color: #1A3E9A;
+    border-width: 1px;
+
+	font-family: Montserrat;
+	font-style: normal;
+	font-weight: 500;
+	font-size: 16px;
+	line-height: 20px;
+	color: #FFFFFF;
+	
+
+}
+
+
+.btnSIUGJCore:hover
+{
+	background: #142E75;
+	cursor: pointer;
+}
+
+.btnSIUGJCore button
+{
+    font-family: Montserrat;
+	font-style: normal;
+	font-weight: 500;
+	font-size: 16px;
+	height: 30px !important;
+	line-height: 20px;
+	color: #FFFFFF;
+	min-width: 120px;
+    padding-top: 5px;
+}
+
+.btnSIUGJCore .x-btn-ml, .btnSIUGJCore .x-btn-mr, .btnSIUGJCore .x-btn-mc, .btnSIUGJCore .x-btn-bl, .btnSIUGJCore .x-btn-bc, .btnSIUGJCore .x-btn-br, .btnSIUGJCore .x-btn-tl, .btnSIUGJCore .x-btn-tc, .btnSIUGJCore .x-btn-tr
+{
+	background-image:none !important;
+}
+
+
+.btnSIUGJCancelCore
+{
+
+	background: #FFF;
+    color:#1A3E9A;
+    height: 40px;
+    border-radius: 6px;
+    border-color: #1A3E9A;
+    border-width: 1px;
+	border: 2px solid #1A3E9A;
+    line-height: 20px;
+	
+	
+	font-family: Montserrat;
+	font-style: normal;
+	font-weight: 500;
+	font-size: 16px;
+	line-height: 20px;
+	color: #FFFFFF;
+}
+
+.btnSIUGJCancelCore button
+{
+    font-family: Montserrat;
+	font-style: normal;
+	font-weight: 500;
+	font-size: 16px;
+	line-height: 20px;
+	height: 30px !important;
+	color: #1A3E9A;
+	min-width: 180px;
+    padding-top: 5px;
+}
+
+.btnSIUGJCancelCore .x-btn-ml, .btnSIUGJCancelCore .x-btn-mr, .btnSIUGJCancelCore .x-btn-mc, .btnSIUGJCancelCore .x-btn-bl, .btnSIUGJCancelCore .x-btn-bc, .btnSIUGJCancelCore .x-btn-br, .btnSIUGJCancelCore .x-btn-tl, .btnSIUGJCancelCore .x-btn-tc, .btnSIUGJCancelCore .x-btn-tr
+{
+	background-image:none !important;
+}
+
+.btnSIUGJCancelCore:hover
+{
+	background: #EFEFEF;
+	cursor: pointer;
+	
+}

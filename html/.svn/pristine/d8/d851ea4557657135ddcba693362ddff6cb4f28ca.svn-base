@@ -1,0 +1,11 @@
+{
+    "version":"1.0",
+    "masks":{
+        "%%%DATABASESCHEMA%%%":"LATIS_DATABASESCHEMA"
+    },
+    "getUserInformation":"SELECT * FROM %%%DATABASESCHEMA%%%.800_usuarios where login = %%%LOGIN%%%",
+    "getSchema":"SELECT * FROM %%%DATABASESCHEMA%%%.20802_mapeoFormulariosTablas",
+    "getReportList":"SELECT idregistro,nombrereporte FROM %%%DATABASESCHEMA%%%.20801_relacionReportes;",
+    "getReportInformation":"SELECT * FROM %%%DATABASESCHEMA%%%.20801_relacionReportes WHERE idRegistro=%%%IDREPORTE%%%;"    
+}
+

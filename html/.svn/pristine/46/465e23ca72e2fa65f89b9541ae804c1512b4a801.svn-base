@@ -1,0 +1,341 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+	$idUsuario=bD($_GET["u"]);
+	$vCU=$_GET["vCU"];
+	$arrBtn="";
+	
+	$consulta="SELECT Nombre,cuentaActiva FROM 800_usuarios WHERE idUsuario=".$idUsuario;
+	$fRegistroUsuario=$con->obtenerPrimeraFilaAsoc($consulta);
+	
+	
+	$lblCuentaActiva="";
+	switch($fRegistroUsuario["cuentaActiva"])
+	{
+		case 0:
+			$lblCuentaActiva="<span style=\'color:#DDD\'>Cuenta Inactiva </span>";
+		break;
+		case 1:
+			$lblCuentaActiva="<span style=\'color:#030\'>Cuenta Activa</span>";
+		break;
+		case 100:
+			$lblCuentaActiva="<span style=\'color:#900\'>Cuenta Bloqueda</span>";
+		break;
+	}
+	
+	$nombreUsuario=$fRegistroUsuario["Nombre"];
+	
+	
+	$posIni=320;
+	if(existeRol("'1_0'"))
+		$posIni=390;
+	$consulta="SELECT * FROM 800_usuariosVSDatosComplementarios WHERE situacion=1 ORDER BY prioridad,etiquetaModulo";
+	if($vCU==1)
+	{
+		$consulta="SELECT * FROM 800_usuariosVSDatosComplementarios WHERE situacion=1 and mostrarVistaCuentaUsuario=1 ORDER BY prioridad,etiquetaModulo";
+	}
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_assoc($res))
+	{
+		$mostrar=1;
+		if(($fila["funcionAplicacion"]!="")&&($fila["funcionAplicacion"]!="-1"))
+		{
+			$obj=json_decode('{"idUsuario":"'.$idUsuario.'","vCU":"'.$vCU.'"}');
+			$cache=NULL;
+			$objParametros=$obj;
+			$mostrar=removerComillasLimite(resolverExpresionCalculoPHP($fila["funcionAplicacion"],$objParametros,$cache));
+			
+		}
+		
+		
+		if($mostrar==1)
+		{
+			$btn="		{
+							width:160,
+							height:40,
+							x:20,
+							enableToggle :true,
+							toggleGroup :'presionado',
+							xtype:'button',
+							y:".$posIni.",
+							text:'".cv($fila["etiquetaModulo"])."',
+							toggleHandler :function(btn,presionado)
+									{
+										if(presionado)
+										{
+											cargarModuloUsuario(".$fila["IDModulo"].");
+										}
+									}
+							
+						}";
+		
+			if($arrBtn=="")
+				$arrBtn=",".$btn;
+			else
+				$arrBtn.=",".$btn;
+			$posIni+=40;
+		}
+	}
+	
+?>
+
+var btnPresionado=null;
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+
+	var htmlPanel=	'<table width="200"><tr><td align="center"><img id="imgUsr" height="140" width="120" '+
+                    ' src="../Usuarios/verFoto.php?Id='+gE('idUsuario').value+'&rand=<?php echo date("YmdHis")?>">'+
+                    '</td></tr><tr><td align="center"><b><span id="lblNombreUsuario"><?php echo $nombreUsuario?></span>'+
+                    '</b><br>(<?php echo $idUsuario?>)<BR /><BR />-- <?php echo $lblCuentaActiva ?> ---</td></tr>';
+   	<?php
+	if(existeRol("'1_0'"))
+	{
+	?>
+    	if(gE('vCU').value=='0')
+        {
+    	 htmlPanel+=	'<tr><td align="center"><br /><span class="letraFichaRespuesta">Para eliminar este usuario<br />de click</span>'+
+                    ' <a href="javascript:removerUsuario(\'<?php echo base64_encode($idUsuario)?>\')"><span class="letraRoja">'+
+                    'AQUÍ <img src="../images/delete.png" /> </span></a></td></tr>';
+   		}
+   
+    <?php
+	}
+	?>
+                    
+    htmlPanel+='</table>';
+
+    new Ext.Viewport(	{
+                                layout: 'border',
+                                items: [
+                                            {
+                                                xtype:'panel',
+                                                region:'center',
+                                                layout:'border',
+                                                tbar:	[
+                                                              {
+                                                                  icon:'../images/salir.gif',
+                                                                  cls:'x-btn-text-icon',
+                                                                  text:'Cerrar',
+                                                                  handler:function()
+                                                                          {
+                                                                              function resp(btn)
+                                                                             {
+                                                                                  if(btn=='yes')
+                                                                                      window.parent.cerrarVentanaFancy();
+                                                                             }
+                                                                             msgConfirm('Est&aacute; seguro de querer salir del m&oacute;dulo de informaci&oacute;n de usuarios?',resp);
+                                                                          }
+                                                                  
+                                                              }
+                                                          ],
+                                                
+                                                items:	[
+                                                         	{
+                                                            	xtype:'panel',
+                                                                width:200,
+                                                                
+                                                                region:'west',
+                                                                layout:'absolute',
+                                                                items:	[
+                                                                			{
+                                                                            	x:0,
+                                                                                y:45,
+                                                                            	xtype:'label',
+                                                                                html:htmlPanel
+                                                                            },
+                                                                            {
+                                                                                width:160,
+                                                                                height:40,
+                                                                                x:20,
+                                                                                xtype:'button',
+                                                                                y:310,
+                                                                                id:'btnIdentifica',
+                                                                                enableToggle :true,
+                                                                                toggleGroup :'presionado',
+                                                                                text:'Datos de identificaci&oacute;n',
+                                                                                toggleHandler :function(btn,presionado)
+                                                                                        {
+                                                                                        	if(presionado)
+                                                                                            {
+                                                                                            	
+                                                                                                gEx('frameContenidoUsuario').load	(
+                                                                                                                                        {
+                                                                                                                                            url:'../Usuarios/nIdentifica.php',
+                                                                                                                                            params:		{
+                                                                                                                                                            idUsuario:gE('idUsuario').value,
+                                                                                                                                                            bandera:1,
+                                                                                                                                                            vCU:gE('vCU').value,
+                                                                                                                                                            cPagina:'sFrm=true'
+                                                                                                                                                        }
+                                                                                                                                        }
+                                                                                                                                        
+                                                                                                                                    )
+                                                                                        	}
+                                                                                            /*else
+                                                                                            {
+                                                                                            	if(btnPresionado.id==btn.id)
+                                                                                                {
+                                                                                                	gEx('btnIdentifica').toggle(true);
+                                                                                                }
+                                                                                            }*/
+                                                                                            
+                                                                                        }
+                                                                                
+                                                                            },
+                                                                            {
+                                                                                width:160,
+                                                                                height:40,
+                                                                                x:20,
+                                                                                enableToggle :true,
+                                                                                toggleGroup :'presionado',
+                                                                                xtype:'button',
+                                                                                y:350,
+                                                                                text:'Datos de la cuenta',
+                                                                                toggleHandler :function(btn,presionado)
+                                                                                        {
+                                                                                        	if(presionado)
+                                                                                            {
+                                                                                                gEx('frameContenidoUsuario').load	(
+                                                                                                                                        {
+                                                                                                                                            url:'../Usuarios/nUsuarios.php',
+                                                                                                                                            params:		{
+                                                                                                                                                            idUsuario:gE('idUsuario').value,
+                                                                                                                                                            bandera:1,
+                                                                                                                                                            vCU:gE('vCU').value,
+                                                                                                                                                            cPagina:'sFrm=true'
+                                                                                                                                                        }
+                                                                                                                                        }
+                                                                                                                                        
+                                                                                                                                    )
+                                                                                        	}
+                                                                                        }
+                                                                                
+                                                                            }
+                                                                            <?php
+																				echo $arrBtn
+																			?>
+                                                                		]
+                                                            },
+                                                            {
+                                                            	xtype:'panel',
+                                                                width:300,
+                                                                region:'center',
+                                                                layout:'absolute',
+                                                                items:	[
+                                                                			new Ext.ux.IFrameComponent({ 
+
+                                                                                                            id: 'frameContenidoUsuario', 
+                                                                                                            anchor:'100% 100%',
+                                                                                                            region:'center',
+                                                                                                            loadFuncion:function(iFrame)
+                                                                                                                        {
+                                                                                                                            
+                                                                                                                            
+                                                                                                                            
+                                                                                                                            
+                                                                                                                        },
+                    
+                                                                                                            url: '../paginasFunciones/white.php',
+                                                                                                            style: 'width:100%;height:100%' 
+                                                                                                    })
+                                                                		]
+                                                            }    
+                                                        ]
+                                            }
+                                         ]
+                            }
+                        )   
+
+	gEx('btnIdentifica').toggle(true);
+}
+
+function regresarGuardar(bandera)
+{
+	switch(bandera)
+    {
+    	case 'nIdentifica':
+        	gE('imgUsr').setAttribute('src','../Usuarios/verFoto.php?Id='+gE('idUsuario').value+'&rand='+(new Date().format('YmdHis')));
+            gEx('frameContenidoUsuario').load	(
+                                                    {
+                                                        url:'../Usuarios/nIdentifica.php',
+                                                        params:		{
+                                                                        idUsuario:gE('idUsuario').value,
+                                                                        bandera:1,
+                                                                        actualizado:1,
+                                                                        cPagina:'sFrm=true'
+                                                                    }
+                                                    }
+                                                    
+                                                )
+		break;
+        case 'nUsuarios':
+        	
+            gEx('frameContenidoUsuario').load	(
+                                                    {
+                                                        url:'../Usuarios/nUsuarios.php',
+                                                        params:		{
+                                                                        idUsuario:gE('idUsuario').value,
+                                                                        bandera:1,
+                                                                        actualizado:1,
+                                                                        vCU:gE('vCU').value,
+                                                                        cPagina:'sFrm=true'
+                                                                    }
+                                                    }
+                                                    
+                                                )
+		break;
+    }
+}
+
+function cargarModuloUsuario(oConf)
+{
+	if(oConf.idProceso)
+    {
+    	var content=Ext.getCmp('frameContenidoUsuario');
+        content.load({ scripts:true,url:'../modeloProyectos/visorRegistrosProcesosV2.php',params:{actor:"'"+oConf.rolIngreso+"'",vCU:gE('vCU').value,tipoVista:1,sL:0,pantallaCompleta:1,idProceso:oConf.idProceso,cPagina:'sFrm=true',idReferencia:gE('idUsuario').value,idFormulario:-1}});
+    }
+}
+
+function recargarContenedorCentral()
+{
+	if((gEx('frameContenidoUsuario'))&&( gEx('frameContenidoUsuario').getFrameWindow().recargarContenedorCentral))
+		gEx('frameContenidoUsuario').getFrameWindow().recargarContenedorCentral();
+    else
+		recargarPagina();
+
+    
+}
+
+function setNombreUsuario(lblNombre)
+{
+	gE('lblNombreUsuario').innerHTML=lblNombre;
+}
+
+function removerUsuario(u)
+{
+	function resp(btn)
+	{
+		if(btn=='yes')
+		{
+        	
+			function funcAjax()
+			{
+				var resp=peticion_http.responseText;
+				arrResp=resp.split('|');
+				if(arrResp[0]=='1')
+				{
+					window.parent.cerrarVentanaFancy();
+				}
+				else
+				{
+					msgBox('No se ha podido llevar a cabo la operaci&oacute;n debido al siguiente problema:'+' <br />'+arrResp[0]);
+				}
+			}
+			obtenerDatosWeb('../paginasFunciones/funcionesUsuarios.php',funcAjax, 'POST','funcion=26&usr='+u,true);
+		}
+	}
+	msgConfirm('Est&aacute; seguro de querer eliminar del sistema al usuario seleccionado?<br />(Esta operaci&oacute;n NO podr&aacute; deshacerse)',resp)
+}

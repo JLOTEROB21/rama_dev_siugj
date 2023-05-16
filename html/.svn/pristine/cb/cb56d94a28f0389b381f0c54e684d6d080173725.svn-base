@@ -1,0 +1,204 @@
+<?php
+	include_once("conexionBD.php");
+	include_once("cExcel.php");
+
+	
+	ini_set("memory_limit","256M");
+
+	$arrArchivos=array();
+	$despachos='';
+	if(isset($_POST["despachos"]))
+	{
+		$despachos=$_POST["despachos"];
+		
+	}
+	
+	$arrDespachos=explode(",",$despachos);
+
+	$fechaInicio="";
+	$fechaFin="";
+	
+	if(isset($_POST["fechaInicio"]))
+	{
+		$fechaInicio=$_POST["fechaInicio"];
+		
+	}
+	
+	if(isset($_POST["fechaFin"]))
+	{
+		$fechaFin=$_POST["fechaFin"];
+		
+	}
+	
+	
+	
+	foreach($arrDespachos as $p)
+	{
+		
+		$nombreArchivo=generarReporteBalanceDespacho($p);
+		array_push($arrArchivos,$nombreArchivo);
+		
+	}
+	
+	$libro=NULL;
+	$libro2;
+	$numLibro=1;
+	foreach($arrArchivos as $ruta)
+	{
+		if($numLibro==1)
+		{
+			$libro=new cExcel($ruta,true,"Excel2007");
+		}
+		else
+		{
+			$libro2=new cExcel($ruta,true,"Excel2007");
+			$libro->libroExcel->addExternalSheet($libro2->obtenerHojaActiva());
+		}
+		$numLibro++;
+		
+	}
+	
+	$libro->cambiarHojaActiva(0);
+	$libro->generarArchivo("Excel2007","balanceDespachos_".(date("Y_m_d")).".xlsx");
+	foreach($arrArchivos as $ruta)
+	{
+		unlink($ruta);
+	}
+	
+	function generarReporteBalanceDespacho($p)
+	{
+		global $con;
+		global $baseDir;
+		global $periodo;
+		global $fechaInicio;
+		global $fechaFin;
+		
+		$periodo="Del ".date("d/m/Y",strtotime($fechaInicio))." al ".date("d/m/Y",strtotime($fechaFin));
+		$arrTipoMovimiento=array();
+		$arrTipoMovimiento[1]="Depósito";
+		$arrTipoMovimiento[2]="Pagado a beneficiario";
+		$arrTipoMovimiento[3]="Prescrito";
+		$arrTipoMovimiento[4]="Traspasado";
+		
+		$periodoComprendido="";
+		
+		$consulta="SELECT nombreUnidad,claveRegistro FROM _17_tablaDinamica WHERE claveUnidad=".$p;
+		$fDespacho=$con->obtenerPrimeraFilaAsoc($consulta);
+		$libro=new cExcel("./plantillas/balanceDespacho.xls",true);	
+		
+		
+		$numFila=23;
+		$ct=1;
+		$libro->setValor("B7",$fDespacho["nombreUnidad"]);
+		
+		
+		
+		$libro->setValor("B8","=CONCATENATE(\"".$fDespacho["claveRegistro"]."\",\"\")");
+		
+		$libro->setValor("B9",date("d/m/Y H:i"));
+		$libro->setValor("B10",$periodoComprendido);
+		
+		$totalDepositos=0;
+		$totalPagados=0;
+		$totalPrescritos=0;
+		$totalTraslados=0;
+		
+		
+		$saldoInicioPeriodo=0;
+		$consulta="SELECT * FROM _1163_libroDepositosDespacho WHERE codigoUnidad=".$p." and fechaMovimiento<'".$fechaInicio."' ORDER BY fechaMovimiento desc";
+		$res=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			switch($fila["tipoMovimiento"])
+			{
+				case 1:
+					$saldoInicioPeriodo+=$fila["montoDeposito"];
+				break;
+				case 2:
+					$saldoInicioPeriodo-=$fila["montoDeposito"];
+				break;
+				case 3:
+					//$totalPrescritos+=$fila["montoDeposito"];
+				break;
+				case 4:
+					if($fila["naturalezaAfectacion"]==1)
+						$saldoInicioPeriodo+=$fila["montoDeposito"];
+					else
+						$saldoInicioPeriodo-=$fila["montoDeposito"];
+				break;
+			}
+			
+		}
+		
+		if($saldoInicioPeriodo<0)
+			$saldoInicioPeriodo=0;
+		
+		$consulta="SELECT * FROM _1163_libroDepositosDespacho WHERE codigoUnidad=".$p." and fechaMovimiento>='".$fechaInicio."' and fechaMovimiento<='".$fechaFin."' ORDER BY fechaMovimiento desc";
+		$res=$con->obtenerFilas($consulta);
+		if($con->filasAfectadas>1)
+			$libro->insertarFila(23,$con->filasAfectadas-1);
+		while($fila=mysql_fetch_assoc($res))
+		{
+			$cargo=0;
+			$abono=0;
+			if($fila["naturalezaAfectacion"]==1)
+			{
+				$abono=$fila["montoDeposito"];
+			}
+			else
+			{
+				$cargo=$fila["montoDeposito"];
+			}
+			$libro->setValor("A".$numFila,$ct);
+			$libro->setValor("B".$numFila,("=CONCATENATE(\"".date("d/m/Y",strtotime($fila["fechaMovimiento"]))."\",\"\")"));
+			$libro->setValor("C".$numFila,("=CONCATENATE(\"".$fila["numeroDeposito"]."\",\"\")"));
+			$libro->setValor("D".$numFila,$cargo);
+			$libro->setValor("E".$numFila,$abono);
+			$libro->setValor("F".$numFila,$arrTipoMovimiento[$fila["tipoMovimiento"]]);
+			$libro->setValor("G".$numFila,$fila["conciliado"]==1?"Sí":"No");
+			$libro->unsetNegritas("A".$numFila.":G".$numFila);
+			
+			switch($fila["tipoMovimiento"])
+			{
+				case 1:
+					$totalDepositos+=$fila["montoDeposito"];
+				break;
+				case 2:
+					$totalPagados+=$fila["montoDeposito"];
+				break;
+				case 3:
+					$totalPrescritos+=$fila["montoDeposito"];
+				break;
+				case 4:
+					if($fila["naturalezaAfectacion"]==1)
+						$totalDepositos+=$fila["montoDeposito"];
+					else
+						$totalTraslados+=$fila["montoDeposito"];
+				break;
+			}
+			$numFila++;
+			$ct++;
+			
+		}
+		$numFila--;
+		
+		
+		
+		$libro->setHAlineacion("A".$numFila.":C".$numFila,"C");
+		$libro->setHAlineacion("F".$numFila.":G".$numFila,"C");
+		$libro->setValor("B10",$periodo);
+		$libro->setValor("B11",$saldoInicioPeriodo);
+		$libro->setValor("C14",$totalDepositos);
+		$libro->setValor("C15",$totalPagados);
+		$libro->setValor("C16",$totalPrescritos);
+		$libro->setValor("C17",$totalTraslados);
+		$libro->setValor("B19",$saldoInicioPeriodo+$totalDepositos-($totalPagados+$totalTraslados));
+		$libro->cambiarTituloHoja(0,$fDespacho["claveRegistro"]);
+		
+		$nombreArchivo=$baseDir."/archivosTemporales/".generarNombreArchivoTemporal();
+		$libro->generarArchivoServidor("Excel2007",$nombreArchivo);
+		
+		return $nombreArchivo;
+		
+	}
+?>

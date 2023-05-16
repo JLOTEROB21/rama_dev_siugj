@@ -1,0 +1,1333 @@
+<?php
+	session_start();
+	$mostrarXML=true;
+	include("conexionBD.php");
+	include("configurarIdioma.php");
+	if($incluirCabeceraISO)
+		header('Content-Type: text/html; charset=iso-8859-1');
+	if(isset($_SESSION["leng"]))
+	{
+		if(isset($_POST["parametros"]))
+			$parametros=$_POST["parametros"];
+		if(isset($_POST["funcion"]))
+			$funcion=$_POST["funcion"];
+		$lenguaje=$_SESSION["leng"];
+		
+		switch($funcion)
+		{
+			case 1:
+				obtenerAlumnos();
+			break;
+			case 2:
+				obtenerRelaciones();
+			break;
+			case 3:
+				actualizarRelacion();
+			break;
+			case 4:
+				eliminarRelacion();
+			break;
+			case 5:
+				obtenerPapas();
+			break;
+			case 6:
+				agregarNuevaRelacion();
+			break;
+			case 7:
+				generaLogin();
+			break;
+			case 8:
+				guardarNuevoUsuario();
+			break;
+			case 9:
+				obtenerOpcionesPapasD();
+			break;
+			case 10:
+				registrarNuevoUsuario();
+			break;
+			case 11:
+				obtenerGrados();
+			break;
+			case 12:
+				obtenerGrupos();
+			break;
+			case 13:
+				eliminarRol();
+			break;
+			case 20:
+				obtenerExtensionesRol();
+			break;
+			case 21:
+				obtenerAlumnosRoles();
+			break;
+			case 22:
+				obtenerPapasRelacion();
+			break;
+			case 23:
+				guardarConfiguracionPadre();
+			break;
+			case 24:
+				modificarViveConAlumno();
+			break;
+			case 25:
+				validarDirecciones();
+			break;
+			case 26:
+				eliminarUsuario();
+			break;
+			case 27:
+				asignarDeptoUsuario();
+			break;
+			case 28:
+				inscribirConvocatoria();
+			break;
+			case 29:
+				obtenerLocalidadesEstado();
+			break;
+			case 30:
+				validarNuevoUsr();
+			break;
+			case 31:
+				guardarDatosNivelInvestigador();
+			break;
+			case 32:
+				guardarDatosSNIInvestigador();
+			break;
+			case 33:
+				eliminarNivelInvSNI();
+			break;
+			case 34:
+				obtenerCamposGridFUMP();
+			break;
+			case 35:
+				agregarCamposGridFUMP();
+			break;
+			case 36:
+				removerCamposGridFUMP();
+			break;
+			case 37:
+				guardarRopajeUsuario();
+			break;
+			case 38:
+				cerrarProcesoRopaje();
+			break;
+			case 39:
+				generarPedidoRopaje();
+			break;
+			case 100:
+				desvincularDeMapa();
+			break;
+			case 101:
+				reinscribirAlumno();
+			break;
+			case 102:
+				obtenerEmailUsuario();
+			break;
+			case 103:
+				obtenerBitacoraAccesoUsuarios();
+			break;
+			case 104:
+				removerFotoUsuario();
+			break;
+		}
+	}
+	
+	
+	
+	function obtenerAlumnos()
+	{
+		global $con;
+		$criterio=$_POST["criterio"];
+		$cBusqueda=$_POST["campoBusqueda"];
+		
+		switch($cBusqueda)
+		{
+			case "1": //Paterno
+				$consulta="(select idUsuario,concat('<b>',Paterno,'</b>') as Paterno,Materno,Nom,Nombre,'' as Status from 802_identifica  where Paterno like '".cv($criterio)."%' 
+						  and idUsuario in(select idUsuario from 807_usuariosVSRoles where idRol=7) order by Paterno,Materno,Nom asc)";
+			break;
+			case "2": //Materno
+				$consulta=" (select idUsuario,Paterno,concat('<b>',Materno,'</b>') as Materno,Nom,Nombre,'' as Status from 802_identifica  where Materno like '".cv($criterio)."%' 
+				and idUsuario in(select idUsuario from 807_usuariosVSRoles where idRol=7) order by Materno,Paterno,Nom asc)";
+			break;
+			case "3": //Nombre
+				$consulta=" (select idUsuario,Paterno, Materno,concat('<b>',Nom,'</b>') as Nom,Nombre,'' as Status from 802_identifica  where Nom like '".cv($criterio)."%' 
+				and idUsuario in(select idUsuario from 807_usuariosVSRoles where idRol=7) order by Nom,Paterno,Materno asc)";
+			break;
+		}
+		
+		$arrDatos=$con->obtenerFilasJson($consulta);
+		$obj='{"num":"'.$con->filasAfectadas.'","personas":'.utf8_encode($arrDatos).'}';
+		
+		echo $obj;
+	
+	}
+	
+	function obtenerRelaciones($idAlumnoParam=null)
+	{
+		global $con;
+		if($idAlumnoParam==null)
+			$idAlumno=$_POST["idAlumno"];
+		else
+			$idAlumno=$idAlumnoParam;
+		$consulta="select viveCon from 802_identifica where idUsuario=".$idAlumno;
+		$viveCon=$con->obtenerValor($consulta);
+		$consulta="select i.Nombre,IdParentezco,idAlumnosParientes,au.idUsuario from 802_identifica i,4518_alumnosParientes au where i.idUsuario=au.idUsuario and idAlumno=".$idAlumno;
+		$obj=utf8_encode($con->obtenerFilasJson($consulta));
+		
+		$arrUsuarios=array();
+		$res=$con->obtenerFilas($consulta);
+		$x=0;
+		while($fila=mysql_fetch_row($res))
+		{
+			$objUsuario=array();
+			$objUsuario[0]=$fila[3];
+			$objUsuario[1]=$fila[0];
+			$arrUsuarios[$x]=$objUsuario;
+			$x++;
+		}
+		
+		$nUsuarios=sizeof($arrUsuarios);
+		$arrOpciones="";
+		$opcion="";
+		for($x=0;$x<$nUsuarios;$x++)
+		{
+			if($arrUsuarios[$x][0]!="")
+			{
+				$consulta="select idPareja from 4538_situacionFamiliar where IdPersona=".$arrUsuarios[$x][0]." and vivePareja=1";
+				
+				$idPareja=$con->obtenerValor($consulta);
+				if(($idPareja!="")&&($idPareja!="-1"))
+				{
+					$posPareja=existeValorMatriz($arrUsuarios,$idPareja);
+					if($posPareja!="-1")
+					{
+						if($viveCon==$arrUsuarios[$x][0])
+						{
+							$opcion="['".$arrUsuarios[$x][0]."','".$arrUsuarios[$x][1]." / ".$arrUsuarios[$posPareja][1]."']";
+						}
+						else
+						{
+							$opcion="['".$arrUsuarios[$posPareja][0]."','".$arrUsuarios[$posPareja][1]." / ".$arrUsuarios[$x][1]."']";
+						}
+						$arrUsuarios[$posPareja][0]="";
+					}
+					else
+						$opcion="['".$arrUsuarios[$x][0]."','".$arrUsuarios[$x][1]."']";
+						
+				}
+				else
+					$opcion="['".$arrUsuarios[$x][0]."','".$arrUsuarios[$x][1]."']";
+				
+				if($arrOpciones=="")
+					$arrOpciones=$opcion;
+				else
+					$arrOpciones.=",".$opcion;
+			}
+		}
+		if($arrOpciones=="")
+			$arrOpcionesViveCon="[['-1','Otro']]";
+		else
+			$arrOpcionesViveCon="[['-1','Otro'],".$arrOpciones."]";
+		
+		if($idAlumnoParam==null)
+			echo "1|".uEJ2($obj)."|".$viveCon."|".uEJ($arrOpcionesViveCon);
+		else
+			return $viveCon."|".uEJ($arrOpcionesViveCon);
+	}
+	
+	function actualizarRelacion()
+	{
+		global $con;
+		$idParentezco=$_POST["idParentezco"];
+		$idRelacion=$_POST["idRelacion"];
+		$consulta="update 4518_alumnosParientes set IdParentezco=".$idParentezco." where idAlumnosParientes=".$idRelacion;
+		if($con->ejecutarConsulta($consulta))
+		{
+			echo "1|";
+		}
+		else
+			echo "|";
+	}
+	
+	function eliminarRelacion()
+	{
+		global $con;
+		$idRelacion=$_POST["idRelacion"];
+		$consulta="select idAlumno from 4518_alumnosParientes where idAlumnosParientes=".$idRelacion;
+		$idAlumno=$con->obtenerValor($consulta);
+		$consulta="delete from 4518_alumnosParientes where idAlumnosParientes=".$idRelacion;
+		if($con->ejecutarConsulta($consulta))
+		{
+			$arrViveCon=obtenerRelaciones($idAlumno);
+			echo "1|".$arrViveCon;
+		}
+		else
+			echo "|";
+	}
+	
+	function obtenerPapas()
+	{
+		global $con;
+		$criterio=$_POST["criterio"];
+		$cBusqueda=$_POST["campoBusqueda"];
+		switch($cBusqueda)
+		{
+			case "1": //Paterno
+				$consulta="(select idUsuario,concat('<b>',Paterno,'</b>') as Paterno,Materno,Nom,Nombre,'' as Status from 802_identifica  where Paterno like '".cv($criterio)."%' 
+						  and idUsuario in(select idUsuario from 807_usuariosVSRoles where idRol=6 or idRol=21) order by Paterno,Materno,Nom asc)";
+			break;
+			case "2": //Materno
+				$consulta=" (select idUsuario,Paterno,concat('<b>',Materno,'</b>') as Materno,Nom,Nombre,'' as Status from 802_identifica  where Materno like '".cv($criterio)."%' 
+				and idUsuario in(select idUsuario from 807_usuariosVSRoles where idRol=6 or idRol=21) order by Materno,Paterno,Nom asc)";
+			break;
+			case "3": //Nombre
+				$consulta=" (select idUsuario,Paterno, Materno,concat('<b>',Nom,'</b>') as Nom,Nombre,'' as Status from 802_identifica  where Nom like '".cv($criterio)."%' 
+				and idUsuario in(select idUsuario from 807_usuariosVSRoles where idRol=6 or idRol=21) order by Nom,Paterno,Materno asc)";
+			break;
+		}
+		
+		$arrDatos=$con->obtenerFilasJson($consulta);
+		$obj='{"num":"'.$con->filasAfectadas.'","personas":'.utf8_encode($arrDatos).'}';
+		
+		echo uEJ2($obj);
+	
+	}
+	
+	function agregarNuevaRelacion()
+	{
+		global $con;
+		$idPersona=$_POST["idPersona"];
+		$idAlumno=$_POST["idAlumno"];
+		$idParentezco=$_POST["idParentezco"];
+		$consulta="insert into 4518_alumnosParientes(idAlumno,idUsuario,IdParentezco) values(".$idAlumno.",".$idPersona.",".$idParentezco.") ";
+		if($con->ejecutarConsulta($consulta))
+		{
+			$id=$con->obtenerUltimoID();
+			$arrViveCon=obtenerRelaciones($idAlumno);
+			echo $id."|1|".$arrViveCon;
+		}
+		else
+			echo "|";
+	}
+	
+	function generaLogin()
+	{
+		global $con;
+		$param=$_POST["param"];
+		$objJson=json_decode($param);
+		
+		$fila[0]=utf8_decode($objJson->apPaterno);
+		$fila[1]=utf8_decode( $objJson->apMaterno);
+		$fila[2]=utf8_decode($objJson->nombre);
+		$arrOpciones[0]=algLogin3($fila);
+		$arrOpciones[1]=algLogin1($fila);
+		$arrOpciones[2]=algLogin2($fila);
+		$ctArr=sizeof($arrOpciones);
+		$arrOpc="";
+		for($x=0;$x<$ctArr;$x++)
+		{
+			if($arrOpc=="")
+				$arrOpc=$arrOpciones[$x];
+			else
+				$arrOpc.="|".$arrOpciones[$x];
+		}
+		echo ($arrOpc);
+	}
+	
+	function existeLogin($login)
+	{
+		global $con;
+		global $conexion;
+		$cond2="";
+		if(isset($_POST["idUsuario"]))
+			$cond2=" and idUsuario<>".$_POST["idUsuario"];
+		$consulta="SELECT Login FROM 800_usuarios WHERE Login='".$login."'".$cond2;
+		$ct=$con->contarRegistros($consulta);
+		if($ct==0)
+			return false;
+		else
+			return true;
+	}
+	
+	function algLogin1($fila)  //Primera y segunda letra del nombre, apellido Paterno y primera letra del apellido materno
+	{
+		//$aPaterno=obtenerNomMayor(trim(utf8_encode($fila[0])));
+		$aPaterno=str_replace(' ','',trim(($fila[0])));
+		$aMaterno=obtenerNomMayor(trim(($fila[1])));
+		$nombre=trim(($fila[2]));
+		$iPN=substr(trim($nombre),0,2);
+		$iN=$iPN;
+		$loginUsado=true;
+		$ctN=1;
+		$lnombre="";
+		while($loginUsado)
+		{
+			if($ctN<=1)
+				$lnombre=substr($aMaterno,0,1);
+			else
+				$lnombre=substr($aMaterno,0,1).$ctN;
+			$login =strtolower($iN);
+			$login.=strtolower($aPaterno);
+			$login.=strtolower($lnombre);
+			$login=str_replace(" ","_",$login);
+			if(!existeLogin($login))
+				return quitarAcentos(($login));
+			$ctN++;
+		}
+	}
+	
+	function algLogin2($fila) //Primera letra del nombre, apellido paterno, primera y segunda letra del apellido materno
+	{
+		//$aPaterno=obtenerNomMayor(trim(utf8_encode($fila[0])));
+		$aPaterno=str_replace(' ','',trim(($fila[0])));
+		$aMaterno=obtenerNomMayor(trim(($fila[1])));
+		$nombre=trim(($fila[2]));
+		$iPN=substr($nombre,0,1);
+		$iN=$iPN;
+		$loginUsado=true;
+		$ctN=2;
+		$lnombre="";
+		while($loginUsado)
+		{
+			if($ctN<=strlen($aMaterno))
+				$lnombre=substr($aMaterno,0,$ctN);
+			else
+				$lnombre=$aMaterno.$ctN;
+			$login =strtolower($iN);
+			$login.=strtolower($aPaterno);
+			$login.=strtolower($lnombre);
+			$login=str_replace(" ","_",$login);
+			if(!existeLogin($login))
+				return quitarAcentos(($login));
+			$ctN++;
+		}
+	}
+	
+	function algLogin3($fila) //Primera letra del nombre, apellido paterno, inicial del apellido materno
+	{
+		//$aPaterno=obtenerNomMayor(trim(utf8_encode($fila[0])));
+		$aPaterno=str_replace(' ','',trim(($fila[0])));
+		$aMaterno=obtenerNomMayor(trim(($fila[1])));
+		$nombre=trim(($fila[2]));
+		$iPN=substr($nombre,0,1);
+		$iN=$iPN;
+		$loginUsado=true;
+		$ctN=1;
+		$lnombre="";
+		while($loginUsado)
+		{
+			if($ctN<=1)
+				$lnombre=substr($aMaterno,0,1);
+			else
+				$lnombre=substr($aMaterno,0,1).$ctN;
+			$login =strtolower($iN);
+			$login.=strtolower($aPaterno);
+			$login.=strtolower($lnombre);
+			$login=str_replace(" ","_",$login);
+			if(!existeLogin($login))
+				return quitarAcentos(($login));
+			$ctN++;
+		}
+	}
+	
+	function obtenerNomMayor($apellido)
+	{
+		$arrNom=explode(' ',$apellido);		
+		if(sizeof($arrNom)>1)
+		{
+
+			$ctNom=sizeof($arrNom);
+			$nomMayor="";
+			for($x=0;$x<$ctNom;$x++)
+			{
+				if(strlen($arrNom[$x])>=strlen($nomMayor))
+					$nomMayor=$arrNom[$x];
+			}
+		}
+		else
+			$nomMayor=$apellido;
+		return $nomMayor;
+	}
+	
+	function guardarNuevoUsuario()
+	{
+		global $con;
+		global $mostrarXML;
+		$mostrarXML=false;
+		$cadObjJson=$_POST["param"];
+		$objJson=json_decode($cadObjJson);
+		$apPaterno=$objJson->apPaterno;
+		$apMaterno=$objJson->apMaterno;
+		$nombre=$objJson->nombre;
+		$nombreC=trim($nombre).' '.trim($apPaterno).' '.trim($apMaterno);
+		$prefijo=$objJson->prefijo;
+		$nacionalidad=$objJson->nacionalidad;
+		$fechaNac=cambiaraFechaMysql($objJson->fechaNac);
+		$mail=$objJson->mail;
+		
+		$password=$objJson->password;
+		$login=$objJson->login;
+		$query[0]="begin";
+		$query[1]="insert into 800_usuarios(Login,Password,Status,Nombre,FechaCambio) values('".cv($login)."','".cv($password)."',5,'".cv($nombreC)."','".date('Y-m-d')."')";
+		if($con->ejecutarBloque($query))
+		{
+			$idUsuario=$con->obtenerUltimoID();
+			$consulta[0]="insert into 805_mails(Mail,Tipo,Notificacion,idUsuario) values('".cv(trim($mail))."',0,1,".$idUsuario.")";
+			$consulta[1]="insert into 807_usuariosVSRoles(idUsuario,idRol,idExtensionRol,codigoRol) values(".$idUsuario.",-1000,0,'-1000_0')";
+			$consulta[2]="insert into 807_usuariosVSRoles(idUsuario,idRol,idExtensionRol,codigoRol) values(".$idUsuario.",6,0,'6_0')";
+			$consulta[3]="insert into 802_identifica(Nom,Paterno,Materno,Nombre,Prefijo,fechaNacimiento,Nacionalidad,Status,idUsuario) 
+						  values('".cv($nombre)."','".cv($apPaterno)."','".cv($apMaterno)."','".cv($nombreC).
+						  "','".cv($prefijo)."','".cv($fechaNac)."','".cv($nacionalidad)."',5,".$idUsuario.")";
+			$consulta[4]="insert into 801_adscripcion(Status,idUsuario) values(5,".$idUsuario.")";
+			$consulta[5]="insert into 803_direcciones(idUsuario,Tipo) values(".$idUsuario.",0)";
+			$consulta[6]="insert into 803_direcciones(idUsuario,Tipo) values(".$idUsuario.",1)";
+			$consulta[7]="insert into 806_fotos(idUsuario) values(".$idUsuario.")";
+			$consulta[8]="commit";
+			if($con->ejecutarBloque($consulta))		
+				echo "1|";
+			else
+				echo "|";
+		}
+		else
+			echo "|";
+	}
+	
+	function obtenerOpcionesPapasD()
+	{
+		global $con;
+		$idUsuario=$_POST["idUsuario"];
+		$idAlumno=$_POST["idAlumno"];
+		$consulta="select distinct(i.Nombre),i.idUsuario from 802_identifica i, 4518_alumnosParientes a where i.idUsuario=a.idUsuario 
+					and a.idAlumno in(select idAlumno from 4518_alumnosParientes where idUsuario=".$idUsuario.")
+					and a.idUsuario not in (select idUsuario from 4518_alumnosParientes where idAlumno =".$idAlumno.")";
+		$obj=$con->obtenerFilasJson($consulta);
+		echo uEJ($obj);
+	}
+	
+	function registrarNuevoUsuario()
+	{
+		global $con;
+		$obj=json_decode($_POST["obj"]);
+		$status="105";
+		$txtApPaterno=cv($obj->txtApPaterno);
+		$txtApMaterno=cv($obj->txtApMaterno);
+		$txtNombre=cv($obj->txtNombre);
+		$txtCalle=cv($obj->txtCalle);
+		$txtNumero=cv($obj->txtNumero);
+		$txtColonia=cv($obj->txtColonia);
+		$txtCiudad=cv($obj->txtCiudad);
+		$txtMunicipio=cv($obj->txtMunicipio);
+		$txtMail=cv($obj->txtMail);
+		$txtRelacion=cv($obj->txtRelacion);
+		$idAlumno=$obj->idAlumno;
+		$txtNombreC=trim($txtNombre." ".$txtApPaterno." ".$txtApMaterno);
+		
+		$consulta1="begin";
+		$x=0;
+		if($con->ejecutarConsulta($consulta1))
+		{
+			$consulta2="insert into 800_usuarios(Status,Nombre,FechaActualiza,paso)values(".$status.",'".$txtNombreC."','".date('Y-m-d')."',1)";
+			if($con->ejecutarConsulta($consulta2))
+			{
+				$idUsuario=$con->obtenerUltimoID();
+				$consulta[$x]="insert into 801_adscripcion(Status,Actualizado,idUsuario) values(".$status.",0,".$idUsuario.")";
+				$x++;
+				$consulta[$x]="insert into 802_identifica(Nom,Paterno,Materno,Nombre,Status,idUsuario,Actualizado) 
+							values('".$txtNombre."','".$txtApPaterno."','".$txtApMaterno."','".$txtNombreC."',".$status.",".$idUsuario.",0)";
+				$x++;
+				$consulta[$x]="insert into 803_direcciones(Calle,Numero,Colonia,Ciudad,Municipio,idUsuario,Tipo) values
+							('".$txtCalle."','".$txtNumero."','".$txtColonia."','".$txtCiudad."','".$txtMunicipio."',".$idUsuario.",0)";
+				$x++;
+				$consulta[$x]="insert into 803_direcciones(idUsuario,Tipo) values(".$idUsuario.",1)";
+				$x++;
+				if(trim($txtMail)!="")
+				{
+					$consulta[$x]="insert into 805_mails(Mail,Tipo,Notificacion,idUsuario) values('".$txtMail."',0,1,".$idUsuario.")";
+					$x++;
+				}
+				$consulta[$x]="insert into 806_fotos(idUsuario) values(".$idUsuario.")";
+				$x++;
+				$consulta[$x]="insert into 807_usuariosVSRoles(idUsuario,idRol) values(".$idUsuario.",6)";
+				$x++;
+				$consulta[$x]="insert into 4518_alumnosParientes(idAlumno,idUsuario,IdParentezco) values(".$idAlumno.",".$idUsuario.",".$txtRelacion.")";
+				$x++;
+				
+				
+				$consulta[$x]="commit";
+				if($con->ejecutarBloque($consulta))
+				{
+					$idRel=$con->obtenerUltimoID();
+					echo $idRel."|1|".$idUsuario;
+				}
+				else
+					echo "|";
+			}
+			else
+				echo "|";
+		}
+		else
+			echo "|";			
+	}
+	
+	function obtenerGrados()
+	{
+		global $con;
+		$idInstanciaPlanEstudio=$_POST["idInstanciaPlanEstudio"];
+		$consulta="SELECT idPlanEstudio,idEsquemaGrupo FROM 4513_instanciaPlanEstudio WHERE idInstanciaPlanEstudio=".$idInstanciaPlanEstudio;
+		$fila=$con->obtenerPrimeraFila($consulta);
+		$idPlanEstudio=$fila[0];
+		$idEsquemaGrupo=$fila[1];
+		$consulta="SELECT idGrado,leyendaGrado FROM 4505_estructuraCurricular e,4501_Grado g 
+					WHERE g.idGrado=e.idUnidad AND  tipoUnidad=3 AND e.idPlanEstudio=".$idPlanEstudio." ORDER BY g.ordenGrado";
+		$arrGrados=$con->obtenerFilasArreglo($consulta);
+		echo "1|".$arrGrados."|".$idEsquemaGrupo;
+	}
+	
+	function obtenerGrupos()
+	{
+		global $con;
+		$idInstancia=$_POST["idInstancia"];
+		$ciclo=$_POST["ciclo"];
+		$consulta="SELECT idGrupoPadre,nombreGrupo FROM 4540_gruposMaestros WHERE idCiclo=".$ciclo." AND idInstanciaPlanEstudio=".$idInstancia." order by nombreGrupo";
+		$arrGrupos=$con->obtenerFilasArreglo($consulta);
+		echo "1|".uEJ($arrGrupos);
+	}
+	
+	function eliminarRol()
+	{
+		global $con;
+		$idCategoria=$_POST["id"];
+		$consulta="delete from 4084_unidadesRoles where idUnidadesRoles=".$idCategoria;
+		if($con->ejecutarConsulta($consulta))
+		{
+			echo "1|";
+		}
+		else
+			echo "|";
+	}
+	
+	function obtenerExtensionesRol()
+	{
+		global $con;
+		$extension=$_POST["extension"];	
+		if(!isset($_POST["noTodos"]))
+			$consulta="select idUnidadesRoles,unidadRol from  4084_unidadesRoles where idCategoria in(".$extension.",0)";
+		else
+			$consulta="select idUnidadesRoles,unidadRol from  4084_unidadesRoles where idCategoria in(".$extension.")";
+		$arrUnidades=$con->obtenerFilasArreglo($consulta);
+		echo "1|".uEJ($arrUnidades);
+		
+	}
+	
+	function obtenerAlumnosRoles()
+	{
+		global $con;
+		$criterio=$_POST["criterio"];
+		$cBusqueda=$_POST["campoBusqueda"];
+		switch($cBusqueda)
+		{
+			case "1": //Paterno
+				$consulta="(select idUsuario,concat('<b>',Paterno,'</b>') as Paterno,Materno,Nom,Nombre,'' as Status from 802_identifica  where Paterno like '".cv($criterio)."%' 
+						  and idUsuario in(select idUsuario from 807_usuariosVSRoles where idRol=7) order by Paterno,Materno,Nom asc)";
+			break;
+			case "2": //Materno
+				$consulta=" (select idUsuario,Paterno,concat('<b>',Materno,'</b>') as Materno,Nom,Nombre,'' as Status from 802_identifica  where Materno like '".cv($criterio)."%' 
+				and idUsuario in(select idUsuario from 807_usuariosVSRoles where idRol=7) order by Materno,Paterno,Nom asc)";
+			break;
+			case "3": //Nombre
+				$consulta=" (select idUsuario,Paterno, Materno,concat('<b>',Nom,'</b>') as Nom,Nombre,'' as Status from 802_identifica  where Nom like '".cv($criterio)."%' 
+				and idUsuario in(select idUsuario from 807_usuariosVSRoles where idRol=7) order by Nom,Paterno,Materno asc)";
+			break;
+		}
+		
+		$arrDatos=$con->obtenerFilasJson($consulta);
+		$obj='{"num":"'.$con->filasAfectadas.'","personas":'.uDJ($arrDatos).'}';
+		echo $obj;
+	}
+	
+	function obtenerPapasRelacion()
+	{
+		global $con;
+		$criterio=$_POST["criterio"];
+		$cBusqueda=$_POST["campoBusqueda"];
+		$idUsuario=$_POST["idUsuario"];
+		switch($cBusqueda)
+		{
+			case "1": //Paterno
+				$consulta="(select idUsuario,concat('<b>',Paterno,'</b>') as Paterno,Materno,Nom,Nombre,'' as Status from 802_identifica  where Paterno like '".cv($criterio)."%' 
+						  and idUsuario<>".$idUsuario." and idUsuario in(select idUsuario from 807_usuariosVSRoles where idRol=6 or idRol=21) order by Paterno,Materno,Nom asc)";
+			break;
+			case "2": //Materno
+				$consulta=" (select idUsuario,Paterno,concat('<b>',Materno,'</b>') as Materno,Nom,Nombre,'' as Status from 802_identifica  where Materno like '".cv($criterio)."%' 
+				and idUsuario<>".$idUsuario." and idUsuario in(select idUsuario from 807_usuariosVSRoles where idRol=6 or idRol=21) order by Materno,Paterno,Nom asc)";
+			break;
+			case "3": //Nombre
+				$consulta=" (select idUsuario,Paterno, Materno,concat('<b>',Nom,'</b>') as Nom,Nombre,'' as Status from 802_identifica  where Nom like '".cv($criterio)."%' 
+				and idUsuario<>".$idUsuario." and idUsuario in(select idUsuario from 807_usuariosVSRoles where idRol=6 or idRol=21) order by Nom,Paterno,Materno asc)";
+			break;
+		}
+		
+		$arrDatos=$con->obtenerFilasJson($consulta);
+		$obj='{"num":"'.$con->filasAfectadas.'","personas":'.utf8_encode($arrDatos).'}';
+		
+		echo ($obj);
+	
+	}
+	
+	function guardarConfiguracionPadre()
+	{
+		global $con;
+		$cadObj=$_POST["obj"];
+		
+		$obj=json_decode($cadObj);
+		
+		$idUsuario=$obj->idUsuario;
+		$idConyuge=$obj->idConyuge;
+		if($idConyuge=="")
+			$idConyuge="-1";
+		$vivePareja=$obj->vivePareja;
+		$edoCivil=$obj->edoCivil;
+		$especifique=$obj->especifique;
+		$idDireccionC=$obj->idDireccionC;
+		if(($edoCivil=="2")||($edoCivil=="4")) //Soltero,viudo
+		{
+			$idConyuge="-1";
+			$vivePareja="-1";
+			$especifique="";
+		}
+		if($idConyuge=="-1")
+			$vivePareja="-1";
+
+		$x=0;
+		$consulta="begin";
+		if($con->ejecutarConsulta($consulta))
+		{
+			if(!desvincularPareja($idUsuario))
+			{
+				echo "|";
+				return;
+			}
+			$consulta="select IdPersona,idPareja from 4538_situacionFamiliar where IdPersona=".$idUsuario;
+			
+			$fila=$con->obtenerPrimeraFila($consulta);
+			if($fila)
+			{
+				$query[$x]="update 4538_situacionFamiliar set Estado=".$edoCivil.",Otro='".cv($especifique)."',vivePareja=".$vivePareja.",idPareja=".$idConyuge." where IdPersona=".$idUsuario;
+				$x++;
+			}
+			else
+			{
+				$query[$x]="insert into 4538_situacionFamiliar(Estado,IdPersona,Otro,vivePareja,idPareja) values(".$edoCivil.",".$idUsuario.",'".cv($especifique)."',".$vivePareja.",".$idConyuge.")";
+				$x++;
+			}
+			if($idConyuge!="-1")
+			{
+				$consulta="select IdPersona,idPareja from 4538_situacionFamiliar where IdPersona=".$idConyuge;
+				$filaC=$con->obtenerPrimeraFila($consulta);
+				if($filaC)
+				{
+					$query[$x]="update 4538_situacionFamiliar set Estado=".$edoCivil.",Otro='".cv($especifique)."',vivePareja=".$vivePareja.",idPareja=".$idUsuario." where IdPersona=".$idConyuge;
+					$x++;
+				}
+				else
+				{
+					$query[$x]="insert into 4538_situacionFamiliar(Estado,IdPersona,Otro,vivePareja,idPareja) values(".$edoCivil.",".$idConyuge.",'".cv($especifique)."',".$vivePareja.",".$idUsuario.")";
+					$x++;
+				}
+			}
+			
+			if($idDireccionC!=-1)
+			{
+				if($idDireccionC==$idUsuario)
+				{
+					$query[$x]="update 802_identifica set   viveCon=".$idUsuario." where idUsuario=".$idConyuge;
+					$x++;
+					if(!actualizarDireccion($idUsuario,$idConyuge))
+					{
+						echo "|";
+						return;
+					}
+				}
+				else
+				{
+					$query[$x]="update 802_identifica set viveCon=".$idConyuge." where idUsuario=".$idUsuario;
+					$x++;
+					if(!actualizarDireccion($idConyuge,$idUsuario))
+					{
+						echo "|";
+						return;
+					}
+				}
+			}
+			
+			$query[$x]="commit";
+			$x++;
+			if($con->ejecutarBloque($query))
+				echo "1|";
+			else	
+				echo "|";
+		}
+		else
+			echo "|";
+	}
+	
+	function validarDirecciones()
+	{
+		global $con;
+		$idUsuario1=$_POST["idUsuario1"];
+		$idUsuario2=$_POST["idUsuario2"];
+		$consulta1="select Calle,Numero,Colonia,Ciudad,Municipio,Estado,Pais,cp from 803_direcciones where Tipo=0 and idUsuario=".$idUsuario1;
+		$f1=$con->obtenerPrimeraFila($consulta1);
+		$consulta2="select Calle,Numero,Colonia,Ciudad,Municipio,Estado,Pais,cp from 803_direcciones where Tipo=0 and idUsuario=".$idUsuario2;
+		$f2=$con->obtenerPrimeraFila($consulta2);
+		$direccion1="";
+		$direccion2="";
+		
+		$consulta1="select Nombre from 802_identifica where idUsuario=".$idUsuario1;
+		$nomUsuario1=$con->obtenerValor($consulta1);
+		$consulta2="select Nombre from 802_identifica where idUsuario=".$idUsuario2;
+		$nomUsuario2=$con->obtenerValor($consulta2);
+		if(compararArreglos($f1,$f2))
+		{
+			$direccion1=formatearDireccion($f1);
+		}
+		else
+		{
+			$direccion1=formatearDireccion($f1);
+			$direccion2=formatearDireccion($f2);
+		}
+		
+		$arrDireccion="[['".$direccion1."','".$idUsuario1."','".uEJ($nomUsuario1)."']";
+		if($direccion2!="")
+			$arrDireccion.=",['".$direccion2."','".$idUsuario2."','".uEJ($nomUsuario2)."']";
+		$arrDireccion.="]";
+		echo "1|".($arrDireccion);
+	}
+	
+	function modificarViveConAlumno()
+	{
+		global $con;
+		$idUsuario=$_POST["idUsuario"];
+		$viveCon=$_POST["viveCon"];
+		$consulta="update 802_identifica set viveCon=".$viveCon." where idUsuario=".$idUsuario;
+		if($con->ejecutarConsulta($consulta))
+		{
+			if($viveCon>0)
+			{
+				if(actualizarDireccion($viveCon,$idUsuario))
+					echo "1|";
+				else
+					echo "|";
+			}
+			else
+				echo "1|";
+		}
+		else
+			echo "|";
+	}
+	
+	function eliminarUsuario()
+	{
+		global $con;
+		$idUsr=base64_decode($_POST["usr"]);
+		$consulta="delete from 800_usuarios where idUsuario=".$idUsr;
+		//echo $consulta;
+		
+		if($con->ejecutarConsulta($consulta))
+			echo "1|";
+		else
+			echo "|";
+		
+	}
+	
+	function desvincularPareja($idUsuario)
+	{
+		global $con;
+		$consulta="select * from 4538_situacionFamiliar where IdPersona=".$idUsuario;
+		$fila=$con->obtenerPrimeraFila($consulta);
+		$x=0;
+		$query=array();
+		if(($fila[5]!="-1")&&($fila[5]!=""))
+		{
+			$query[$x]="update 4538_situacionFamiliar set vivePareja=-1,idPareja=-1 where IdPersona=".$fila[5];
+			$x++;
+			$query[$x]="update 4538_situacionFamiliar set vivePareja=-1,idPareja=-1 where IdPersona=".$idUsuario;
+			$x++;
+			$query[$x]="update 802_identifica set viveCon=-1 where idUsuario=".$fila[5];
+			$x++;
+			$query[$x]="update 802_identifica set viveCon=-1 where idUsuario=".$idUsuario;
+			$x++;
+		}
+		return $con->ejecutarBloque($query);
+	}
+	
+	function asignarDeptoUsuario()
+	{
+		global $con;
+		$idUsuario=$_POST["idUsuario"];
+		$codUnidad=$_POST["codUnidad"];
+		$institucion=obtenerCodigoInstitucion($codUnidad);
+		$consulta="update 801_adscripcion set Institucion='".$institucion."',codigoUnidad='".$codUnidad."' where idUsuario=".$idUsuario;
+		if($con->ejecutarConsulta($consulta))
+			echo "1|";
+		else
+			echo "|";
+	}
+	
+	function desvincularDeMapa()
+	{
+		global $con;
+		$idUsuario=$_POST["idUsuario"];
+		$idPrograma=$_POST["idPrograma"];
+		$idGrado=$_POST["idGrado"];
+		$ciclo=$_POST["idCiclo"];
+		
+		
+		$conMapa="SELECT idMapaCurricular FROM 4029_mapaCurricular WHERE idPrograma=".$idPrograma." AND ciclo=".$ciclo;
+		$idMapaCurricular=$con->obtenerValor($conMapa);
+		
+		$conMaterias="SELECT idMateria,idGrado FROM 4031_elementosMapa WHERE idMapaCurricular=".$idMapaCurricular." AND idTipoMateria=1";
+		$resMaterias=$con->obtenerFilas($conMaterias);
+		
+		$consulta="begin";
+		$ct=0;
+		if($con->ejecutarConsulta($consulta))
+		{
+			$consulta="select idAlumnoTabla from 4118_alumnos where ciclo=".$ciclo." and idUsuario=".$idUsuario." and idPrograma=".$idPrograma." and idGrado=".$idGrado;
+			$idAlumno=$con->obtenerValor($consulta);
+			
+			if($idAlumno!="")
+			{
+				$query[$ct]="delete from 4118_alumnos where ciclo=".$ciclo." and idPrograma=".$idPrograma." and idUsuario=".$idUsuario." and idGrado=".$idGrado;
+				$ct++;
+				
+				$consulta="select em.idMateria,m.compartida from 4031_elementosMapa em,4013_materia m where m.idmateria=em.idMateria and em.idPadre=0 and em.idGrado=".$idGrado;
+				  $resMat=$con->obtenerFilas($consulta);
+				  while($filaMat=mysql_fetch_row($resMat))
+				  {
+					  if($filaMat[1]==1)
+					  {
+						  $query[$ct]="delete from 4120_alumnosVSElementosMapa where idMateria=".$filaMat[0]." AND idUsuario=".$idUsuario;
+						  $ct++;
+						 // $existe=$con->obtenerValor($conExiste);
+//						  if($existe=="")
+//						  {
+//							  $query[$ct]="insert into 4120_alumnosVSElementosMapa(idUsuario,situacion,idGrupo,idMateria,idPrograma) values(".$idUsuario.",1,NULL,".$filaMat[0].",".$idSeccion.")";
+//							  $ct++;
+//						  }
+						  
+						  borrarMateriasObligatoriasAlumno($idUsuario,$filaMat[0],$query,$ct,$idPrograma);
+					  }
+					  else
+					  {
+						  $query[$ct]="delete FROM 4120_alumnosVSElementosMapa WHERE idMateria=".$filaMat[0]." AND idUsuario=".$idUsuario;
+						  $ct++;
+						  //$existe=$con->obtenerValor($conExiste);
+//						  if($existe=="")
+//						  {
+//							  $query[$ct]="insert into 4120_alumnosVSElementosMapa(idUsuario,situacion,idGrupo,idMateria,idPrograma) values(".$idUsuario.",1,".$idGrupo.",".$filaMat[0].",".$idSeccion.")";
+//							  $ct++;
+//						  }
+						 
+						  borrarMateriasObligatoriasAlumno($idUsuario,$filaMat[0],$query,$ct,$idPrograma);
+					  }
+				  }
+				
+			}
+			$query[$ct]="commit";
+			if($con->ejecutarBloque($query))
+			{
+				echo "1|";
+			}
+			else
+			{
+				echo "2|";
+			}
+		}
+	}
+	
+	function borrarMateriasObligatoriasAlumno($idUsuario,$idPadre,&$query,&$ct,$idPrograma)
+	{
+		global $con;
+		$consulta="select em.idMateria,m.compartida from 4031_elementosMapa em,4013_materia m where m.idmateria=em.idMateria and em.idPadre=".$idPadre;
+		$resMat=$con->obtenerFilas($consulta);
+		while($filaMat=mysql_fetch_row($resMat))
+		{
+			if($filaMat[1]==1)
+			{
+				$query[$ct]="delete FROM 4120_alumnosVSElementosMapa WHERE idMateria=".$filaMat[0]." AND idUsuario=".$idUsuario;
+				$ct++;
+				borrarMateriasObligatoriasAlumno($idUsuario,$filaMat[0],$query,$ct,$idPrograma);
+			}
+			else
+			{
+				$query[$ct]="delete FROM 4120_alumnosVSElementosMapa WHERE idMateria=".$filaMat[0]." AND idUsuario=".$idUsuario;
+				$ct++;
+				borrarMateriasObligatoriasAlumno($idUsuario,$filaMat[0],$query,$ct,$idPrograma);
+			}
+		}
+	}
+	
+	function reinscribirAlumno()
+	{
+		global $con;
+		$iU=bD($_POST["iU"]);	
+		$iG=bD($_POST["iG"]);	
+		$iP=bD($_POST["iP"]);	
+		$ciclo=bD($_POST["ciclo"]);	
+		$consulta="insert into 4118_alumnos(ciclo,idPrograma,idGrado,idUsuario,estado) values(".$ciclo.",".$iP.",".$iG.",".$iU.",7)";
+		if($con->ejecutarConsulta($consulta))
+		{
+			$consulta="SELECT estado FROM 4119_estadosAlumno WHERE idEstadoAlumno=7";
+			$tEstado=$con->obtenerValor($consulta);
+			echo "1|".$tEstado;	
+		}
+		
+	}
+	
+	function inscribirConvocatoria()
+	{
+		global $con;
+		$idConvocatoria=$_POST["idConvocatoria"];
+		$consulta="insert into 9200_usuariosInscritosConvocatoria(idUsuario,idConvocatoria,fechaInscripcion) values(".$_SESSION["idUsr"].",".$idConvocatoria.",'".date("Y-m-d")."')";	
+		eC($consulta);
+	}
+	
+	function obtenerLocalidadesEstado()
+	{
+		global $con;
+		$cveEstado=$_POST["cveEstado"];
+		$consulta="SELECT cveMunicipio,municipio FROM 821_municipios WHERE cveEstado='".$cveEstado."' order by municipio";
+		$arrEstados=$con->ObtenerFilasArreglo($consulta);
+		echo "1|".$arrEstados;
+	}
+	
+	function validarNuevoUsr()
+	{
+		global $con;
+		$nombre=$_POST["nombre"];
+		$apPaterno=$_POST["apPaterno"];
+		$apMaterno=$_POST["apMaterno"];
+		$rfc=$_POST["rfc"];
+		$curp=$_POST["curp"];
+		$idUsuario=$_POST["idUsuario"];
+		
+		if($rfc!="")
+		{
+			$consulta="select * from 802_identifica where RFC='".$rfc."' and idUsuario<>".$idUsuario;		
+			$fila=$con->obtenerPrimeraFila($consulta);
+			if($fila)
+			{
+				$resp='{"resp":"1","msg":"El RFC ingresado ya estest&aacute; siendo ocupado por otra persona ['.$fila[2]." ".$fila[3]." ".$fila[1].']"}';
+				echo "1|".$resp;
+				return;
+			}
+		}
+		if($curp!="")
+		{
+			$consulta="select * from 802_identifica where CURP='".$curp."' and idUsuario<>".$idUsuario;		
+			$fila=$con->obtenerPrimeraFila($consulta);
+			if($fila)
+			{
+				$resp='{"resp":"1","msg":"La CURP ingresada ya est&aacute; siendo ocupada por otra persona ['.$fila[2]." ".$fila[3]." ".$fila[1].']"}';
+				echo "1|".$resp;
+				return;
+			}
+		}
+		
+		$consulta="select * from 802_identifica where Paterno='".$apPaterno."' and Materno='".$apMaterno."' and Nom='".$nombre."' and idUsuario<>".$idUsuario;	
+		$fila=$con->obtenerPrimeraFila($consulta);
+		if($fila)
+		{
+			$resp='{"resp":"2","msg":""}';
+			echo "1|".$resp;
+			return;
+		}
+		echo '1|{"resp":"0"}';
+		
+	}
+	
+	function guardarDatosNivelInvestigador()
+	{
+		global $con;
+		$cadObj=$_POST["obj"];
+		$obj=json_decode($cadObj);
+		
+		$consulta="select fechaNombramiento,fechaVencimiento from 801_investigadorVSnivelInvestigador where idUsuario=".$obj->idUsuario." and idNivelInvestigador<>".$obj->idNivelInvUsuario;
+		$resNiveles=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_row($resNiveles))
+		{
+			if(colisionaTiempo($obj->fechaNombramiento,$obj->fechaVigencia,$fila[0],$fila[1]))
+			{
+				echo "<br>La fecha de nombramiento y vigencia ya se encuentran comprendidos en un periodo de fechas registrado anteriormente";
+				return;
+			}
+		}
+		
+		
+		if($obj->idNivelInvUsuario==-1)
+		{
+			$consulta="INSERT INTO  801_investigadorVSnivelInvestigador(idUsuario,nivel,fechaNombramiento,situacion,fechaVencimiento)
+						VALUES(".$obj->idUsuario.",".$obj->idNivelInvestigador.",'".$obj->fechaNombramiento."',1,'".$obj->fechaVigencia."')";
+		}
+		else
+		{
+			$consulta="update  801_investigadorVSnivelInvestigador set idUsuario=".$obj->idUsuario.",nivel=".$obj->idNivelInvestigador.",
+						fechaNombramiento='".$obj->fechaNombramiento."',fechaVencimiento='".$obj->fechaVigencia."' where idNivelInvestigador=".$obj->idNivelInvUsuario;
+		}
+		if($con->ejecutarConsulta($consulta))
+		{
+			if($obj->idNivelInvUsuario==-1)
+			{
+				$obj->idNivelInvUsuario=$con->obtenerUltimoID();
+			}
+			echo "1|".$obj->idNivelInvUsuario;
+		}
+		
+	}
+	
+	function guardarDatosSNIInvestigador()
+	{
+		global $con;
+		$cadObj=$_POST["obj"];
+		$obj=json_decode($cadObj);
+		
+		$consulta="select fechaNombramiento,fechaVencimiento from 801_nivelSNIInvestigador where idUsuario=".$obj->idUsuario." and idNivelSNIInvestigador<>".$obj->idNivelSNIUsuario;
+		$resNiveles=$con->obtenerFilas($consulta);
+		while($fila=mysql_fetch_row($resNiveles))
+		{
+			if(colisionaTiempo($obj->fechaNombramiento,$obj->fechaVigencia,$fila[0],$fila[1]))
+			{
+				echo "<br>La fecha de nombramiento y vigencia ya se encuentran comprendidos en un periodo de fechas registrado anteriormente";
+				return;
+			}
+		}
+		
+		if($obj->idNivelSNIUsuario==-1)
+		{
+			$consulta="INSERT INTO  801_nivelSNIInvestigador(idUsuario,nivelSNI,fechaNombramiento,fechaVencimiento)
+						VALUES(".$obj->idUsuario.",".$obj->idNivelSNI.",'".$obj->fechaNombramiento."','".$obj->fechaVigencia."')";
+		}
+		else
+		{
+			$consulta="update  801_nivelSNIInvestigador set idUsuario=".$obj->idUsuario.",nivelSNI=".$obj->idNivelSNI.",
+						fechaNombramiento='".$obj->fechaNombramiento."',fechaVencimiento='".$obj->fechaVigencia."' where idNivelSNIInvestigador=".$obj->idNivelSNIUsuario;
+		}
+		if($con->ejecutarConsulta($consulta))
+		{
+			if($obj->idNivelSNIUsuario==-1)
+			{
+				$obj->idNivelSNIUsuario=$con->obtenerUltimoID();
+			}
+			echo "1|".$obj->idNivelSNIUsuario;
+		}
+	}
+	
+	
+	function eliminarNivelInvSNI()
+	{
+		global $con;
+		$tipoEliminacion=$_POST["tipo"]; //0 Nivel;1 SNI
+		$idRegistro=$_POST["idRegistro"];
+		if($tipoEliminacion==0)
+			$consulta="DELETE from 801_investigadorVSnivelInvestigador WHERE idNivelInvestigador=".$idRegistro;
+		else
+			$consulta="DELETE FROM 801_nivelSNIInvestigador WHERE idNivelSNIInvestigador=".$idRegistro;
+		eC($consulta);
+	}
+	
+	
+	function obtenerCamposGridFUMP()
+	{
+		global $con;
+		$idUsuario=$_SESSION["idUsr"];
+		$tipo=$_POST["tipo"]; //1 GridMostrar; 2 Grid campo Restante	
+		
+		$consulta="";
+		if($tipo=="1")
+			$consulta="SELECT cF.idCampo,c.nombreCampo FROM 801_confCamposFump cF,801_camposFump c WHERE c.idCampo=cF.idCampo AND cF.idUsuario=".$idUsuario." order by c.nombreCampo";
+		else
+		{
+			$consulta="SELECT idCampo FROM 801_confCamposFump cF WHERE cF.idUsuario=".$idUsuario;
+			$lUsuarios=$con->obtenerListaValores($consulta);
+			if($lUsuarios=="")
+				$lUsuarios="-1";
+			$consulta="SELECT idCampo,nombreCampo FROM 801_camposFump WHERE idCampo NOT in(".$lUsuarios.") order by nombreCampo";
+		}
+		$arrCampos=$con->obtenerFilasArreglo($consulta);			
+		echo "1|".$arrCampos;
+	}
+	
+	function agregarCamposGridFUMP()
+	{
+		global $con;
+		$idUsuario=$_SESSION["idUsr"];
+		$listCampos=$_POST["lista"];
+		$arrLista=explode(",",$listCampos);
+		$x=0;
+		$consulta[$x]="begin";
+		$x++;
+		foreach($arrLista as $idCampo)
+		{
+			$consulta[$x]="insert into 801_confCamposFump(idUsuario,idCampo) values(".$idUsuario.",".$idCampo.")";
+			$x++;
+		}
+		$consulta[$x]="commit";
+		$x++;
+		if($con->ejecutarBloque($consulta))
+		{
+			$consulta="select idCampo from 801_confCamposFump where idUsuario=".$idUsuario;
+			$listCampos=$con->obtenerListaValores($consulta);
+			if($listCampos=="")
+				$listCampos="-1";
+			$consulta="select idCampo,nombreCampo FROM 801_camposFump where idCampo in (".$listCampos.") order by nombreCampo";
+			$arrCampos=$con->obtenerFilasArreglo($consulta);
+			echo "1|".$arrCampos;
+		}
+	}
+	
+	function removerCamposGridFUMP()
+	{
+		global $con;
+		$idUsuario=$_SESSION["idUsr"];
+		$listCampos=$_POST["lista"];
+		$consulta="delete from 801_confCamposFump where idUsuario=".$idUsuario." and idCampo in (".$listCampos.")";
+		eC($consulta);
+	}
+	
+	function guardarRopajeUsuario()
+	{
+		global $con;
+		$cadena=$_POST["cadena"];
+		$arreglo=json_decode($cadena);
+		//$arreglo=explode(",",$cadena);
+		//$tamano=sizeof($arreglo);
+		$x=0;
+		$consulta[$x]="begin";
+		$x++;
+		foreach($arreglo as $p1)
+		{
+			$consulta[$x]="delete from 533_ropajeUsuario where idUsuario=".$p1->idUsuario." and ciclo=".$p1->ciclo;
+			$x++;
+			$query="SELECT cod_Puesto,codigoUnidad FROM 801_adscripcion where idUsuario=".$p1->idUsuario;
+			$filaPuesto=$con->obtenerPrimeraFila($query);
+			foreach($p1->arrPrendas as $p)
+			{
+				$consulta[$x]="insert into 533_ropajeUsuario(idUsuario,codigoUnidad,cantidad,color,tamano,idPrenda,ciclo,situacion,idUniforme,tipoTalla,genero)
+								values(".$p1->idUsuario.",'".$filaPuesto[1]."',".$p->cantidad.",".$p->color.",".$p->tamano.",".$p->prenda.",".$p1->ciclo.",0,".$p->idUniforme.",".$p->tipoTalla.",".$p->genero.")";
+				//echo $consulta[$x];
+				$x++;
+			}
+		}
+		$consulta[$x]="commit";
+		$x++;
+		//echo var_dump($consulta);
+		eB($consulta);
+	}
+	
+	function cerrarProcesoRopaje()
+	{
+		global $con;
+		$ciclo=bD($_POST["ciclo"]);
+		$departamento=$_POST["departamento"];
+		$consulta="insert into 534_departamentosCierreRopaje (codigoDepartamento,ciclo) values('".$departamento."',".$ciclo.")";
+		eC($consulta);
+	}
+	
+	function generarPedidoRopaje()
+	{
+		global $con;
+		$ciclo=$_POST["ciclo"];	
+		$consulta="insert into 535_pedidosRopaje(ciclo,idResponsable) values(".$ciclo.",".$_SESSION["idUsr"].")";
+		eC($consulta);
+	}
+	
+	function obtenerEmailUsuario()
+	{
+		global $con;
+		$idUsuario=$_POST["iU"];
+		$consulta="SELECT Mail FROM 805_mails WHERE idUsuario=".$idUsuario;
+		$email=$con->obtenerValor($consulta);
+		echo "1|".$email;
+	}
+
+	
+	function obtenerBitacoraAccesoUsuarios()
+	{
+		global $con;
+		$idUsuario=$_POST["idUsuario"];
+		$fechaInicio=$_POST["fechaInicio"];
+		$fechaFin=$_POST["fechaFin"];
+		$start=$_POST["start"];
+		$limit=$_POST["limit"];
+		$tipoEventos=$_POST["tipoEventos"];
+		$pagina=$_POST["pagina"];
+		
+		
+		$condWhere="";
+		if($tipoEventos!=-1)
+		{
+			$condWhere.=" and tipo in(".$tipoEventos.")";
+		}
+		
+		if($pagina!="")
+		{
+			$condWhere.=" and pagina like '%".$pagina."%'";
+		}
+		
+		
+		$total="";
+		$totalIP=0;
+		$arrRegistros="";
+		if($idUsuario!=-1)
+		{
+		
+			$consulta="SELECT count(*) FROM 8000_logSistema WHERE idUsuario=".$idUsuario."
+					AND fecha>='".$fechaInicio."' AND fecha<='".$fechaFin."' ".$condWhere;
+			
+			
+			
+			
+			$total=$con->obtenerValor($consulta);
+			
+			
+			
+			
+			/*$consulta="SELECT count(distinct dirIP) FROM 8000_logSistema WHERE idUsuario=".$idUsuario."
+					AND fecha>='".$fechaInicio."' AND fecha<='".$fechaFin."' order by fechaEvento";
+			$totalIP=$con->obtenerValor($consulta);*/	
+			
+			$consulta="SELECT idLog,fecha,tipo,hora,pagina,parametros,dirIP,consultaSql,(select Nombre from 800_usuarios u where u.idUsuario=l.idUsuario) as nombreUsuario,idUsuario 
+					FROM 8000_logSistema l WHERE idUsuario=".$idUsuario."
+					AND fecha>='".$fechaInicio."' AND fecha<='".$fechaFin."' ".$condWhere." order by fechaEvento desc limit ".$start.",".$limit;
+	
+			$arrRegistros=utf8_encode($con->obtenerFilasJSON($consulta));		
+		}
+		else
+		{
+			
+			$consulta="SELECT count(*) FROM 8000_logSistema WHERE fecha>='".$fechaInicio."' AND fecha<='".$fechaFin."' ".$condWhere;
+			$total=$con->obtenerValor($consulta);
+			
+			/*$consulta="SELECT count(distinct dirIP) FROM 8000_logSistema WHERE idUsuario=".$idUsuario."
+					AND fecha>='".$fechaInicio."' AND fecha<='".$fechaFin."' order by fechaEvento";
+			$totalIP=$con->obtenerValor($consulta);	*/
+			
+			$consulta="SELECT idLog,fecha,tipo,hora,pagina,parametros,dirIP,consultaSql,(select Nombre from 800_usuarios u where u.idUsuario=l.idUsuario) as nombreUsuario,idUsuario 
+					FROM 8000_logSistema l WHERE  fecha>='".$fechaInicio."' AND fecha<='".$fechaFin."'  ".$condWhere." order by fechaEvento desc limit ".$start.",".$limit;
+			$arrRegistros=utf8_encode($con->obtenerFilasJSON($consulta));	
+			
+		}
+		echo '{"numReg":"'.$total.'","totalIP":"'.$totalIP.'","registros":'.$arrRegistros.'}';
+	}
+	
+	function removerFotoUsuario()
+	{
+		global $con;
+		$idUsuario=$_POST["iU"];
+		
+		$consulta="UPDATE 806_fotos SET Binario=NULL WHERE idUsuario=".$idUsuario;
+		eC($consulta);
+	}
+?>

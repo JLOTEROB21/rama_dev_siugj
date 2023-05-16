@@ -1,0 +1,343 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+	$idUsuario=bD($_GET["u"]);
+	$vCU=$_GET["vCU"];
+	$arrBtn="";
+	
+	$consulta="SELECT Nombre,cuentaActiva FROM 800_usuarios WHERE idUsuario=".$idUsuario;
+	$fRegistroUsuario=$con->obtenerPrimeraFilaAsoc($consulta);
+	
+	
+	$lblCuentaActiva="";
+	switch($fRegistroUsuario["cuentaActiva"])
+	{
+		case 0:
+			$lblCuentaActiva="Cuenta Inactiva";
+		break;
+		case 1:
+			$lblCuentaActiva="Cuenta Activa";
+		break;
+		case 100:
+			$lblCuentaActiva="Cuenta Bloqueda";
+		break;
+	}
+	
+	$nombreUsuario=$fRegistroUsuario["Nombre"];
+	
+	
+	$posIni=320;
+	if(existeRol("'1_0'"))
+		$posIni=390;
+	$consulta="SELECT * FROM 800_usuariosVSDatosComplementarios WHERE situacion=1 ORDER BY prioridad,etiquetaModulo";
+	if($vCU==1)
+	{
+		$consulta="SELECT * FROM 800_usuariosVSDatosComplementarios WHERE situacion=1 and mostrarVistaCuentaUsuario=1 ORDER BY prioridad,etiquetaModulo";
+	}
+	$res=$con->obtenerFilas($consulta);
+	while($fila=mysql_fetch_assoc($res))
+	{
+		$mostrar=1;
+		if(($fila["funcionAplicacion"]!="")&&($fila["funcionAplicacion"]!="-1"))
+		{
+			$obj=json_decode('{"idUsuario":"'.$idUsuario.'","vCU":"'.$vCU.'"}');
+			$cache=NULL;
+			$objParametros=$obj;
+			$mostrar=removerComillasLimite(resolverExpresionCalculoPHP($fila["funcionAplicacion"],$objParametros,$cache));
+			
+		}
+		
+		
+		if($mostrar==1)
+		{
+			$btn="		{
+							width:160,
+							height:40,
+							x:20,
+							enableToggle :true,
+							toggleGroup :'presionado',
+							xtype:'button',
+							y:".$posIni.",
+							text:'".cv($fila["etiquetaModulo"])."',
+							toggleHandler :function(btn,presionado)
+									{
+										if(presionado)
+										{
+											cargarModuloUsuario(".$fila["IDModulo"].");
+										}
+									}
+							
+						}";
+		
+			if($arrBtn=="")
+				$arrBtn=",".$btn;
+			else
+				$arrBtn.=",".$btn;
+			$posIni+=40;
+		}
+	}
+	
+?>
+
+var btnPresionado=null;
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+
+	var htmlPanel=	'<table width="280"><tr><td align="center"><img id="imgUsr" height="297" width="260" '+
+                    ' src="../Usuarios/verFoto.php?Id='+gE('idUsuario').value+'&rand=<?php echo date("YmdHis")?>">'+
+                    '</td></tr><tr><td align="center"><span class="letraNombreTablero" style="font-size:18px; line-height:22px" id="lblNombreUsuario"><?php echo $nombreUsuario?>'+
+                    '<br>(<?php echo $idUsuario?>)</span><BR /><BR /><span class="letraNombreTablero" style="font-size:16px; line-height:20px; color:#1A3E9A !important" >-- <?php echo $lblCuentaActiva ?> ---</span></td></tr>';
+   	<?php
+	if(existeRol("'1_0'"))
+	{
+	?>
+    	if(gE('vCU').value=='0')
+        {
+    	 /*htmlPanel+=	'<tr><td align="center"><br /><span class="letraFichaRespuesta">Para eliminar este usuario<br />de click</span>'+
+                    ' <a href="javascript:removerUsuario(\'<?php echo base64_encode($idUsuario)?>\')"><span class="letraRoja">'+
+                    'AQUÍ <img src="../images/delete.png" /> </span></a></td></tr>';*/
+   		
+        	htmlPanel+=	'<tr><td align="center"><br /><span id="btnEliminar"></span></a></td></tr>'
+        }
+   
+    <?php
+	}
+	?>
+                    
+    htmlPanel+='</table>';
+
+    new Ext.Viewport(	{
+                                layout: 'border',
+                                border:false,
+                                items: [
+                                			{
+                                                xtype:'panel',
+                                                width:300,  
+                                                border:false,                                                              
+                                                region:'west',
+                                                
+                                                layout:'absolute',
+                                                items:	[
+                                                            {
+                                                                x:0,
+                                                                y:45,
+                                                                xtype:'label',
+                                                                html:htmlPanel
+                                                            }
+                                                        ]
+                                            },
+                                            {
+                                                xtype:'tabpanel',
+                                                cls:'tabPanelSIUGJ',
+                                                border:false,    
+                                                activeTab:1, 
+                                                id:'tabSecciones',    
+                                                region:'center',
+                                                items:	[
+                                                         	{
+                                                            	xtype:'panel',
+                                                                border:false,
+                                                                title:'Datos de identificaci&oacute;n',
+                                                                region:'center',
+                                                                layout:'absolute',
+                                                                items:	[
+                                                                			  new Ext.ux.IFrameComponent({ 
+
+                                                                                                            id: 'frameContenido1', 
+                                                                                                            anchor:'100% 100%',
+                                                                                                            border:false,
+                                                                                                            loadFuncion:function(iFrame)
+                                                                                                                        {
+                                                                                                                            
+                                                                                                                            
+                                                                                                                           
+                                                                                                                            
+                                                                                                                        },
+                    
+                                                                                                            url: '../paginasFunciones/white.php',
+                                                                                                            style: 'width:100%;height:700px' 
+                                                                                                    })
+                                                                			
+                                                                		]
+                                                            } ,
+                                                            {
+                                                            	xtype:'panel',
+                                                                border:false,
+                                                                title:'Datos de la cuenta',
+                                                                region:'center',
+                                                                layout:'absolute',
+                                                                items:	[
+                                                                			 new Ext.ux.IFrameComponent({ 
+
+                                                                                                            id: 'frameContenido2', 
+                                                                                                            anchor:'100% 100%',
+                                                                                                            border:false,
+                                                                                                            loadFuncion:function(iFrame)
+                                                                                                                        {
+                                                                                                                            
+                                                                                                                            
+                                                                                                                            
+                                                                                                                            
+                                                                                                                        },
+                    
+                                                                                                            url: '../paginasFunciones/white.php',
+                                                                                                            style: 'width:100%;height:700px' 
+                                                                                                    })
+                                                                			
+                                                                		]
+                                                            }    
+                                                        ]
+                                            }
+                                         ]
+                            }
+                        )   
+                        
+	                       
+	cargarFrameDatosCuenta();
+    gEx('tabSecciones').setActiveTab(0);
+    cargarFrameDatosIdentificacion(); 	            
+
+	if(gE('btnEliminar'))
+    {
+        new Ext.Button (
+                                {
+                                   
+                                    text:'Eliminar usuario',
+                                    width:200,
+                                    height:40,
+                                    icon:'../principalPortal/imagesSIUGJ/trash.png',
+                                    cls:'btnSIUGJDelete',
+                                    renderTo:'btnEliminar',
+                                    handler:function()
+                                            {
+                                               removerUsuario();
+                                            }
+                                    
+                                }
+                            )
+	}
+}
+
+
+function cargarFrameDatosIdentificacion()
+{
+	gEx('frameContenido1').load	(
+                                                    {
+                                                        url:'../Usuarios/nIdentifica.php',
+                                                        params:		{
+                                                                        idUsuario:gE('idUsuario').value,
+                                                                        bandera:1,
+                                                                        cPagina:'sFrm=true'
+                                                                    }
+                                                    }
+                                                    
+                                                )
+}
+
+function cargarFrameDatosCuenta()
+{
+	gEx('frameContenido2').load	(
+                                                    {
+                                                        url:'../Usuarios/nUsuarios.php',
+                                                        params:		{
+                                                                        idUsuario:gE('idUsuario').value,
+                                                                        bandera:1,
+                                                                        vCU:gE('vCU').value,
+                                                                        cPagina:'sFrm=true'
+                                                                    }
+                                                    }
+                                                    
+                                                )
+}
+
+
+function regresarGuardar(bandera)
+{
+	switch(bandera)
+    {
+    	case 'nIdentifica':
+        	gE('imgUsr').setAttribute('src','../Usuarios/verFoto.php?Id='+gE('idUsuario').value+'&rand='+(new Date().format('YmdHis')));
+            gEx('frameContenido1').load	(
+                                                    {
+                                                        url:'../Usuarios/nIdentifica.php',
+                                                        params:		{
+                                                                        idUsuario:gE('idUsuario').value,
+                                                                        bandera:1,
+                                                                        actualizado:1,
+                                                                        cPagina:'sFrm=true'
+                                                                    }
+                                                    }
+                                                    
+                                                )
+		break;
+        case 'nUsuarios':
+        	
+            gEx('frameContenido2').load	(
+                                                    {
+                                                        url:'../Usuarios/nUsuarios.php',
+                                                        params:		{
+                                                                        idUsuario:gE('idUsuario').value,
+                                                                        bandera:1,
+                                                                        actualizado:1,
+                                                                        vCU:gE('vCU').value,
+                                                                        cPagina:'sFrm=true'
+                                                                    }
+                                                    }
+                                                    
+                                                )
+		break;
+    }
+}
+
+function cargarModuloUsuario(oConf)
+{
+	if(oConf.idProceso)
+    {
+    	var content=Ext.getCmp('frameContenidoUsuario');
+        content.load({ scripts:true,url:'../modeloProyectos/visorRegistrosProcesosV2.php',params:{actor:"'"+oConf.rolIngreso+"'",vCU:gE('vCU').value,tipoVista:1,sL:0,pantallaCompleta:1,idProceso:oConf.idProceso,cPagina:'sFrm=true',idReferencia:gE('idUsuario').value,idFormulario:-1}});
+    }
+}
+
+function recargarContenedorCentral()
+{
+	if((gEx('frameContenidoUsuario'))&&( gEx('frameContenidoUsuario').getFrameWindow().recargarContenedorCentral))
+		gEx('frameContenidoUsuario').getFrameWindow().recargarContenedorCentral();
+    else
+		recargarPagina();
+
+    
+}
+
+function setNombreUsuario(lblNombre)
+{
+	gE('lblNombreUsuario').innerHTML=lblNombre;
+}
+
+function removerUsuario()
+{
+	function resp(btn)
+	{
+		if(btn=='yes')
+		{
+        	
+			function funcAjax()
+			{
+				var resp=peticion_http.responseText;
+				arrResp=resp.split('|');
+				if(arrResp[0]=='1')
+				{
+					window.parent.cerrarVentanaFancy();
+				}
+				else
+				{
+					msgBox('No se ha podido llevar a cabo la operaci&oacute;n debido al siguiente problema:'+' <br />'+arrResp[0]);
+				}
+			}
+			obtenerDatosWeb('../paginasFunciones/funcionesUsuarios.php',funcAjax, 'POST','funcion=26&usr='+bE(gE('idUsuario').value),true);
+		}
+	}
+	msgConfirm('Est&aacute; seguro de querer eliminar del sistema al usuario seleccionado?<br />(Esta operaci&oacute;n NO podr&aacute; deshacerse)',resp)
+}

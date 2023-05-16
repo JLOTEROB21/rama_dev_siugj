@@ -1,0 +1,8 @@
+{
+	"id":"btnAddTextoEnriquecido",
+	"funcion":"mostrarVentanaPreguntasUnicas(10)",
+	"titulo":"Insertar campo de texto enriquecido",
+	"icono":"page_white_picture.png",
+	"script":"campoTextoLargo.js.php"
+	
+}

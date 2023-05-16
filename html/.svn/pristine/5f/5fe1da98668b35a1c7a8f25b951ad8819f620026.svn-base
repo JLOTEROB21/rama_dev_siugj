@@ -1,0 +1,740 @@
+<?php
+	session_start();
+	include("configurarIdiomaJS.php");
+	include("conexionBD.php");
+	
+	$consulta="SELECT concat('\"',claveUnidad,'\"') as claveUnidad,nombreUnidad FROM _17_tablaDinamica    ORDER BY categoriaDespacho,nombreUnidad";//WHERE esDespacho=1
+	$arrDespachos=$con->obtenerFilasArreglo($consulta);
+	
+?>
+
+
+var arrMovimientosMostrar=[['0','Todos'],['1','Conciliados'],['2','NO Conciliados']];
+var arrTiposMovimiento=[['1','Dep&oacute;sito'],['2','Pagado a beneficiario'],['3','Prescrito'],['4','Traspasado']];
+var arrDespachos=<?php echo $arrDespachos?>;
+
+Ext.onReady(inicializar);
+
+function inicializar()
+{
+	arrDespachos.splice(0,0,['0','Cualquiera']);
+    var cmbDespacho=crearComboExt('cmbDespacho',arrDespachos,0,0,400,{multiSelect:true,listClass:'listComboSIUGJControl',cls:"comboSIUGJ",fieldClass:"comboSIUGJ",ctCls:"comboWrapSIUGJ"});
+    cmbDespacho.setValue('0');
+    
+    var cmbMostrar1=crearComboExt('cmbMostrar1',arrMovimientosMostrar,0,0,220,{multiSelect:false,listClass:'listComboSIUGJControl',cls:"comboSIUGJ",fieldClass:"comboSIUGJ",ctCls:"comboWrapSIUGJ"});
+    cmbMostrar1.setValue('0');
+    var cmbMostrar2=crearComboExt('cmbMostrar2',arrMovimientosMostrar,0,0,220,{multiSelect:false,listClass:'listComboSIUGJControl',cls:"comboSIUGJ",fieldClass:"comboSIUGJ",ctCls:"comboWrapSIUGJ"});
+    cmbMostrar2.setValue('0');
+    var cmbMes=crearComboExt('cmbMes',arrMeses,0,0,180,{listClass:'listComboSIUGJControl',cls:"comboSIUGJ",fieldClass:"comboSIUGJ",ctCls:"comboWrapSIUGJ"});
+    cmbMes.on('select',function(cmb,registro)
+    					{
+                        	var mes=registro.data.id;
+                            if(parseInt(mes)<10)
+                            {
+                            	mes='0'+mes;
+                            }
+                            gEx('dteFechaInicio').setValue(gEx('dteFechaInicio').getValue().format('Y')+'-'+mes+'-01');
+							var fechaFinal=gEx('dteFechaInicio').getValue();
+                            fechaFinal=fechaFinal.add(Date.MONTH,1);
+                        	fechaFinal=Date.parseDate(fechaFinal.format('Y')+'-'+fechaFinal.format('m')+'-01','Y-m-d');
+                            fechaFinal=fechaFinal.add(Date.DAY,-1);
+                            gEx('dteFechaFin').setValue(fechaFinal);
+                        }
+    			)
+    new Ext.Viewport(	{
+                                layout: 'border',
+                                items: [
+                                            {
+                                                xtype:'panel',
+                                                cls:'panelSiugj',
+                                                border:false,
+                                                region:'center',
+                                                tbar:	[
+                                                			{
+                                                            	xtype:'label',
+                                                            	html:'<span class="SIUGJ_Etiqueta">Despacho:</span>&nbsp;&nbsp;'
+                                                                
+                                                            },
+                                                            cmbDespacho,
+                                                            {
+                                                            	xtype:'tbspacer',
+                                                                width:10
+                                                            },
+                                                            
+                                                            {
+                                                            	xtype:'label',
+                                                            	html:'<span class="SIUGJ_Etiqueta">Mes:</span>&nbsp;&nbsp;'
+                                                                
+                                                            },
+                                                            cmbMes,
+                                                             {
+                                                            	xtype:'tbspacer',
+                                                                width:10
+                                                            },
+                                                            {
+                                                                x:10,
+                                                                y:10,
+                                                                html:'<span class="SIUGJ_Etiqueta">Periodo del:</span>&nbsp;&nbsp;'
+                                                            },
+                                                            {
+                                                                xtype:'datefield',
+                                                                id:'dteFechaInicio',
+                                                                value:'<?php echo date("Y-m-d") ?>',
+                                                                
+                                                            },
+                                                            {
+                                                                x:10,
+                                                                y:10,
+                                                                html:'<span class="SIUGJ_Etiqueta">&nbsp;&nbsp;al:&nbsp;&nbsp;</span>'
+                                                            },
+                                                             {
+                                                                xtype:'datefield',
+                                                                id:'dteFechaFin',
+                                                                value:'<?php echo date("Y-m-d") ?>',
+                                                                
+                                                            }
+                                                            
+                                                		],
+                                                layout:'border',
+                                                title: 'Conciliaci&oacute;n bancaria',
+                                                items:	[
+                                                			{
+                                                            	xtype:'panel',
+                                                                layout:'border',
+                                                                border:false,
+                                                                region:'center',
+                                                                tbar:	[
+                                                                			{
+                                                                                icon:'../images/page_excel.png',
+                                                                                cls:'x-btn-text-icon',
+                                                                                height:30,
+                                                                                text:'<span class="SIUGJ_Etiqueta">Exportar reporte de conciliaci&oacute;n</span>',
+                                                                                handler:function()
+                                                                                        {
+                                                                                            mostrarVentanaReporteConciliacion();
+                                                                                            
+                                                                                            
+                                                                                            
+                                                                                        }
+                                                                                
+                                                                            }
+                                                                		],
+                                                            	items:	[
+                                                                			{
+                                                                                xtype:'panel',
+                                                                                region:'center', 
+                                                                                layout:'border',
+                                                                                border:true,
+                                                                                title:'Movimientos del periodo' ,   
+                                                                                tbar:	[
+                                                                                            {
+                                                                                            	xtype:'label',
+                                                                                                cls:'SIUGJ_Etiqueta',
+                                                                                                html:'Mostrar movimientos:&nbsp;&nbsp;&nbsp;'
+                                                                                            },
+                                                                                            cmbMostrar1
+                                                                                        ],                                                           
+                                                                                items:	[
+                                                                                            crearGridMovimientoPeriodo()
+                                                                                        ]
+                                                                            },
+                                                                            {
+                                                                                xtype:'panel',
+                                                                                width:'50%',
+                                                                                cls:'panelSiugjPrincipal',
+                                                                                layout:'border',
+                                                                                border:true,
+                                                                                title:'Movimientos Importados'   , 
+                                                                                region:'east',  
+                                                                                tbar:	[
+                                                                                             {
+                                                                                            	xtype:'label',
+                                                                                                cls:'SIUGJ_Etiqueta',
+                                                                                                html:'Mostrar movimientos: &nbsp;&nbsp;&nbsp;'
+                                                                                            },
+                                                                                            cmbMostrar2
+                                                                                        ],                                                                
+                                                                                items:	[
+                                                                                            crearGridMovimientosImportados()
+                                                                                        ]
+                                                                            }
+                                                                		]
+                                                            }
+                                                            
+                                                        ]
+                                            }
+                                         ]
+                            }
+                        )   
+}
+
+function crearGridMovimientoPeriodo()
+{
+	var lector= new Ext.data.JsonReader({
+                                            
+                                            totalProperty:'numReg',
+                                            fields: [
+                                               			{name:'idRegistro'},
+		                                                {name: 'carpetaAdministrativa'},
+		                                                {name:'codigoUnidad'},
+		                                                {name:'fechaMovimiento', type:'date', dateFormat:'Y-m-d'},
+                                                        {name: 'numeroDeposito'},
+                                                        {name: 'abono'},
+                                                        {name: 'cargo'},
+                                                        {name:'tipoMovimiento'},
+                                                        {name:'fechaRegistro', type:'date', dateFormat:'Y-m-d H:i:s'},
+                                                        {name: 'conciliado'},
+                                                        {name: 'fechaConciliacion', type:'date', dateFormat:'Y-m-d H:i:s'},
+                                                        {name: 'carpetaAdministrativaDestino'},
+                                                        {name: 'codigoUnidadDestino'}
+                                            		],
+                                            root:'registros'
+                                            
+                                        }
+                                      );
+	 
+                                                                                      
+	var alDatos=new Ext.data.GroupingStore({
+                                                            reader: lector,
+                                                            proxy : new Ext.data.HttpProxy	(
+
+                                                                                              {
+
+                                                                                                  url: '../modulosEspeciales_SIUGJ/paginasFunciones/funcionesModuloDepositos.php'
+
+                                                                                              }
+
+                                                                                          ),
+                                                            sortInfo: {field: 'fechaRegistro', direction: 'ASC'},
+                                                            groupField: 'fechaRegistro',
+                                                            remoteGroup:false,
+				                                            remoteSort: true,
+                                                            autoLoad:false
+                                                            
+                                                        }) 
+	alDatos.on('beforeload',function(proxy)
+    								{
+                                    	proxy.baseParams.funcion='1';
+                                        //proxy.baseParams.codigoUnidad=gE('codigoUnidad').value;
+                                        //proxy.baseParams.fechaInicio=gE('fechaInicio').value;
+                                        //proxy.baseParams.fechaFin=gE('fechaFin').value;
+                                    }
+                        )   
+       
+       
+	var paginador=	new Ext.PagingToolbar	(
+                                              {
+                                                    pageSize: 1000,
+                                                    store: alDatos,
+                                                    displayInfo: true,
+                                                    disabled:false
+                                                }
+                                             )       
+       
+    var cModelo= new Ext.grid.ColumnModel   	(
+                                                    [
+                                                        new  Ext.grid.RowNumberer({width:40}),
+                                                        
+                                                        {
+                                                            header:'ID',
+                                                            width:60,
+                                                            sortable:true,
+                                                            dataIndex:'idRegistro'
+                                                        },
+                                                        {
+                                                            header:'Fecha registro',
+                                                            width:180,
+                                                            sortable:true,
+                                                            dataIndex:'fechaRegistro',
+                                                            renderer:function(val)
+                                                            			{
+                                                                        	return val.format('d/m/Y H:i');
+                                                                        }
+                                                        },
+                                                        {
+                                                            header:'Proceso judicial',
+                                                            width:180,
+                                                            sortable:true,
+                                                            dataIndex:'carpetaAdministrativa'
+                                                        },
+                                                        {
+                                                            header:'Despacho',
+                                                            width:300,
+                                                            sortable:true,
+                                                            dataIndex:'codigoUnidad'
+                                                        },
+                                                        {
+                                                            header:'No. dep&oacute;sito',
+                                                            width:180,
+                                                            sortable:true,
+                                                            dataIndex:'numeroDeposito'
+                                                        },
+                                                        {
+                                                            header:'Fecha movimiento',
+                                                            width:180,
+                                                            sortable:true,
+                                                            dataIndex:'fechaMovimiento',
+                                                            renderer:function(val)
+                                                            			{
+                                                                        	return val.format('d/m/Y');
+                                                                        }
+                                                        },
+                                                        {
+                                                            header:'Cargo',
+                                                            width:180,
+                                                            align:'center',
+                                                            sortable:true,
+                                                            dataIndex:'cargo',
+                                                            renderer:'usMoney'
+                                                        },
+                                                        {
+                                                            header:'Abono',
+                                                            width:180,
+                                                            sortable:true,
+                                                            align:'center',
+                                                            dataIndex:'abono',
+                                                            renderer:'usMoney'
+                                                        },
+                                                        {
+                                                            header:'Tipo movimiento',
+                                                            width:200,
+                                                            sortable:true,
+                                                            dataIndex:'tipoMovimiento',
+                                                            renderer:function(val)
+                                                            		{
+                                                                    	return formatearValorRenderer(arrTiposMovimiento,val);
+                                                                    }
+                                                        },
+                                                         {
+                                                            header:'Proceso judicial trasladado',
+                                                            width:235,
+                                                            sortable:true,
+                                                            dataIndex:'carpetaAdministrativaDestino'
+                                                        },
+                                                        {
+                                                            header:'Despacho al que se traslada',
+                                                            width:300,
+                                                            sortable:true,
+                                                            dataIndex:'codigoUnidadDestino'
+                                                        }, 
+                                                        {
+                                                            header:'Conciliado',
+                                                            width:140,
+                                                            sortable:true,
+                                                            dataIndex:'conciliado',
+                                                            renderer:function(val)		
+                                                            		{
+                                                                    	return val=='1'?'S&iacute;':'No';
+                                                                    }
+                                                        },
+                                                        {
+                                                            header:'Fecha conciliaci&oacute;n',
+                                                            width:180,
+                                                            sortable:true,
+                                                            dataIndex:'fechaConciliacion',
+                                                            renderer:function(val)		
+                                                            		{
+                                                                    	if(val)
+	                                                                    	return val.format('d/m/Y');
+                                                                        return '------';
+                                                                    }
+                                                        }
+                                                    ]
+                                                );
+                                                
+    var tblGrid=	new Ext.grid.GridPanel	(
+                                                        {
+                                                            id:'gridMovimientos',
+                                                            store:alDatos,
+                                                            region:'center',
+                                                            frame:false,
+                                                            cm: cModelo,
+                                                            border:false,
+                                                            stripeRows :false,
+                                                            loadMask:true,
+                                                            cls:'gridSiugjPrincipal',
+                                                            columnLines : false,
+                                                            bbar:[paginador],
+                                                            view:new Ext.grid.GroupingView({
+                                                                                                forceFit:false,
+                                                                                                showGroupName: false,
+                                                                                                enableGrouping :false,
+                                                                                                enableNoGroups:false,
+                                                                                                enableGroupingMenu:false,
+                                                                                                hideGroupedColumn: true,
+                                                                                                startCollapsed:false
+                                                                                            })
+                                                        }
+                                                    );
+	tblGrid.getStore().load(	{
+    								params:	{
+                                    			url:'../modulosEspeciales_SIUGJ/paginasFunciones/funcionesModuloDepositos.php',
+                                                start:0, 
+                                                limit:200
+                                                
+                                    		}
+    							}
+                           )      
+
+
+    return 	tblGrid;
+}
+
+
+
+function crearGridMovimientosImportados()
+{
+	var lector= new Ext.data.JsonReader({
+                                            
+                                            totalProperty:'numReg',
+                                            fields: [
+                                               			{name:'idRegistro'},
+		                                                {name: 'noMovimiento'},
+                                                        {name: 'numeroDeposito'},
+		                                                {name:'fechaMovimiento', type:'date', dateFormat:'Y-m-d'},
+                                                        {name: 'valorDeposito'},
+                                                        {name: 'comentarios'},
+                                                        {name: 'conciliado'},
+                                                        {name: 'tipoMovimiento'}
+                                            		],
+                                            root:'registros'
+                                            
+                                        }
+                                      );
+	 
+                                                                                      
+	var alDatos=new Ext.data.GroupingStore({
+                                                            reader: lector,
+                                                            proxy : new Ext.data.HttpProxy	(
+
+                                                                                              {
+
+                                                                                                  url: '../modulosEspeciales_SIUGJ/paginasFunciones/funcionesModuloDepositos.php'
+
+                                                                                              }
+
+                                                                                          ),
+                                                            sortInfo: {field: 'fechaRegistro', direction: 'ASC'},
+                                                            groupField: 'fechaRegistro',
+                                                            remoteGroup:false,
+				                                            remoteSort: true,
+                                                            autoLoad:false
+                                                            
+                                                        }) 
+	alDatos.on('beforeload',function(proxy)
+    								{
+                                    	proxy.baseParams.funcion='1';
+                                        //proxy.baseParams.codigoUnidad=gE('codigoUnidad').value;
+                                        //proxy.baseParams.fechaInicio=gE('fechaInicio').value;
+                                        //proxy.baseParams.fechaFin=gE('fechaFin').value;
+                                    }
+                        )   
+       
+       
+	var paginador=	new Ext.PagingToolbar	(
+                                              {
+                                                    pageSize: 1000,
+                                                    store: alDatos,
+                                                    displayInfo: true,
+                                                    disabled:false
+                                                }
+                                             )       
+       
+    var cModelo= new Ext.grid.ColumnModel   	(
+                                                    [
+                                                        new  Ext.grid.RowNumberer({width:40}),
+                                                        
+                                                        {
+                                                            header:'No. Movimiento',
+                                                            width:150,
+                                                            sortable:true,
+                                                            dataIndex:'idRegistro'
+                                                        },
+                                                        {
+                                                            header:'Fecha Movimiento',
+                                                            width:180,
+                                                            sortable:true,
+                                                            dataIndex:'fechaMovimiento',
+                                                            renderer:function(val)
+                                                            			{
+                                                                        	return val.format('d/m/Y');
+                                                                        }
+                                                        },
+                                                        {
+                                                            header:'No. dep&oacute;sito',
+                                                            width:180,
+                                                            sortable:true,
+                                                            dataIndex:'numeroDeposito'
+                                                        },
+                                                        {
+                                                            header:'Monto movimiento',
+                                                            width:180,
+                                                            sortable:true,
+                                                            dataIndex:'valorDeposito',
+                                                            renderer:'usMoney'
+                                                        },
+                                                        {
+                                                            header:'Tipo movimiento',
+                                                            width:180,
+                                                            sortable:true,
+                                                            dataIndex:'tipoMovimiento',
+                                                            rrenderer:function(val)
+                                                            		{
+                                                                    	return formatearValorRenderer(arrTiposMovimiento,val);
+                                                                    }
+                                                        },
+                                                        {
+                                                            header:'Conciliado',
+                                                            width:140,
+                                                            sortable:true,
+                                                            dataIndex:'conciliado',
+                                                            renderer:function(val)
+                                                            		{
+                                                                    	return val=='1'?'S&iacute;':'No';
+                                                                    }
+                                                        },
+                                                        {
+                                                            header:'Comentarios',
+                                                            width:400,
+                                                            sortable:true,
+                                                            dataIndex:'comentarios',
+                                                            renderer:mostrarValorDescripcion
+                                                        }
+                                                        
+                                                    ]
+                                                );
+                                                
+    var tblGrid=	new Ext.grid.GridPanel	(
+                                                        {
+                                                            id:'gridImportados',
+                                                            store:alDatos,
+                                                            region:'center',
+                                                            frame:false,
+                                                            cm: cModelo,
+                                                            border:false,
+                                                            stripeRows :false,
+                                                            loadMask:true,
+                                                            cls:'gridSiugjPrincipal',
+                                                            columnLines : false,
+                                                            bbar:[paginador],
+                                                            view:new Ext.grid.GroupingView({
+                                                                                                forceFit:false,
+                                                                                                showGroupName: false,
+                                                                                                enableGrouping :false,
+                                                                                                enableNoGroups:false,
+                                                                                                enableGroupingMenu:false,
+                                                                                                hideGroupedColumn: true,
+                                                                                                startCollapsed:false
+                                                                                            })
+                                                        }
+                                                    );
+	tblGrid.getStore().load(	{
+    								params:	{
+                                    			url:'../modulosEspeciales_SIUGJ/paginasFunciones/funcionesModuloDepositos.php',
+                                                start:0, 
+                                                limit:200
+                                                
+                                    		}
+    							}
+                           )      
+
+
+    return 	tblGrid;
+}
+
+var arrCatecoriaColumna=[['1','Movimientos del periodo en despacho'],['2','Movimientos Importados']];
+function mostrarVentanaReporteConciliacion()
+{	
+	
+	var arrColumnas=[];
+    arrColumnas.push(['A','No de Movimiento','1']);
+    arrColumnas.push(['B','Proceso Judicial','1']);
+    arrColumnas.push(['C','Despacho','1']);
+    arrColumnas.push(['D','No Depósito','1']);
+    arrColumnas.push(['E','Fecha movimiento','1']);
+    arrColumnas.push(['F','Cargo','1']);
+    arrColumnas.push(['G','Abono','1']);
+    arrColumnas.push(['H','Tipo Movimiento','1']);
+    arrColumnas.push(['I','Consolidado','1']);
+    arrColumnas.push(['J','No. de Movimiento','2']);
+    arrColumnas.push(['K','Fecha movimiento','2']);
+    arrColumnas.push(['L','Monto movimiento','2']);
+    arrColumnas.push(['M','Tipo movimiento','2']);
+    arrColumnas.push(['N','Consolidado','2']);
+    arrColumnas.push(['O','Comentarios','2']);
+    
+    
+    var form = new Ext.form.FormPanel(	
+										{
+											baseCls: 'x-plain',
+											layout:'absolute',
+                                            cls:'panelSiugj',
+											defaultType: 'label',
+											items: 	[
+                                            			{
+                                                        	x:10,
+                                                            y:15,
+                                                            cls:'SIUGJ_Etiqueta',
+                                                            html:'Seleccione los campos que desea proyectar en el reporte:'
+                                                        },
+                                                        crearGridCamposReporte(arrColumnas)
+													]
+										}
+									);
+	
+	var ventanaAM = new Ext.Window(
+									{
+										title: 'Generar reporte de conciliaci&oacute;n ',
+										width: 700,
+										height:450,
+										layout: 'fit',
+										plain:true,
+										modal:true,
+                                        closable:false,
+                                        cls:'msgHistorialSIUGJ',
+										bodyStyle:'padding:5px;',
+										buttonAlign:'center',
+										items: form,
+										listeners : {
+													show : {
+																buffer : 10,
+																fn : function() 
+																{
+																}
+															}
+												},
+										buttons:	[
+														{
+															
+															text: '<?php echo $etj["lblBtnAceptar"]?>',
+                                                            cls:'btnSIUGJ',
+                                                            width:140,
+															handler: function()
+																	{
+                                                                    	var arrColumnas='';
+																		var filas=gEx('gridCampos').getSelectionModel().getSelections();
+                                                                        var x;
+                                                                        var o;
+                                                                        if(filas.length==0)
+                                                                        {
+                                                                        	msgBox('Debe selecionar almenos un campo a proyectar en el informe');
+                                                                        	return;
+                                                                        }
+                                                                        for(x=0;x<filas.length;x++)
+                                                                        {
+                                                                        	o='{"columna":"'+filas[x].data.columna+'","campo":"'+filas[x].data.campo+'"}';
+                                                                        	if(arrColumnas=='')
+                                                                            	arrColumnas=o;
+                                                                            else
+                                                                            	arrColumnas+=','+o;
+                                                                        }
+                                                                        
+                                                                        
+                                                                        var cadObj='{"despachos":"'+bE(gEx('cmbDespacho').getValue())+'","periodo":"'+gEx('cmbMes').getValue()+
+                                                                        			'","fechaInicio":"'+gEx('dteFechaInicio').getValue().format('Y-m-d')+
+                                                                                    '","fechaFin":"'+gEx('dteFechaFin').getValue().format('Y-m-d')+
+                                                                                    '","arrColumas":['+arrColumnas+']}';
+																	
+                                                                    	var aParams=[['cadObj',bE(cadObj)]];
+                                                                        enviarFormularioDatosV('../reportes/generarConciliacionBancaria.php',aParams,'POST');
+                                                                        ventanaAM.close();
+                                                                    
+                                                                    }
+														},
+														{
+															text: '<?php echo $etj["lblBtnCancelar"]?>',
+                                                            cls:'btnSIUGJ',
+                                                            width:140,
+															handler:function()
+																	{
+																		ventanaAM.close();
+																	}
+														}
+													]
+									}
+								);
+	ventanaAM.show();	
+    					  	  							
+
+}
+
+function crearGridCamposReporte(arrRegistros)
+{
+	var dsDatos=arrRegistros;
+    var lector=	new Ext.data.ArrayReader	(
+                                                    {
+                                                        fields:	[
+                                                                    {name: 'columna'},
+                                                                    {name: 'campo'},
+                                                                    {name: 'categoria'}
+                                                                ]
+                                                    }
+                                                );
+
+	var alDatos=new Ext.data.GroupingStore({
+                                                            reader: lector,
+
+                                                            sortInfo: {field: 'categoria', direction: 'ASC'},
+                                                            groupField: 'categoria',
+                                                            remoteGroup:false,
+				                                            remoteSort: false,
+                                                            autoLoad:false
+                                                            
+                                                        }) 
+
+    alDatos.loadData(dsDatos);
+	var chkRow=new Ext.grid.CheckboxSelectionModel({width:40});
+	
+	var cModelo= new Ext.grid.ColumnModel   	(
+												 	[
+													 	new  Ext.grid.RowNumberer({width:40}),
+														chkRow,
+														{
+															header:'Campo',
+															width:300,
+															sortable:true,
+															dataIndex:'campo'
+														},
+                                                        {
+															header:'Categor&iacute;a',
+															width:300,
+															sortable:true,
+															dataIndex:'categoria',
+                                                            renderer:function(val)
+                                                            		{
+                                                                    	return formatearValorRenderer(arrCatecoriaColumna,val);
+                                                                    }
+														}
+													]
+												);
+                                                
+	var tblGrid=	new Ext.grid.EditorGridPanel	(
+                                                        {
+                                                            
+                                                            store:alDatos,
+                                                            frame:false,
+                                                            y:40,
+                                                            x:10,
+                                                            id:'gridCampos',
+                                                            cm: cModelo,
+                                                            stripeRows :true,
+                                                            loadMask:true,
+                                                            stripeRows :false,
+                                                            cls:'gridSiugjPrincipal',
+                                                            columnLines : false,
+                                                            height:260,
+                                                            width:650,
+                                                            view:new Ext.grid.GroupingView({
+                                                                                                    forceFit:false,
+                                                                                                    showGroupName: false,
+                                                                                                    enableGrouping :true,
+                                                                                                    enableNoGroups:false,
+                                                                                                    enableGroupingMenu:false,
+                                                                                                    hideGroupedColumn: true,
+                                                                                                    startCollapsed:false
+                                                                                                }),
+                                                            sm:chkRow
+                                                        }
+                                                    );
+	return 	tblGrid;	
+}

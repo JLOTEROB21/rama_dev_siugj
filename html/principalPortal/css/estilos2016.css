@@ -1,0 +1,239 @@
+@font-face
+{
+	font-family:'SoberanaSans_Regular';
+	src: url('../principalCensida/tipografias/SoberanaSans/SoberanaSans-Regular.otf');
+	src: url('../principalCensida/tipografias/SoberanaSans/SoberanaSans-Regular.otf?#iefix') format('embedded-opentype'),
+	
+	
+}
+
+.campoFormulario
+{
+	
+	padding: 5px;
+	border-left: solid 1px #a4a4a4;
+	border-top: solid 1px #a4a4a4;
+	border-right: solid 1px #a4a4a4;
+	border-bottom: solid 1px #a4a4a4;
+	background: #fefcfc;
+	-webkit-border-radius: 0px;
+	-moz-border-radius: 0px;
+	-ms-border-radius: 0px;
+	-o-border-radius: 0px;
+	border-radius: 0px;
+	border-top-left-radius: 0px;
+	border-bottom-left-radius: 0px;
+	height: 16px;
+}
+
+.btnAcceso
+{
+	  
+	  font-size:14px;
+	  font-weight: normal;
+	  width:30px;
+	  height:26px;
+
+	  
+	  color: #555555;
+	  text-align: center;
+	  background-color: #eeeeee;
+	  border: 1px solid #cccccc;
+	  
+	
+}
+
+.btnAcceso li
+{
+	padding-top:5px;
+}
+
+
+.letraSitioBase
+{
+	font-family:'Ubuntu';
+	font-size:11px;
+	color:#003
+	
+}
+
+.letraBannerBienvenida
+{
+	font-family:'Ubuntu';
+	font-size:12px;
+	color:#FFF;
+	text-align:center
+}
+
+.letraImagenBannerBienvenida
+{
+	padding:6px;
+	border-left: solid 2px #FFF;
+	border-top: solid 2px #FFF;
+	border-right: solid 2px #FFF;
+	border-bottom: solid 2px #FFF;
+	background: #21A4D8;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-ms-border-radius: 5px;
+	-o-border-radius: 5px;
+	border-radius: 5px;
+	color:#FFF;
+	font-size:40px;
+}
+
+.letraBannerBienvenida a
+{
+	text-decoration:none;
+	color:#FFF;
+}
+
+.letraBannerInferior
+{
+	font-family:'Ubuntu';
+	text-align:center;
+	width:160px;
+	font-size:12px;
+	color:#7AC244;
+	text-align:center
+}
+
+.letraBannerInferior a
+{
+	text-decoration:none;
+	color:#7AC244;
+}
+
+
+.letraBannerAzul
+{
+	font-family:'Ubuntu';
+	text-align:center;
+	width:160px;
+	font-size:12px;
+	color:#21A4D8;
+	text-align:center
+}
+
+.letraBannerNegro
+{
+	font-family:'Ubuntu';
+	text-align:center;
+	width:160px;
+	font-size:12px;
+	color:#000;
+	text-align:center
+}
+
+.campoFormularioCompleto
+{
+	
+	padding: 5px;
+	border-left: solid 1px #a4a4a4;
+	border-top: solid 1px #a4a4a4;
+	border-right: solid 1px #a4a4a4;
+	border-bottom: solid 1px #a4a4a4;
+	background: #fefcfc;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-ms-border-radius: 5px;
+	-o-border-radius: 5px;
+	border-radius: 5px;
+	
+	height: 16px;
+}
+
+.titulo
+{
+	font-size: 39px;
+  	line-height: 45px;
+	color: #7F3F95;
+	font-family: SoberanaSans_Regular;
+	line-height: 45px;
+	padding-left:30px;
+	padding-right:30px;
+
+}
+
+.parrafoSitio
+{
+	color: rgb(118, 120, 121);	
+	font-family: SoberanaSans_Regular;
+	font-size: 15px;
+	font-style: normal;
+	font-variant: normal;
+	height: auto;
+	line-height: 24px;
+	visibility: visible;
+	width: auto;
+	text-align:justify;
+	padding-left:30px;
+	padding-right:30px;
+	
+	
+	
+	
+}
+
+.tituloParrafo
+{
+	font-family: SoberanaSans_Regular;
+	font-size: 17px;
+	line-height: 30px;
+	text-transform: uppercase;
+	color: #7F3F95;
+	font-weight:bold;
+	padding-left:30px;
+	padding-right:30px;
+}
+
+.tituloParrafo a
+{
+	text-decoration:none;
+	color:#7F3F95;
+}
+
+
+.letraEtiquetaMorado
+{
+	font-family: SoberanaSans_Regular;
+	text-align:center;
+	
+	font-size:12px;
+	color:#7F3F95;
+	
+}
+
+.letraEtiquetaGris
+{
+	font-family: SoberanaSans_Regular;
+	text-align:center;
+	
+	font-size:14px;
+	color:rgb(118, 120, 121);
+	
+}
+
+.x-grid3-cell-inner
+{
+	font-family: SoberanaSans_Regular;
+	height:21px;
+	font-size:12px;
+	
+	
+}
+
+.x-grid3-hd-inner
+{
+	font-family: SoberanaSans_Regular;
+	height:21px;	
+	font-size:12px;
+	
+	
+	
+}
+
+
+
+
+
