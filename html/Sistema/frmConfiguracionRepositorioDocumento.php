@@ -700,7 +700,7 @@ $res=$con->obtenerFilas($consulta);
                                     <td >
                                     </td>
                                     <td>
-                                   	 <input type="password" value="<?php echo $fRegistro["passwordServidor"]?>" size="42" class="<?php echo $estiloLetraControles?>" val="obl" id="_passwordServidorvch" name="_passwordServidorvch"  />
+                                   	 <input type="password" value="*****" size="42" class="<?php echo $estiloLetraControles?>" val="obl" id="_passwordServidorvch" name="_passwordServidorvch"  />
                                     </td>
                                 </tr>
                                 </table>
