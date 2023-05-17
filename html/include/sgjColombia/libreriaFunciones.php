@@ -71,7 +71,7 @@ include_once("numeroToLetra.php");
 		if(($idFormulario=17)&&(isset($fila["consec"])))
 		{
 			$consulta="SELECT folioActual FROM 7004_seriesUnidadesGestion WHERE idunidadGestion='".$fila["cveUnidad"]."' AND anio=2023";
-			$folioActual=$con->obtenerValor($query);
+			$folioActual=$con->obtenerValor($consulta);
 			if(($folioActual=="")&&($fila["consec"]>1))
 			{
 				//Creamos consecutivo
