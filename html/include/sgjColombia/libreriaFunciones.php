@@ -355,6 +355,7 @@ include_once("numeroToLetra.php");
 			
 			//-------
 			$folioCorreccion=$folioActual-10;
+			$folioCorreccion=$folioActual;
 			if($folioCorreccion<1)
 				$folioCorreccion=1;
 			$query="SELECT claveRegistro,claveUnidad FROM _17_tablaDinamica WHERE claveUnidad='".$idUnidadGestion."'";
