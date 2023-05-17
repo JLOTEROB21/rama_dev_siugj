@@ -355,7 +355,10 @@ include_once("numeroToLetra.php");
 			
 			//-------
 			$folioCorreccion=$folioActual-10;
+
+			//JL 17-05-2023: Para que no haga revision y ajuste retroactivo del folio entregado desde 7004_seriesUnidadesGestion
 			$folioCorreccion=$folioActual;
+
 			if($folioCorreccion<1)
 				$folioCorreccion=1;
 			$query="SELECT claveRegistro,claveUnidad FROM _17_tablaDinamica WHERE claveUnidad='".$idUnidadGestion."'";
