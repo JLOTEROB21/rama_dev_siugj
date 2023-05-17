@@ -16,7 +16,7 @@ include_once("numeroToLetra.php");
 				$consulta="SELECT unidadPadre,nombreInmueble as nombreUnidad,claveUnidad as cveUnidad,cveInmueble as cveRegistro,tipoUnidad FROM _1_tablaDinamica WHERE id__1_tablaDinamica=".$idRegistro;
 			break;
 			case 17:
-				$consulta="SELECT unidadPadre,nombreUnidad as nombreUnidad,claveUnidad as cveUnidad,claveRegistro as cveRegistro,tipoUnidad FROM _17_tablaDinamica WHERE id__17_tablaDinamica=".$idRegistro;
+				$consulta="SELECT unidadPadre,nombreUnidad as nombreUnidad,claveUnidad as cveUnidad,claveRegistro as cveRegistro,tipoUnidad, consecutivoInicial as consec FROM _17_tablaDinamica WHERE id__17_tablaDinamica=".$idRegistro;
 			break;
 			case 992:
 				$consulta="SELECT unidadPadre,nombreSala as nombreUnidad,claveUnidad as cveUnidad,cveSala as cveRegistro,tipoUnidad FROM _992_tablaDinamica WHERE id__992_tablaDinamica=".$idRegistro;
@@ -65,6 +65,29 @@ include_once("numeroToLetra.php");
 			$query[$x]="set @idOrganigrama:=(select idOrganigrama FROM 817_organigrama WHERE codigoUnidad='".$fila["cveUnidad"]."')";
 			$x++;
 			
+		}
+
+		//JL 17-05-2023: Se incorpora seteo de consecutivo inicial
+		if(($idFormulario=17)&&(isset($fila["consec"])))
+		{
+			$consulta="SELECT folioActual FROM 7004_seriesUnidadesGestion WHERE idunidadGestion='".$fila["cveUnidad"]."' AND anio=2023";
+			$folioActual=$con->obtenerValor($query);
+			if(($folioActual=="")&&($fila["consec"]>1))
+			{
+				//Creamos consecutivo
+				$query[$x]="INSERT INTO 7004_seriesUnidadesGestion(idUnidadGestion,anio,folioActual,tipoDelito) VALUES('".$fila["cveUnidad"].
+						"',2023,".($fila["consec"]-1).",'0')";
+				$x++;
+
+			}
+			elseif($folioActual<($fila["consec"]-1))
+			{
+				//Actualizamos consecutivo
+				$query[$x]="update 7004_seriesUnidadesGestion set folioActual=".($fila["consec"]-1)." where idUnidadGestion='".$fila["cveUnidad"].
+						"' and anio=2023 and tipoDelito='0'";
+				$x++;
+
+			}
 		}
 		
 		
