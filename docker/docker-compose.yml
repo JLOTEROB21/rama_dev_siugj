@@ -6,7 +6,7 @@ services:
      context: .
     restart: always
     volumes:
-      - /opt/src:/var/src
+      - /mnt/e/E/Proyectos consultoria/Rama Judicial/LinkTic/Software/SIUGJ_Colombia/rama_dev_siugj/html:/var/www/html
     ports:
       - 80:80
 
