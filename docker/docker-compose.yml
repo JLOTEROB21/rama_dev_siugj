@@ -1,0 +1,25 @@
+version: '3.1'
+
+services:
+  siugj:
+    build:
+     context: .
+    restart: always
+    volumes:
+      - /opt/src:/var/src
+    ports:
+      - 80:80
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  taskCheck:
+    image: marioegc/siugjtask:02
+    restart: always
+    environment:
+      - urlSite=http://siugj/
+      - TimeCheckTask=300
+
